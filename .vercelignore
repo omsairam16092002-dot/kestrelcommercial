@@ -4,7 +4,5 @@
 **/.env.*.local
 **/node_modules
 **/.next
-frontend/public/listings/axtra
-frontend/public/listings/infopacks
 backend/tmp
 docs/proof
