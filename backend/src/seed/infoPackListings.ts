@@ -1,4 +1,11 @@
-import { AGENCY, type PropertyStatus, type PropertyType, type TransactionSide } from "@kestrel/shared";
+import {
+  AGENCY,
+  deriveAssetCategory,
+  type AssetCategory,
+  type PropertyStatus,
+  type PropertyType,
+  type TransactionSide,
+} from "@kestrel/shared";
 
 export type InfoPackListing = {
   slug: string;
@@ -21,6 +28,7 @@ export type InfoPackListing = {
   carSpaces: number | null;
   zoning: string;
   propertyType: PropertyType;
+  assetCategory: AssetCategory;
   description: string;
   images: [];
   floorplanPublicId: null;
@@ -41,7 +49,7 @@ export type InfoPackListing = {
 const PACK =
   "https://drive.google.com/drive/folders/1yIMt2snEude_9Lfigou2_jM25R55l8WG";
 
-function listing(partial: Omit<InfoPackListing, "state" | "images" | "floorplanPublicId" | "brochureUrl" | "agentLicenceNumber" | "lat" | "lng" | "yieldPercent" | "leaseTermYears" | "outgoingsPa" | "evidenceLine" | "priceValue" | "clearSpanM" | "rollerDoorM" | "bedrooms" | "bathrooms" | "syndicateToRealcommercial" | "syndicateToCommercialRealEstate" | "internalNotes"> & {
+function listing(partial: Omit<InfoPackListing, "state" | "images" | "floorplanPublicId" | "brochureUrl" | "agentLicenceNumber" | "lat" | "lng" | "yieldPercent" | "leaseTermYears" | "outgoingsPa" | "evidenceLine" | "priceValue" | "clearSpanM" | "rollerDoorM" | "bedrooms" | "bathrooms" | "propertyType" | "assetCategory" | "syndicateToRealcommercial" | "syndicateToCommercialRealEstate" | "internalNotes"> & {
   type: PropertyType;
   notes: string;
   description: string;
@@ -67,6 +75,7 @@ function listing(partial: Omit<InfoPackListing, "state" | "images" | "floorplanP
     carSpaces: partial.carSpaces,
     zoning: partial.zoning,
     propertyType: partial.type,
+    assetCategory: deriveAssetCategory(partial.type),
     description: partial.description,
     images: [],
     floorplanPublicId: null,

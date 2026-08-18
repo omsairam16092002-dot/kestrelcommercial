@@ -1,4 +1,32 @@
+import type { AssetCategory } from "./types";
+
 /** Agency identity — licence must appear on every page footer and every listing detail. */
+export const SOCIAL = {
+  facebook: {
+    href: "https://www.facebook.com/profile.php?id=61582024322776",
+    label: "Kestrel Commercial on Facebook",
+  },
+  linkedin: {
+    href: "https://www.linkedin.com/in/jignesh-j-a93451190/",
+    label: "Kestrel Commercial on LinkedIn",
+  },
+  instagram: {
+    href: "https://www.instagram.com/jjcommercialrealestate",
+    label: "Kestrel Commercial on Instagram",
+  },
+} as const;
+
+/** Client-facing project marketing copy for /services. */
+export const PROJECT_MARKETING = {
+  kicker: "Project marketing",
+  title: "Off the plan, business parks and land estates.",
+  paragraphs: [
+    "Project marketing and pre-sale — not a launch party. We work with developers on off-the-plan stock, business parks and land estates when the numbers and the buyer pool are real.",
+    "With over 15 years across commercial, residential and off-the-plan property, the desk brings campaign structure, buyer qualification and settlement discipline from first release through to the last lot.",
+    "Whether it is a staged industrial release, a residential precinct or a greenfield land estate, the method stays the same: understand the asset, understand the client, and run a campaign that converts — priced against real paper, not brochure theatre.",
+  ],
+} as const;
+
 export const AGENCY = {
   tradingName: "Kestrel Commercial",
   legalName: "RAJNIL PTY LTD T/A KESTREL COMMERCIAL",
@@ -58,6 +86,36 @@ export const INDUSTRIAL_PROPERTY_TYPES = [
   "yard",
 ] as const;
 
+export const COMMERCIAL_PROPERTY_TYPES = [...INDUSTRIAL_PROPERTY_TYPES] as const;
+
+export const RESIDENTIAL_PROPERTY_TYPES = ["house", "townhouse", "apartment"] as const;
+
+export const DEVELOPMENT_PROPERTY_TYPES = ["development-land", "rural"] as const;
+
+export const ASSET_CATEGORY_LABELS: Record<
+  AssetCategory,
+  { title: string; short: string; description: string; path: string }
+> = {
+  commercial: {
+    title: "Commercial & industrial",
+    short: "Commercial",
+    description: "Warehouses, yards, showrooms and office stock across Melbourne west.",
+    path: "/properties/commercial",
+  },
+  residential: {
+    title: "Residential",
+    short: "Residential",
+    description: "Houses, townhouses and apartments — sale and lease.",
+    path: "/properties/residential",
+  },
+  "development-site": {
+    title: "Development sites",
+    short: "Development",
+    description: "Land and development opportunities — zoning, area and price.",
+    path: "/properties/development-sites",
+  },
+};
+
 export const FLOOR_AREA_PRESETS = [
   { label: "Any size", value: "" },
   { label: "80 m²+", value: "80" },
@@ -106,4 +164,39 @@ export const PRICE_PRESETS_LEASE = [
   { label: "Under $150k pa", value: "150000" },
   { label: "Under $300k pa", value: "300000" },
   { label: "Under $600k pa", value: "600000" },
+] as const;
+
+export const LAND_AREA_PRESETS = [
+  { label: "Any land", value: "" },
+  { label: "200 m²+", value: "200" },
+  { label: "400 m²+", value: "400" },
+  { label: "600 m²+", value: "600" },
+  { label: "1,000 m²+", value: "1000" },
+  { label: "2,000 m²+", value: "2000" },
+  { label: "5,000 m²+", value: "5000" },
+  { label: "1 ha+", value: "10000" },
+] as const;
+
+export const BEDROOM_PRESETS = [
+  { label: "Any beds", value: "" },
+  { label: "1+", value: "1" },
+  { label: "2+", value: "2" },
+  { label: "3+", value: "3" },
+  { label: "4+", value: "4" },
+  { label: "5+", value: "5" },
+] as const;
+
+export const BATHROOM_PRESETS = [
+  { label: "Any baths", value: "" },
+  { label: "1+", value: "1" },
+  { label: "2+", value: "2" },
+  { label: "3+", value: "3" },
+] as const;
+
+export const CAR_PRESETS = [
+  { label: "Any cars", value: "" },
+  { label: "1+", value: "1" },
+  { label: "2+", value: "2" },
+  { label: "3+", value: "3" },
+  { label: "4+", value: "4" },
 ] as const;

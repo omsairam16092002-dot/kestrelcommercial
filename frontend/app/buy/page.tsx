@@ -1,20 +1,15 @@
-import type { Metadata } from "next";
-import { SearchPage } from "@/components/listing/SearchPage";
-import { filtersFromSearchParams } from "@/lib/api";
-
-export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Properties for sale",
-  description:
-    "Industrial and commercial buildings for sale across Melbourne's west and north-west. Filter by floor area, clear span, zoning and price.",
-};
+import { redirect } from "next/navigation";
 
 export default function BuyPage({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const filters = filtersFromSearchParams(searchParams);
-  return <SearchPage side="sale" filters={filters} />;
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    const v = Array.isArray(value) ? value[0] : value;
+    if (v) params.set(key, v);
+  }
+  params.set("side", "sale");
+  redirect(`/properties/commercial?${params.toString()}`);
 }

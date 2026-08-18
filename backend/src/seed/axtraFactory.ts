@@ -1,4 +1,12 @@
-import { AGENCY, formatAud, propertyTypeLabel, type PropertyStatus, type PropertyType } from "@kestrel/shared";
+import {
+  AGENCY,
+  deriveAssetCategory,
+  formatAud,
+  propertyTypeLabel,
+  type AssetCategory,
+  type PropertyStatus,
+  type PropertyType,
+} from "@kestrel/shared";
 
 export type AxtraCampaign = {
   suburb: string;
@@ -35,6 +43,7 @@ export type AxtraUnit = {
   occupancy?: string;
   extra?: string;
   evidenceLine?: string | null;
+  featured?: boolean;
 };
 
 export type AxtraListing = {
@@ -58,12 +67,13 @@ export type AxtraListing = {
   carSpaces: number | null;
   zoning: string;
   propertyType: PropertyType;
+  assetCategory: AssetCategory;
   description: string;
   images: [];
   floorplanPublicId: null;
   brochureUrl: null;
   agentLicenceNumber: string;
-  featured: false;
+  featured: boolean;
   lat: null;
   lng: null;
   yieldPercent: number | null;
@@ -169,12 +179,13 @@ export function axtraListing(campaign: AxtraCampaign, unit: AxtraUnit): AxtraLis
     carSpaces: unit.cars ?? null,
     zoning: campaign.zoning ?? (campaign.type === "warehouse" ? "IN1Z" : campaign.type === "rural" ? "FZ" : "TBC"),
     propertyType: campaign.type,
+    assetCategory: deriveAssetCategory(campaign.type),
     description: listingCopy(campaign, unit, priceLabel),
     images: [],
     floorplanPublicId: null,
     brochureUrl: null,
     agentLicenceNumber: AGENCY.licenceNumber,
-    featured: false,
+    featured: Boolean(unit.featured),
     lat: null,
     lng: null,
     yieldPercent: unit.yieldPercent ?? null,

@@ -1,4 +1,4 @@
-import { AGENCY, AGENTS, isAvailableStatus } from "@kestrel/shared";
+import { AGENCY, AGENTS, SOCIAL, isAvailableStatus } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { HeroVideo } from "@/components/brand/HeroVideo";
@@ -10,11 +10,11 @@ import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { CtaLink } from "@/components/ui/CtaLink";
 import {
-  IconBriefcase,
-  IconBuilding,
   IconClipboard,
   IconClock,
-  IconEyeOff,
+  IconFacebook,
+  IconInstagram,
+  IconLinkedIn,
   IconMail,
   IconMapPin,
   IconWhatsApp,
@@ -30,15 +30,6 @@ export const revalidate = 0;
 const STATS = [
   { n: 700, suffix: "+", l: "Property transactions", decimals: 0 },
   { n: 15, suffix: "+", l: "Years in Australian property", decimals: 0 },
-  { n: 4, suffix: "", l: "Asset classes, off the plan to industrial", decimals: 0 },
-  { n: 4, suffix: "", l: "International markets, Asia and Australia", decimals: 0 },
-];
-
-const AGENT_PILLARS = [
-  { t: "Commercial", d: "Offices, showrooms and investments with covenant first.", Icon: IconBuilding },
-  { t: "Management", d: "Rent, outgoings, reviews — reporting an owner can read.", Icon: IconClipboard },
-  { t: "Investments", d: "SMSF, yield and hold-or-sell advice on west-side stock.", Icon: IconBriefcase },
-  { t: "Off market", d: "Quiet campaigns when the buyer list is already known.", Icon: IconEyeOff },
 ];
 
 const WHY_POINTS = [
@@ -55,9 +46,13 @@ const TRANSFER_POINTS = [
 ];
 
 export default async function HomePage() {
-  const featured = (await getFeaturedProperties()).filter((p) => isAvailableStatus(p.status));
+  const featured = (await getFeaturedProperties()).filter(
+    (p) => isAvailableStatus(p.status) && p.assetCategory === "commercial",
+  );
   const market = featured.slice(0, 3);
-  const evidence = (await getProperties()).filter((p) => p.status === "sold" || p.status === "leased");
+  const evidence = (await getProperties({ assetCategory: "commercial" })).filter(
+    (p) => p.status === "sold" || p.status === "leased",
+  );
   const flagship = pickFlagship(evidence);
   const proof = corridorProof(evidence);
   const agent = (await getAgents())[0] ?? AGENTS[0];
@@ -114,7 +109,7 @@ export default async function HomePage() {
       {/* 2 — Stats bar */}
       <section className="border-t border-paper/10 bg-oxblood text-paper">
         <Container className="py-10 md:py-12">
-          <div className="grid grid-cols-2 gap-8 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-paper/15">
+          <div className="grid grid-cols-2 gap-8 lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-paper/15">
             {STATS.map((stat, i) => (
               <Reveal key={stat.l} delay={i * 40} className="lg:px-8 first:lg:pl-0 last:lg:pr-0">
                 <p className="t-mono-lg text-paper">
@@ -181,7 +176,7 @@ export default async function HomePage() {
             Floor area, clear span, door height, power and yard — the filters industrial buyers actually use.
           </p>
           <div className="mt-8">
-            <SpecSearchConsole />
+            <SpecSearchConsole assetCategory="commercial" />
           </div>
         </Container>
       </section>
@@ -237,20 +232,53 @@ export default async function HomePage() {
                 <CtaLink href="/about" id="cta-home-about" page="home" className="font-semibold text-tan hover:text-paper">
                   Full profile →
                 </CtaLink>
+                <a
+                  href={SOCIAL.facebook.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={SOCIAL.facebook.label}
+                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
+                >
+                  <IconFacebook className="h-4 w-4" />
+                  Facebook
+                </a>
+                <a
+                  href={SOCIAL.linkedin.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={SOCIAL.linkedin.label}
+                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
+                >
+                  <IconLinkedIn className="h-4 w-4" />
+                  LinkedIn
+                </a>
+                <a
+                  href={SOCIAL.instagram.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={SOCIAL.instagram.label}
+                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
+                >
+                  <IconInstagram className="h-4 w-4" />
+                  Instagram
+                </a>
               </div>
               <div className="mt-10 grid gap-5 sm:grid-cols-2">
-                {AGENT_PILLARS.map((item) => {
-                  const Icon = item.Icon;
-                  return (
-                    <div key={item.t} className="border-t border-tan/30 pt-4">
-                      <h3 className="flex items-center gap-2 t-h3 text-paper">
-                        <Icon className="h-4 w-4 shrink-0 text-tan" />
-                        {item.t}
-                      </h3>
-                      <p className="mt-2 text-sm text-paper/70">{item.d}</p>
-                    </div>
-                  );
-                })}
+                <div className="border-t border-tan/30 pt-4">
+                  <h3 className="flex items-center gap-2 t-h3 text-paper">
+                    <IconClipboard className="h-4 w-4 shrink-0 text-tan" />
+                    Management
+                  </h3>
+                  <p className="mt-2 text-sm text-paper/70">
+                    Rent, outgoings, reviews and practical reporting an owner can read.
+                  </p>
+                </div>
+                <div className="border-t border-tan/30 pt-4">
+                  <h3 className="t-h3 text-paper">Direct advice</h3>
+                  <p className="mt-2 text-sm text-paper/70">
+                    One desk from appraisal through negotiation and completion, without category mixing on the public site.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

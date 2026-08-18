@@ -21,6 +21,10 @@ export type PropertyType =
   | "apartment"
   | "rural";
 
+export const ASSET_CATEGORIES = ["commercial", "residential", "development-site"] as const;
+
+export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
+
 export const ENQUIRY_SOURCES = [
   "web",
   "phone",
@@ -104,6 +108,8 @@ export interface Property {
   carSpaces?: number | null;
   zoning: string;
   propertyType: PropertyType;
+  /** Primary browse category — commercial, residential, or development-site. */
+  assetCategory: AssetCategory;
   description: string;
   images: PropertyImage[];
   /** Blueprint / floorplate image. Null when land or not yet drawn. */
@@ -269,10 +275,15 @@ export interface DeskTask {
 export interface SpecFilters {
   side?: TransactionSide | "all";
   status?: PropertyStatus[];
+  assetCategory?: AssetCategory;
   minFloorAreaSqm?: number;
   maxFloorAreaSqm?: number;
   minClearSpanM?: number;
   minRollerDoorM?: number;
+  minLandAreaSqm?: number;
+  minBedrooms?: number;
+  minBathrooms?: number;
+  minCarSpaces?: number;
   maxPrice?: number;
   zoning?: string;
   suburb?: string;
@@ -285,10 +296,15 @@ export interface SpecFilters {
 export const SPEC_FILTER_QUERY_KEYS = [
   "side",
   "status",
+  "category",
   "minFloor",
   "maxFloor",
   "minSpan",
   "minDoor",
+  "minLand",
+  "minBeds",
+  "minBaths",
+  "minCars",
   "maxPrice",
   "zoning",
   "suburb",

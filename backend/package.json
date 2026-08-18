@@ -14,6 +14,9 @@
     "seed:axtra-media": "tsx src/seed/attachAxtraMedia.ts",
     "seed:geocode": "tsx src/seed/geocodeProperties.ts",
     "seed:cloudinary": "tsx src/seed/uploadListingMedia.ts",
+    "seed:portrait": "tsx src/seed/uploadAgentPortrait.ts",
+    "seed:feature-west": "tsx src/seed/featureWestCampaigns.ts",
+    "seed:asset-categories": "tsx src/seed/backfillAssetCategories.ts",
     "worker": "tsx src/jobs/workers.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test test/api.features.test.ts test/portalParsers.test.ts test/reaxml.test.ts test/axtra.listings.test.ts test/geocodeAddress.test.ts test/infoPack.listings.test.ts"

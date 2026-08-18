@@ -1,5 +1,9 @@
-import { INDUSTRIAL_PROPERTY_TYPES } from "./constants";
-import type { Property, PropertyType } from "./types";
+import {
+  DEVELOPMENT_PROPERTY_TYPES,
+  INDUSTRIAL_PROPERTY_TYPES,
+  RESIDENTIAL_PROPERTY_TYPES,
+} from "./constants";
+import type { AssetCategory, Property, PropertyType } from "./types";
 
 export function formatLandArea(value: number | null | undefined): string {
   if (value == null) return "—";
@@ -70,6 +74,33 @@ export function propertyTypeLabel(type: PropertyType): string {
 
 export function isIndustrialPropertyType(type: PropertyType): boolean {
   return (INDUSTRIAL_PROPERTY_TYPES as readonly PropertyType[]).includes(type);
+}
+
+export function deriveAssetCategory(propertyType: PropertyType): AssetCategory {
+  if ((RESIDENTIAL_PROPERTY_TYPES as readonly PropertyType[]).includes(propertyType)) {
+    return "residential";
+  }
+  if ((DEVELOPMENT_PROPERTY_TYPES as readonly PropertyType[]).includes(propertyType)) {
+    return "development-site";
+  }
+  return "commercial";
+}
+
+export function resolveAssetCategory(property: Pick<Property, "assetCategory" | "propertyType">): AssetCategory {
+  return property.assetCategory ?? deriveAssetCategory(property.propertyType);
+}
+
+export function assetCategoryLabel(category: AssetCategory): string {
+  switch (category) {
+    case "commercial":
+      return "Commercial & industrial";
+    case "residential":
+      return "Residential";
+    case "development-site":
+      return "Development site";
+    default:
+      return category;
+  }
 }
 
 export function listingPreviewSpecs(property: Property): { k: string; v: string }[] {

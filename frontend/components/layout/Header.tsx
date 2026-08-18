@@ -3,15 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AGENCY } from "@kestrel/shared";
-import { IconClose, IconMenu, IconWhatsApp } from "@/components/icons";
+import { AGENCY, ASSET_CATEGORY_LABELS } from "@kestrel/shared";
+import { Logo } from "@/components/brand/Logo";
+import { IconChevronDown, IconClose, IconMenu, IconWhatsApp } from "@/components/icons";
 
 const NAV = [
   { href: "/about", label: "About", match: ["/about"] },
-  { href: "/buy", label: "Properties", match: ["/buy", "/lease", "/listing", "/properties"] },
   { href: "/services", label: "Services", match: ["/services"] },
   { href: "/investing", label: "Investing", match: ["/investing"] },
   { href: "/contact", label: "Contact", match: ["/contact"] },
+];
+
+const PROPERTY_LINKS = [
+  ASSET_CATEGORY_LABELS.commercial,
+  ASSET_CATEGORY_LABELS.residential,
+  ASSET_CATEGORY_LABELS["development-site"],
 ];
 
 export function Header() {
@@ -62,16 +68,39 @@ export function Header() {
   return (
     <header id="site-header" className="sticky top-0 z-50 border-b border-oxblood/10 bg-paper/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
-        <Link href="/" className="shrink-0 leading-none" onClick={() => setOpen(false)}>
-          <span className="block text-[1.45rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.65rem]">
-            Kestrel
-          </span>
-          <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.22em] text-mauve">
-            Commercial
-          </span>
-        </Link>
+        <Logo onClick={() => setOpen(false)} />
 
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
+          <div className="group relative">
+            <Link
+              href="/properties/commercial"
+              className={`relative inline-flex items-center gap-1 pb-0.5 text-[13px] font-medium tracking-[0.04em] transition-colors duration-150 ease-out ${
+                pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease"
+                  ? "text-oxblood"
+                  : "text-ink/80 hover:text-ink"
+              }`}
+            >
+              Properties
+              <IconChevronDown className="h-3.5 w-3.5" />
+              {pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease" ? (
+                <span className="absolute inset-x-0 -bottom-1 h-px bg-tan" aria-hidden />
+              ) : null}
+            </Link>
+            <div className="invisible absolute left-1/2 top-full z-20 mt-4 w-[380px] -translate-x-1/2 border border-oxblood/10 bg-paper p-3 opacity-0 shadow-[0_12px_30px_rgba(42,20,24,0.12)] transition-all duration-150 group-hover:visible group-hover:opacity-100">
+              <div className="grid gap-2">
+                {PROPERTY_LINKS.map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className="block border border-transparent px-4 py-3 transition-colors duration-150 ease-out hover:border-oxblood/10 hover:bg-white"
+                  >
+                    <p className="text-sm font-semibold text-ink">{item.title}</p>
+                    <p className="mt-1 text-xs text-mauve">{item.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
           {NAV.map((item) => {
             const active = item.match.some((m) => pathname === m || pathname.startsWith(`${m}/`));
             return (
@@ -139,6 +168,23 @@ export function Header() {
                 </Link>
               );
             })}
+            <div className="px-4 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-mauve">Properties</p>
+              <div className="mt-2 grid gap-1">
+                {PROPERTY_LINKS.map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`min-h-11 px-4 py-3 text-base font-semibold ${
+                      pathname === item.path ? "bg-oxblood text-paper" : "text-ink hover:bg-white"
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <Link
               href="/sell"
               className="mx-1 mt-2 btn-sharp bg-tan text-ink"

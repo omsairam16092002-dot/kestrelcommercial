@@ -1,5 +1,5 @@
-import type { SpecFilters, TransactionSide } from "@kestrel/shared";
-import { AGENCY, filterProperties } from "@kestrel/shared";
+import type { AssetCategory, SpecFilters, TransactionSide } from "@kestrel/shared";
+import { AGENCY, ASSET_CATEGORY_LABELS, filterProperties } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { HeroBleed } from "@/components/brand/HeroBleed";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
@@ -13,15 +13,34 @@ import { campaignPhotos, pickFlagship } from "@/lib/campaignPhoto";
 export async function SearchPage({
   side,
   filters,
+  assetCategory = "commercial",
+  pageKey,
+  heroKicker,
+  heroTitle,
+  heroDescription,
+  evidenceTitle,
+  emptyTitle,
+  emptyBody,
+  resetHref,
 }: {
   side: TransactionSide;
   filters: SpecFilters;
+  assetCategory?: AssetCategory;
+  pageKey?: string;
+  heroKicker?: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  evidenceTitle?: string;
+  emptyTitle?: string;
+  emptyBody?: string;
+  resetHref?: string;
 }) {
-  const merged: SpecFilters = { ...filters, side };
+  const category = ASSET_CATEGORY_LABELS[assetCategory];
+  const merged: SpecFilters = { ...filters, side, assetCategory };
   const results = filterProperties(await getProperties(merged), merged);
   const available = results.filter((p) => p.status !== "sold" && p.status !== "leased");
   const evidence = results.filter((p) => p.status === "sold" || p.status === "leased");
-  const page = side === "lease" ? "lease" : "buy";
+  const page = pageKey ?? (side === "lease" ? "lease" : "buy");
   const flagship = pickFlagship(evidence);
   const rest = evidence.filter((p) => p.id !== flagship?.id);
   const bleed = campaignPhotos(available.length ? available : results, 1)[0];
@@ -32,20 +51,24 @@ export async function SearchPage({
         <HeroBleed alt={bleed?.alt ?? ""} src={bleed?.src} />
         <Container className="relative z-10 pb-16 pt-28 md:pb-24 md:pt-40">
           <p className="t-caption text-tan">
-            {side === "lease" ? "Leasing" : "Sales"} · Melbourne west
+            {heroKicker ?? `${category.short} · ${side === "lease" ? "Leasing" : "Sales"}`}
           </p>
           <h1 className="t-h1 mt-5 max-w-3xl text-paper">
-            {side === "lease" ? "Buildings for lease." : "Buildings for sale."}
+            {heroTitle ?? (side === "lease" ? `${category.short} for lease.` : `${category.short} for sale.`)}
           </h1>
           <p className="t-body-lg mt-6 max-w-2xl text-pretty text-paper/90">
-            Floor, span, door, power, yard. Click a pin for the card. If it does not clear the spec, it
-            is not on this grid.
+            {heroDescription ??
+              (assetCategory === "commercial"
+                ? "Floor, span, door, power, yard. Click a pin for the card. If it does not clear the spec, it is not on this grid."
+                : assetCategory === "residential"
+                  ? "Beds, baths, cars, land and price. Use the map and list together to narrow the right home or investment."
+                  : "Land area, zoning, permit status and price. Development stock stays separate from operational buildings for a reason.")}
           </p>
         </Container>
       </section>
 
       <Container className="space-y-8 py-14 md:py-20">
-        <SpecSearchConsole initial={merged} variant="page" />
+        <SpecSearchConsole initial={merged} variant="page" assetCategory={assetCategory} />
         <SearchResultsWorkspace properties={available} side={side} />
       </Container>
 
@@ -54,7 +77,7 @@ export async function SearchPage({
           <Container className="pb-8 pt-6 md:pb-10">
             <p className="t-caption text-oxblood">Evidence</p>
             <h2 className="t-h2 mt-5 text-ink">
-              {side === "lease" ? "Recently leased" : "Recently sold"}
+              {evidenceTitle ?? (side === "lease" ? "Recently leased" : "Recently sold")}
             </h2>
           </Container>
           <FlagshipCaseStudy property={flagship} />

@@ -50,8 +50,8 @@ export const metadata: Metadata = {
     siteName: "Kestrel Commercial",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=60",
-        alt: "Industrial warehouse, Melbourne west",
+        url: "/assets/logo.png",
+        alt: "Kestrel Commercial logo",
       },
     ],
   },
@@ -63,16 +63,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-AU" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
-      <head>
-        <link
-          rel="preload"
-          href="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=640&q=50"
-          as="image"
-          imageSrcSet="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=640&q=50 640w, https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=828&q=55 828w, https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=60 1200w"
-          imageSizes="100vw"
-          fetchPriority="high"
-        />
-      </head>
+      <head />
       <body className={`${sans.className} min-h-screen bg-paper text-ink antialiased`}>
         <a
           href="#main"

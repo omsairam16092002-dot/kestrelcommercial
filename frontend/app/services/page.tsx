@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { AGENCY } from "@kestrel/shared";
+import { AGENCY, PROJECT_MARKETING } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
+import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { PageHero } from "@/components/brand/PageHero";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
 import { ServicesGrid } from "@/components/brand/ServicesGrid";
@@ -14,7 +15,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ServicesPage() {
-  const bleed = campaignPhotos(await getProperties(), 1)[0];
+  const stock = await getProperties();
+  const bleed = campaignPhotos(stock, 1)[0];
+  const projectPhoto = campaignPhotos(stock.filter((p) => p.assetCategory === "development-site"), 1)[0] ?? bleed;
   return (
     <div className="bg-paper">
       <PageHero
@@ -32,6 +35,32 @@ export default async function ServicesPage() {
           <h2 className="t-h2 mt-5 text-ink">How the desk works.</h2>
           <div className="mt-12">
             <ServicesGrid columns={4} />
+          </div>
+        </Container>
+      </section>
+
+      <section className="bg-ink text-paper">
+        <Container className="grid items-center gap-10 py-16 md:grid-cols-12 md:py-24 lg:min-h-[80vh] lg:gap-16">
+          <div className="md:col-span-5">
+            <p className="t-caption text-tan">{PROJECT_MARKETING.kicker}</p>
+            <h2 className="t-h2 mt-5">{PROJECT_MARKETING.title}</h2>
+            <div className="t-body mt-8 space-y-4 text-paper/80">
+              {PROJECT_MARKETING.paragraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+          <div className="relative min-h-[46vh] overflow-hidden bg-oxblood md:col-span-7 lg:min-h-[70vh]">
+            {projectPhoto ? (
+              <DuotoneImage
+                src={projectPhoto.src}
+                alt={projectPhoto.alt}
+                sizes="(min-width: 1024px) 55vw, 100vw"
+                tone="photo"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-oxblood" />
+            )}
           </div>
         </Container>
       </section>

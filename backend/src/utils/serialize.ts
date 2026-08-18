@@ -1,5 +1,6 @@
 import {
   normalizePropertyStatus,
+  deriveAssetCategory,
   type Agent,
   type Property,
   type TransactionSide,
@@ -51,6 +52,9 @@ export function serializeProperty(
     carSpaces: (doc.carSpaces as number | null) ?? null,
     zoning: String(doc.zoning),
     propertyType: doc.propertyType as Property["propertyType"],
+    assetCategory:
+      (doc.assetCategory as Property["assetCategory"] | undefined) ??
+      deriveAssetCategory(doc.propertyType as Property["propertyType"]),
     description: String(doc.description),
     images: Array.isArray(doc.images) ? (doc.images as Property["images"]) : [],
     floorplanPublicId: (doc.floorplanPublicId as string | null) ?? null,

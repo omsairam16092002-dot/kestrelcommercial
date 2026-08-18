@@ -1,6 +1,13 @@
 import { PROPERTY_TYPES } from "./constants";
+import { deriveAssetCategory } from "./format";
 import { statusesForSide } from "./status";
-import { PROPERTY_STATUSES, type Property, type SpecFilters, type TransactionSide } from "./types";
+import {
+  ASSET_CATEGORIES,
+  PROPERTY_STATUSES,
+  type Property,
+  type SpecFilters,
+  type TransactionSide,
+} from "./types";
 
 function toNumber(value: unknown): number | undefined {
   if (value === undefined || value === null || value === "") return undefined;
@@ -51,16 +58,26 @@ export function parseSpecFilters(
     ? (typeRaw as SpecFilters["propertyType"])
     : undefined;
 
+  const categoryRaw = String(get("category") ?? "").toLowerCase();
+  const assetCategory = (ASSET_CATEGORIES as readonly string[]).includes(categoryRaw)
+    ? (categoryRaw as SpecFilters["assetCategory"])
+    : undefined;
+
   const suburb = String(get("suburb") ?? "").trim();
   const zoning = String(get("zoning") ?? "").trim().toUpperCase();
 
   return {
     side,
     status: status && status.length ? status : undefined,
+    assetCategory,
     minFloorAreaSqm: toNumber(get("minFloor")),
     maxFloorAreaSqm: toNumber(get("maxFloor")),
     minClearSpanM: toNumber(get("minSpan")),
     minRollerDoorM: toNumber(get("minDoor")),
+    minLandAreaSqm: toNumber(get("minLand")),
+    minBedrooms: toNumber(get("minBeds")),
+    minBathrooms: toNumber(get("minBaths")),
+    minCarSpaces: toNumber(get("minCars")),
     maxPrice: toNumber(get("maxPrice")),
     zoning: zoning || undefined,
     suburb: suburb || undefined,
@@ -74,10 +91,15 @@ export function specFiltersToQuery(filters: SpecFilters): Record<string, string>
   const q: Record<string, string> = {};
   if (filters.side && filters.side !== "all") q.side = filters.side;
   if (filters.status?.length) q.status = filters.status.join(",");
+  if (filters.assetCategory) q.category = filters.assetCategory;
   if (filters.minFloorAreaSqm) q.minFloor = String(filters.minFloorAreaSqm);
   if (filters.maxFloorAreaSqm) q.maxFloor = String(filters.maxFloorAreaSqm);
   if (filters.minClearSpanM) q.minSpan = String(filters.minClearSpanM);
   if (filters.minRollerDoorM) q.minDoor = String(filters.minRollerDoorM);
+  if (filters.minLandAreaSqm) q.minLand = String(filters.minLandAreaSqm);
+  if (filters.minBedrooms) q.minBeds = String(filters.minBedrooms);
+  if (filters.minBathrooms) q.minBaths = String(filters.minBathrooms);
+  if (filters.minCarSpaces) q.minCars = String(filters.minCarSpaces);
   if (filters.maxPrice) q.maxPrice = String(filters.maxPrice);
   if (filters.zoning) q.zoning = filters.zoning;
   if (filters.suburb) q.suburb = filters.suburb;
@@ -95,6 +117,11 @@ export function specFiltersToSearchParams(filters: SpecFilters): string {
 
 export function matchesSpecFilters(property: Property, filters: SpecFilters): boolean {
   if (filters.featured && !property.featured) return false;
+
+  if (filters.assetCategory) {
+    const category = property.assetCategory ?? deriveAssetCategory(property.propertyType);
+    if (category !== filters.assetCategory) return false;
+  }
 
   if (filters.side && filters.side !== "all") {
     if (property.transactionSide !== filters.side) return false;
@@ -126,6 +153,20 @@ export function matchesSpecFilters(property: Property, filters: SpecFilters): bo
     if (property.rollerDoorM == null || property.rollerDoorM < filters.minRollerDoorM) {
       return false;
     }
+  }
+  if (filters.minLandAreaSqm != null) {
+    if (property.landAreaSqm == null || property.landAreaSqm < filters.minLandAreaSqm) {
+      return false;
+    }
+  }
+  if (filters.minBedrooms != null) {
+    if (property.bedrooms == null || property.bedrooms < filters.minBedrooms) return false;
+  }
+  if (filters.minBathrooms != null) {
+    if (property.bathrooms == null || property.bathrooms < filters.minBathrooms) return false;
+  }
+  if (filters.minCarSpaces != null) {
+    if (property.carSpaces == null || property.carSpaces < filters.minCarSpaces) return false;
   }
   if (filters.maxPrice != null) {
     if (property.priceValue == null || property.priceValue > filters.maxPrice) return false;

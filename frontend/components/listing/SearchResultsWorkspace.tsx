@@ -29,11 +29,20 @@ export function SearchResultsWorkspace({
   );
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [listQuery, setListQuery] = useState("");
   const rowRefs = useRef<Record<string, HTMLElement | null>>({});
 
+  const visible = useMemo(() => {
+    const q = listQuery.trim().toLowerCase();
+    if (!q) return properties;
+    return properties.filter((p) =>
+      `${p.address} ${p.suburb} ${p.postcode} ${p.slug}`.toLowerCase().includes(q),
+    );
+  }, [properties, listQuery]);
+
   const mappedCount = useMemo(
-    () => properties.filter(hasMapCoordinates).length,
-    [properties],
+    () => visible.filter(hasMapCoordinates).length,
+    [visible],
   );
 
   useEffect(() => {
@@ -45,9 +54,9 @@ export function SearchResultsWorkspace({
   }, []);
 
   useEffect(() => {
-    if (selectedSlug && properties.some((p) => p.slug === selectedSlug)) return;
-    setSelectedSlug(properties.find(hasMapCoordinates)?.slug ?? null);
-  }, [properties, selectedSlug]);
+    if (selectedSlug && visible.some((p) => p.slug === selectedSlug)) return;
+    setSelectedSlug(visible.find(hasMapCoordinates)?.slug ?? null);
+  }, [visible, selectedSlug]);
 
   useEffect(() => {
     if (!selectedSlug) return;
@@ -70,12 +79,23 @@ export function SearchResultsWorkspace({
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <p className="t-mono text-oxblood">
-          {String(properties.length).padStart(2, "0")} building{properties.length === 1 ? "" : "s"} match
-          that spec
-          {mappedCount ? ` · ${String(mappedCount).padStart(2, "0")} on the map` : ""}
-        </p>
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="t-mono text-oxblood">
+            {String(visible.length).padStart(2, "0")} of {String(properties.length).padStart(2, "0")} building
+            {properties.length === 1 ? "" : "s"}
+            {mappedCount ? ` · ${String(mappedCount).padStart(2, "0")} on the map` : ""}
+          </p>
+          <label className="mt-3 block max-w-md">
+            <span className="sr-only">Filter this list by suburb or street</span>
+            <input
+              className="dial t-mono w-full bg-white px-4 py-3 text-ink placeholder:text-mauve"
+              value={listQuery}
+              onChange={(e) => setListQuery(e.target.value)}
+              placeholder="Filter: Williamstown North, Truganina, Launceston…"
+            />
+          </label>
+        </div>
         <div
           className="grid grid-cols-2 bg-white p-1 lg:hidden"
           role="group"
@@ -100,7 +120,8 @@ export function SearchResultsWorkspace({
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,42%)]">
         <div className={mobileView === "map" ? "hidden lg:block" : ""}>
           <div className="max-h-[calc(100dvh-12rem)] space-y-3 overflow-y-auto pr-1 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)]">
-            {properties.map((property, i) => (
+            {visible.length ? (
+              visible.map((property, i) => (
               <SearchResultRow
                 key={property.id}
                 property={property}
@@ -112,7 +133,10 @@ export function SearchResultsWorkspace({
                   rowRefs.current[property.slug] = el;
                 }}
               />
-            ))}
+              ))
+            ) : (
+              <p className="t-body text-mauve">No buildings in this list match that suburb or street.</p>
+            )}
           </div>
         </div>
 
@@ -120,7 +144,7 @@ export function SearchResultsWorkspace({
           <div className="surface h-[calc(100dvh-12rem)] overflow-hidden lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
             {isDesktop === true || mobileView === "map" ? (
               <SearchMap
-                properties={properties}
+                properties={visible}
                 selectedSlug={selectedSlug}
                 hoveredSlug={hoveredSlug}
                 onSelect={setSelectedSlug}

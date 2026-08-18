@@ -46,10 +46,15 @@ export async function getProperties(filters: SpecFilters = {}): Promise<Property
   const params = new URLSearchParams();
   if (filters.side && filters.side !== "all") params.set("side", filters.side);
   if (filters.status?.length) params.set("status", filters.status.join(","));
+  if (filters.assetCategory) params.set("category", filters.assetCategory);
   if (filters.minFloorAreaSqm) params.set("minFloor", String(filters.minFloorAreaSqm));
   if (filters.maxFloorAreaSqm) params.set("maxFloor", String(filters.maxFloorAreaSqm));
   if (filters.minClearSpanM) params.set("minSpan", String(filters.minClearSpanM));
   if (filters.minRollerDoorM) params.set("minDoor", String(filters.minRollerDoorM));
+  if (filters.minLandAreaSqm) params.set("minLand", String(filters.minLandAreaSqm));
+  if (filters.minBedrooms) params.set("minBeds", String(filters.minBedrooms));
+  if (filters.minBathrooms) params.set("minBaths", String(filters.minBathrooms));
+  if (filters.minCarSpaces) params.set("minCars", String(filters.minCarSpaces));
   if (filters.maxPrice) params.set("maxPrice", String(filters.maxPrice));
   if (filters.zoning) params.set("zoning", filters.zoning);
   if (filters.suburb) params.set("suburb", filters.suburb);
@@ -60,7 +65,7 @@ export async function getProperties(filters: SpecFilters = {}): Promise<Property
 
   const qs = params.toString();
   const data = await apiFetch<Property[]>(`/api/properties${qs ? `?${qs}` : ""}`, {
-    cache: filters.side && filters.side !== "all" ? "no-store" : undefined,
+    cache: "no-store",
   });
   if (data) return filterProperties(data, filters);
   return filterProperties(PROPERTIES, filters);

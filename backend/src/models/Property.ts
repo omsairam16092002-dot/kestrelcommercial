@@ -50,6 +50,12 @@ const PropertySchema = new Schema(
         "rural",
       ],
     },
+    assetCategory: {
+      type: String,
+      required: true,
+      enum: ["commercial", "residential", "development-site"],
+      index: true,
+    },
     description: { type: String, required: true },
     images: { type: [ImageSchema], default: [] },
     floorplanPublicId: { type: String, default: null },

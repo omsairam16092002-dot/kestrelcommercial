@@ -9,6 +9,14 @@ test("Axtra import has unique slugs and one Mitcham campaign", () => {
   const mitcham = AXTRA_LISTINGS.filter((p) => p.slug.includes("26-dudley-street-mitcham"));
   assert.equal(mitcham.length, 3);
   assert.equal(AXTRA_LISTINGS.length, 155);
+  assert.equal(
+    AXTRA_LISTINGS.find((p) => p.slug === "14-launceston-street-williamstown-north-lot-1")?.featured,
+    true,
+  );
+  assert.equal(
+    AXTRA_LISTINGS.find((p) => p.slug === "191-leakes-road-truganina-lot-39")?.featured,
+    true,
+  );
 });
 
 test("channel-list statuses match Sold, Reserved and Under contract", () => {

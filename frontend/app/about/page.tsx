@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { AGENCY, AGENTS } from "@kestrel/shared";
+import { AGENCY, AGENTS, SOCIAL } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { PageHero } from "@/components/brand/PageHero";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { ReasonCards } from "@/components/brand/ReasonCards";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
-import { IconBuilding, IconFile, IconHome, IconWarehouse } from "@/components/icons";
+import { IconFacebook, IconInstagram, IconLinkedIn } from "@/components/icons";
 import { getAgents, getProperties } from "@/lib/api";
 import { agentPortraitSrc } from "@/lib/images";
 import { campaignPhotos, corridorProof } from "@/lib/campaignPhoto";
@@ -13,31 +13,8 @@ import { campaignPhotos, corridorProof } from "@/lib/campaignPhoto";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Jignesh Jhanjaria, Director of Kestrel Commercial — 15+ years and 700+ transactions across industrial, commercial and off-the-plan property.",
+    "Jignesh Jhanjaria, Director of Kestrel Commercial — 15+ years and 700+ transactions across industrial, commercial, residential and development property.",
 };
-
-const ASSET_CLASSES = [
-  {
-    t: "Commercial",
-    d: "Offices, showrooms, retail investments. Covenant first.",
-    Icon: IconBuilding,
-  },
-  {
-    t: "Industrial",
-    d: "Warehouses, yards, distribution. Span, power, hardstand.",
-    Icon: IconWarehouse,
-  },
-  {
-    t: "Residential",
-    d: "Houses, apartments, development sites — when the numbers work.",
-    Icon: IconHome,
-  },
-  {
-    t: "Off the plan",
-    d: "Project marketing and pre-sale. Not a launch party.",
-    Icon: IconFile,
-  },
-];
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -54,7 +31,7 @@ export default async function AboutPage() {
       <PageHero
         kicker="About us"
         title={agent.name}
-        description="Director. Industrial, commercial, residential and off-the-plan. Melbourne west first."
+        description="Director. Industrial, commercial, residential and development property. Melbourne west first."
         page="about"
         imageSrc={bleed?.src}
         imageAlt={bleed?.alt}
@@ -90,29 +67,39 @@ export default async function AboutPage() {
                   ))}
                 <p>{proof}</p>
               </div>
-              <p className="t-caption mt-10 text-tan">Singapore · India · Malaysia · China · Australia</p>
+              <div className="mt-8 flex flex-wrap gap-4 text-sm text-tan">
+                <a
+                  href={SOCIAL.facebook.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={SOCIAL.facebook.label}
+                  className="inline-flex items-center gap-1.5 font-semibold hover:text-paper"
+                >
+                  <IconFacebook className="h-4 w-4" />
+                  Facebook
+                </a>
+                <a
+                  href={SOCIAL.linkedin.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={SOCIAL.linkedin.label}
+                  className="inline-flex items-center gap-1.5 font-semibold hover:text-paper"
+                >
+                  <IconLinkedIn className="h-4 w-4" />
+                  LinkedIn
+                </a>
+                <a
+                  href={SOCIAL.instagram.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={SOCIAL.instagram.label}
+                  className="inline-flex items-center gap-1.5 font-semibold hover:text-paper"
+                >
+                  <IconInstagram className="h-4 w-4" />
+                  Instagram
+                </a>
+              </div>
             </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="py-14 md:py-20">
-        <Container>
-          <p className="t-caption text-oxblood">Asset classes</p>
-          <h2 className="t-h2 mt-5 text-ink">Four lines. One standard.</h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {ASSET_CLASSES.map((item) => {
-              const Icon = item.Icon;
-              return (
-                <article key={item.t} className="border-t-2 border-oxblood bg-paper pt-5">
-                  <span className="inline-flex h-9 w-9 items-center justify-center bg-oxblood text-tan">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <h2 className="t-h3 mt-4 text-ink">{item.t}</h2>
-                  <p className="t-body mt-2 text-ink/75">{item.d}</p>
-                </article>
-              );
-            })}
           </div>
         </Container>
       </section>

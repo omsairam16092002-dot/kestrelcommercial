@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 import {
+  ASSET_CATEGORIES,
   AGENTS,
   PROPERTIES,
   PROPERTY_TYPES,
+  deriveAssetCategory,
   filterProperties,
   parseSpecFilters,
   resolveImageSrc,
@@ -44,6 +46,7 @@ const propertyWriteSchema = z.object({
   hardstand: z.boolean().optional(),
   zoning: z.string().min(1),
   propertyType: z.enum(PROPERTY_TYPES),
+  assetCategory: z.enum(ASSET_CATEGORIES).optional(),
   bedrooms: z.number().nullable().optional(),
   bathrooms: z.number().nullable().optional(),
   carSpaces: z.number().nullable().optional(),
@@ -110,6 +113,7 @@ propertiesRouter.get("/", optionalAuth, async (req, res, next) => {
     if (filters.status?.length) q.status = { $in: filters.status };
     if (filters.zoning) q.zoning = filters.zoning.toUpperCase();
     if (filters.propertyType) q.propertyType = filters.propertyType;
+    if (filters.assetCategory) q.assetCategory = filters.assetCategory;
     if (filters.suburb) q.suburb = new RegExp(escapeRegex(filters.suburb), "i");
     if (filters.threePhasePower) q.threePhasePower = true;
     if (filters.hardstand) q.hardstand = true;
@@ -121,6 +125,10 @@ propertiesRouter.get("/", optionalAuth, async (req, res, next) => {
 
     if (filters.minClearSpanM != null) q.clearSpanM = { $gte: filters.minClearSpanM };
     if (filters.minRollerDoorM != null) q.rollerDoorM = { $gte: filters.minRollerDoorM };
+    if (filters.minLandAreaSqm != null) q.landAreaSqm = { $gte: filters.minLandAreaSqm };
+    if (filters.minBedrooms != null) q.bedrooms = { $gte: filters.minBedrooms };
+    if (filters.minBathrooms != null) q.bathrooms = { $gte: filters.minBathrooms };
+    if (filters.minCarSpaces != null) q.carSpaces = { $gte: filters.minCarSpaces };
     if (filters.maxPrice != null) q.priceValue = { $lte: filters.maxPrice };
     const search = typeof req.query.q === "string" ? req.query.q.trim() : "";
     if (search) {
@@ -290,7 +298,10 @@ propertiesRouter.post("/", requireAuth, async (req, res, next) => {
       throw new HttpError(503, "MongoDB is not connected. Set MONGODB_URI to create listings.");
     }
     const parsed = propertyWriteSchema.parse(req.body);
-    const created = await PropertyModel.create(parsed);
+    const created = await PropertyModel.create({
+      ...parsed,
+      assetCategory: parsed.assetCategory ?? deriveAssetCategory(parsed.propertyType),
+    });
     await logActivity({
       type: "listing.create",
       entityType: "listing",
@@ -312,8 +323,12 @@ propertiesRouter.patch("/:id", requireAuth, async (req, res, next) => {
     const parsed = propertyWriteSchema.partial().parse(req.body);
     const previous = await PropertyModel.findById(req.params.id);
     if (!previous) throw new HttpError(404, "Listing not found");
+    const nextPropertyType = parsed.propertyType ?? previous.propertyType;
 
-    const updated = await PropertyModel.findByIdAndUpdate(req.params.id, parsed, {
+    const updated = await PropertyModel.findByIdAndUpdate(req.params.id, {
+      ...parsed,
+      assetCategory: parsed.assetCategory ?? deriveAssetCategory(nextPropertyType),
+    }, {
       new: true,
     });
     if (!updated) throw new HttpError(404, "Listing not found");
