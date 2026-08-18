@@ -22,7 +22,7 @@ export function Logo({
         alt="Kestrel Commercial"
         width={w}
         height={h}
-        className="h-auto"
+        className="h-12 w-auto"
         priority
       />
     </PrefetchLink>

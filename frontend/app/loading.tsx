@@ -3,7 +3,7 @@ import { Container } from "@/components/brand/Container";
 export default function Loading() {
   return (
     <div className="page-shell min-h-[100svh] bg-paper">
-      <div className="border-b border-oxblood/10 bg-paper/95 backdrop-blur-xl">
+      <div className="border-b border-oxblood/10 bg-paper">
         <Container className="flex items-center justify-between py-4">
           <div className="h-10 w-12 animate-pulse bg-oxblood/10" />
           <div className="hidden gap-5 md:flex">

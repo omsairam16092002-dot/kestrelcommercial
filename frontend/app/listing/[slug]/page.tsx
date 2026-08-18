@@ -98,20 +98,10 @@ export default async function ListingPage({ params }: { params: { slug: string }
       </Container>
 
       <Container className="py-8 md:py-10">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.34fr)] lg:items-end">
-          <div>
-            <StatusStamp status={property.status} side={property.transactionSide} size="lg" />
-            <h1 className="t-h1 mt-5 max-w-4xl text-ink">{property.address}</h1>
-            <p className="t-mono mt-3 uppercase tracking-plate text-mauve">{fullAddress(property)}</p>
-            <p className="t-mono-lg mt-5 tabular text-oxblood">{property.priceLabel}</p>
-          </div>
-          <div className="premium-panel p-5 text-ink">
-            <p className="t-caption text-oxblood">Campaign read</p>
-            <p className="mt-3 text-sm leading-relaxed text-mauve">
-              Images first, key specs immediately after, then documents, map and evidence so the page answers the practical questions in the order serious buyers ask them.
-            </p>
-          </div>
-        </div>
+        <StatusStamp status={property.status} side={property.transactionSide} size="lg" />
+        <h1 className="t-h1 mt-5 max-w-4xl text-ink">{property.address}</h1>
+        <p className="t-mono mt-3 uppercase tracking-plate text-mauve">{fullAddress(property)}</p>
+        <p className="t-mono-lg mt-5 tabular text-oxblood">{property.priceLabel}</p>
       </Container>
 
       <ListingGallery property={property} />

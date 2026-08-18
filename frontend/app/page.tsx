@@ -69,64 +69,43 @@ export default async function HomePage() {
       {/* 1 — Hero */}
       <section className="relative overflow-hidden bg-oxblood text-paper">
         <HeroVideo alt="Drone footage over Footscray, Melbourne west" posterSrc={heroBleed?.src} />
-        <Container className="relative z-10 flex min-h-[100svh] flex-col justify-end pb-16 pt-28 sm:pb-20 md:pb-24">
-          <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(290px,0.52fr)]">
-            <div>
-              <p className="hero-enter eyebrow-rule t-caption text-tan">Kestrel Commercial · Melbourne west</p>
-              <h1 className="hero-enter t-display mt-4 max-w-5xl uppercase tracking-[-0.03em] text-paper sm:mt-5">
-                Buildings that{" "}
-                <em className="font-serif font-normal italic normal-case tracking-normal text-tan">work</em>{" "}
-                for the business inside them
-              </h1>
-              <p className="hero-enter-delay mt-5 max-w-2xl text-base leading-relaxed text-paper/88 sm:mt-6 sm:text-lg">
-                Industrial and commercial assets across Melbourne’s west, handled by one direct desk with
-                evidence-led pricing, sharper leasing campaigns, and cleaner execution from first enquiry to completion.
-              </p>
-              <div className="hero-enter-delay mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
-                <CtaLink
-                  href="/buy"
-                  id="cta-home-hero-listings"
-                  page="home"
-                  className="btn-sharp bg-tan px-7 py-3.5 text-ink hover:bg-paper"
-                >
-                  View listings
-                </CtaLink>
-                <CtaLink
-                  href="/sell"
-                  id="cta-home-hero-appraisal"
-                  page="home"
-                  className="btn-sharp border border-tan/70 bg-transparent px-6 py-3.5 text-tan hover:bg-tan hover:text-ink"
-                >
-                  Request appraisal
-                </CtaLink>
-                <a
-                  href={AGENCY.whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2 text-sm font-semibold text-paper/85 hover:text-tan"
-                >
-                  <IconWhatsApp className="h-4 w-4" />
-                  WhatsApp
-                </a>
-              </div>
-            </div>
-            <div className="hero-enter-delay premium-panel border-paper/15 bg-paper/10 p-5 text-paper backdrop-blur-sm">
-              <p className="t-caption text-tan">Why this desk</p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="border-t border-paper/15 pt-3">
-                  <p className="t-mono text-tan">700+</p>
-                  <p className="mt-1 text-sm text-paper/78">Transactions shaped by real west-side evidence.</p>
-                </div>
-                <div className="border-t border-paper/15 pt-3">
-                  <p className="t-mono text-tan">15+ years</p>
-                  <p className="mt-1 text-sm text-paper/78">Industrial, commercial, residential and development work.</p>
-                </div>
-                <div className="border-t border-paper/15 pt-3">
-                  <p className="t-mono text-tan">One desk</p>
-                  <p className="mt-1 text-sm text-paper/78">WhatsApp first, then the strategy, campaign and close.</p>
-                </div>
-              </div>
-            </div>
+        <Container className="relative z-10 flex min-h-[100svh] flex-col justify-end pb-20 pt-28 sm:pb-24 md:pb-28">
+          <p className="hero-enter t-caption text-tan">Kestrel Commercial · Melbourne west</p>
+          <h1 className="hero-enter t-display mt-4 max-w-4xl uppercase tracking-[-0.02em] text-paper sm:mt-5">
+            Buildings that{" "}
+            <em className="font-serif font-normal italic normal-case tracking-normal text-tan">work</em>{" "}
+            for the business inside them
+          </h1>
+          <p className="hero-enter-delay mt-5 max-w-xl text-base leading-relaxed text-paper/90 sm:mt-6 sm:text-lg">
+            Industrial and commercial assets across Melbourne’s west — sales, leasing and management,
+            priced properly the first time.
+          </p>
+          <div className="hero-enter-delay mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+            <CtaLink
+              href="/buy"
+              id="cta-home-hero-listings"
+              page="home"
+              className="btn-sharp bg-tan px-7 py-3.5 text-ink hover:bg-paper"
+            >
+              View listings
+            </CtaLink>
+            <CtaLink
+              href="/sell"
+              id="cta-home-hero-appraisal"
+              page="home"
+              className="btn-sharp border border-tan/70 bg-transparent px-6 py-3.5 text-tan hover:bg-tan hover:text-ink"
+            >
+              Request appraisal
+            </CtaLink>
+            <a
+              href={AGENCY.whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2 text-sm font-semibold text-paper/85 hover:text-tan"
+            >
+              <IconWhatsApp className="h-4 w-4" />
+              WhatsApp
+            </a>
           </div>
         </Container>
       </section>

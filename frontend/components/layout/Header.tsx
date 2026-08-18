@@ -74,15 +74,15 @@ export function Header() {
   }, [pathname]);
 
   return (
-    <header id="site-header" className="sticky top-0 z-50 border-b border-oxblood/10 bg-paper/92 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <header id="site-header" className="relative sticky top-0 z-50 border-b border-oxblood/10 bg-paper">
+      <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <Logo onClick={() => setOpen(false)} />
 
-        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           <div className="group relative">
             <PrefetchLink
               href="/properties/commercial"
-              className={`relative inline-flex items-center gap-1.5 pb-0.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition-colors duration-150 ease-out ${
+              className={`relative inline-flex items-center gap-1 pb-0.5 text-[13px] font-medium tracking-[0.04em] transition-colors duration-150 ease-out ${
                 pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease"
                   ? "text-oxblood"
                   : "text-ink/80 hover:text-ink"
@@ -115,7 +115,7 @@ export function Header() {
               <PrefetchLink
                 key={item.href}
                 href={item.href}
-                className={`relative pb-0.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition-colors duration-150 ease-out ${
+                className={`relative pb-0.5 text-[13px] font-medium tracking-[0.04em] transition-colors duration-150 ease-out ${
                   active ? "text-oxblood" : "text-ink/80 hover:text-ink"
                 }`}
               >
@@ -131,7 +131,7 @@ export function Header() {
             href={AGENCY.whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden items-center gap-1.5 border border-oxblood/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/80 transition-colors duration-150 ease-out hover:border-oxblood/25 hover:text-oxblood lg:inline-flex"
+            className="hidden items-center gap-1.5 text-[12px] font-semibold tracking-[0.04em] text-ink/80 transition-colors duration-150 ease-out hover:text-oxblood lg:inline-flex"
             aria-label={`WhatsApp ${AGENCY.whatsapp}`}
           >
             <IconWhatsApp className="h-3.5 w-3.5 text-oxblood" />
@@ -146,23 +146,21 @@ export function Header() {
           <button
             ref={menuButtonRef}
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center text-ink lg:hidden"
+            className="relative z-[60] inline-flex h-11 w-11 items-center justify-center text-ink lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? <IconClose className="h-5 w-5" /> : <IconMenu className="h-5 w-5" />}
+            {open ? <IconClose className="h-6 w-6" /> : <IconMenu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
+      {open ? (
       <div
         id="mobile-nav"
-        hidden={!open}
-        className={`fixed inset-x-0 bottom-0 top-[69px] z-40 overflow-y-auto border-t border-oxblood/10 bg-paper px-4 pb-6 shadow-[0_20px_50px_rgba(42,20,24,0.12)] lg:hidden ${
-          open ? "" : "hidden"
-        }`}
+        className="absolute inset-x-0 top-full z-50 h-[calc(100svh-100%)] overflow-y-auto bg-paper px-4 pb-6 lg:hidden"
       >
           <nav className="flex min-h-full flex-col gap-1 pt-3" aria-label="Mobile">
             {NAV.map((item) => {
@@ -239,6 +237,7 @@ export function Header() {
             <p className="px-4 pt-2 text-xs text-mauve">Licence {AGENCY.licenceNumber}</p>
           </nav>
         </div>
+      ) : null}
     </header>
   );
 }
