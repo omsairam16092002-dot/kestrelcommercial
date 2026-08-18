@@ -12,13 +12,16 @@ export function Logo({
   variant?: "header" | "footer";
   onClick?: () => void;
 }) {
+  const w = variant === "footer" ? 110 : 52;
+  const h = variant === "footer" ? 44 : 52;
+
   return (
     <Link href={href} className={`shrink-0 leading-none ${className}`.trim()} onClick={onClick}>
       <Image
         src="/assets/logo.png"
         alt="Kestrel Commercial"
-        width={variant === "footer" ? 140 : 120}
-        height={variant === "footer" ? 56 : 48}
+        width={w}
+        height={h}
         className="h-auto"
         priority
       />

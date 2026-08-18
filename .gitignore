@@ -15,8 +15,9 @@ Thumbs.db
 uploads/
 backend/data/
 backend/tmp/
-frontend/public/listings/axtra/
-frontend/public/listings/infopacks/
+# listing images now committed for deployment
+# frontend/public/listings/axtra/
+# frontend/public/listings/infopacks/
 .idea/
 .vscode/
 !docs/

@@ -47,10 +47,10 @@ export function portraitSrc(publicId: string, width = 1400) {
   return listingImageSrc(publicId, width);
 }
 
-export const AGENT_PORTRAIT = portraitSrc("unsplash:photo-1560250097-0b93528c311a", 1400);
+export const AGENT_PORTRAIT = "/assets/agent/jignesh.jpeg";
 
-/** Unsplash stock only when nothing has been uploaded to Cloudinary. */
-export function agentPortraitSrc(photoPublicId?: string | null, width = 1400) {
-  if (isStockImageId(photoPublicId)) return AGENT_PORTRAIT;
-  return portraitSrc(photoPublicId as string, width);
+/** Local portrait first, then Cloudinary, then stock Unsplash. */
+export function agentPortraitSrc(photoPublicId?: string | null, _width = 1400) {
+  if (!photoPublicId || isStockImageId(photoPublicId)) return AGENT_PORTRAIT;
+  return portraitSrc(photoPublicId as string, _width);
 }

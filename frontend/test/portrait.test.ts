@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { agentPortraitSrc, AGENT_PORTRAIT } from "../lib/images";
 
-test("agent portrait falls back to Unsplash only when nothing is uploaded", () => {
+test("agent portrait falls back to local JPEG when nothing is uploaded", () => {
   assert.equal(agentPortraitSrc(undefined), AGENT_PORTRAIT);
   assert.equal(agentPortraitSrc(""), AGENT_PORTRAIT);
   assert.equal(agentPortraitSrc("unsplash:photo-1560250097-0b93528c311a"), AGENT_PORTRAIT);
-  assert.match(AGENT_PORTRAIT, /images\.unsplash\.com\/photo-1560250097-0b93528c311a/);
+  assert.match(AGENT_PORTRAIT, /\/assets\/agent\/jignesh\.jpeg/);
 });
 
-test("uploaded Cloudinary public id is used instead of Unsplash", () => {
+test("uploaded Cloudinary public id is used instead of local fallback", () => {
   const src = agentPortraitSrc("kestrel/agents/jignesh", 1400);
   assert.match(src, /res\.cloudinary\.com\//);
   assert.match(src, /kestrel\/agents\/jignesh/);
