@@ -1,0 +1,43 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { cloudinaryUrl, isStockImageId, resolveImageSrc } from "../src/images";
+
+test("isStockImageId treats empty and unsplash: as stock", () => {
+  assert.equal(isStockImageId(undefined), true);
+  assert.equal(isStockImageId(null), true);
+  assert.equal(isStockImageId(""), true);
+  assert.equal(isStockImageId("   "), true);
+  assert.equal(isStockImageId("unsplash:photo-1560250097-0b93528c311a"), true);
+  assert.equal(isStockImageId("kestrel/agents/mfntqffneeizxmmfhqwi"), false);
+  assert.equal(isStockImageId("local:axtra/mitcham/01.jpg"), false);
+});
+
+test("resolveImageSrc uses Unsplash only for stock ids", () => {
+  const stock = resolveImageSrc("unsplash:photo-1560250097-0b93528c311a", "dne4fejan", { width: 800 });
+  assert.match(stock, /images\.unsplash\.com\/photo-1560250097-0b93528c311a/);
+  assert.doesNotMatch(stock, /res\.cloudinary\.com/);
+
+  const empty = resolveImageSrc("", "dne4fejan");
+  assert.match(empty, /images\.unsplash\.com/);
+});
+
+test("resolveImageSrc never maps a Cloudinary public id to Unsplash", () => {
+  const id = "kestrel/agents/mfntqffneeizxmmfhqwi";
+  const withCloud = resolveImageSrc(id, "dne4fejan", { width: 1400 });
+  assert.equal(withCloud, cloudinaryUrl("dne4fejan", id, { width: 1400 }));
+  assert.match(withCloud, /res\.cloudinary\.com\/dne4fejan/);
+  assert.doesNotMatch(withCloud, /unsplash/);
+
+  const withoutCloud = resolveImageSrc(id);
+  assert.equal(withoutCloud, "");
+  assert.doesNotMatch(withoutCloud, /unsplash/);
+});
+
+test("resolveImageSrc keeps absolute http urls", () => {
+  const url = "https://res.cloudinary.com/dne4fejan/image/upload/v1/kestrel/agents/x.jpg";
+  assert.equal(resolveImageSrc(url, "dne4fejan"), url);
+});
+
+test("resolveImageSrc serves local listing files from /listings", () => {
+  assert.equal(resolveImageSrc("local:axtra/mitcham/01.jpg"), "/listings/axtra/mitcham/01.jpg");
+});

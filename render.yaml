@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: kestrel-api
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: .
+    buildCommand: npm install && npm run build -w @kestrel/shared
+    startCommand: npm run start -w backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_UPLOAD_FOLDER
+        value: kestrel/listings
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: SITE_URL
+        sync: false
+      - key: ADMIN_SEED_EMAIL
+        sync: false
+      - key: ADMIN_SEED_PASSWORD
+        sync: false
+      - key: ADMIN_SIGNUP_OPEN
+        value: "false"
+      - key: ADMIN_INVITE_CODE
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_WEBHOOK_SECRET
+        sync: false
+      - key: NOTIFY_EMAIL_TO
+        value: jignesh@kestrelcommercial.com
+      - key: NOTIFY_FORMSUBMIT
+        value: "true"

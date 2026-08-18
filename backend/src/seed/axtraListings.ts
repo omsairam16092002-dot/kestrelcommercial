@@ -1,0 +1,585 @@
+import { campaignListings, monthlyYield, passingYield, type AxtraCampaign } from "./axtraFactory";
+import { AXTRA_LISTINGS as PART1 } from "./axtraListingsPart1";
+
+const pack = {
+  rosella: "https://www.dropbox.com/scl/fo/p4rgfom9z5uhwydvx4q9u/ALbaecp36MSufwrpjkuzEnM?rlkey=xd1txxu06rxepesptq7ov2ork&dl=0",
+  pitt: "https://www.dropbox.com/scl/fo/ktgt7qf1qizruvw49u34m/AIYcGQqL0i-TEraFiVTe6pk?rlkey=bmht9guobwmytnij527k0mexp&dl=0",
+  riverwalk: "https://www.dropbox.com/scl/fo/f2llkq7b1gyob132y717b/AI7cMHAKkAYD7AKeA3hlDHk?rlkey=kzd2nxao52fovfkihl7chuc6y&dl=0",
+  winfield: "https://www.dropbox.com/scl/fo/8094gz6l8m4duc22s28ez/AJcnNOYP1aIOVNLOLvo8lwY?rlkey=4f83p2d87wmz14d7zgppqwp1y&dl=0",
+  laurel: "https://www.dropbox.com/scl/fo/xh57hjirk1j0nxc8r5y23/AGxOyIqcf-drnypYM8xDNxA?rlkey=pbhdzqhobsehbg4dzewgaalwt&dl=0",
+  thompsons: "https://www.dropbox.com/scl/fo/gj8sa118rx91wu2bbzlee/AMiJTzM8yoQyce0JccIuRCY?rlkey=86kbaz5hypmlw80c05ewwvesk&dl=0",
+  travers: "https://www.dropbox.com/scl/fo/hl9q5v0r5gpligque4wjh/ADq0fjei6vDuBiIpuR8RI9k?rlkey=6n34d5t80nfyu9qc6jgzjlxr6&dl=0",
+  willowstone: "https://www.dropbox.com/scl/fo/hcijoo7xefdbeijq9vc2i/AOB4uzlaej05879CjRiOgMA?rlkey=2v8ireab2nhp31jap5yeaxppx&dl=0",
+  hull: "https://www.dropbox.com/scl/fo/6re4qfqbvq9j0azu6y2oi/AJLq_FdgwLSZQJY-NHDf37A?rlkey=bzq0wx76nc155nathp0x7ilc3&dl=0",
+  spring: "https://www.dropbox.com/scl/fo/zkmm82iiyhf9cdgn4hzvz/AJYkqj0ORXCoiuIS2kM-9Hk?rlkey=6pcxjyg3da4jzlc7lxoh8dyvt&dl=0",
+  eden: "https://www.dropbox.com/scl/fo/gg4jjfxivggx7b2piuyvb/AKK2fhSmEhAicQ113JqpCpo?rlkey=aafkvyp8d0pkyumu0iezjxbx7&dl=0",
+  finlay: "https://www.dropbox.com/scl/fo/3yegapp5hn0ii6nvw7par/APuEn6EyGUJR9G6k1FicM4s?rlkey=ro38z03adgbos83r770ywh0rf&dl=0",
+  northern: "https://www.dropbox.com/scl/fo/1sn387m5o8rmlhgdt2fbh/AL6AF8tqoB4IvxdXImXzO5o?rlkey=i5mrybs4nz3rmoajc2w2z66ih&dl=0",
+  plenty: "https://www.dropbox.com/scl/fo/5e12yjoixqf6mrov6bktn/AONbLg7A5FK5MsEGnJtf-Ws?rlkey=z3c4chdzke1iko37zauq02z1w&dl=0",
+  norman: "https://www.dropbox.com/scl/fo/s40tsoyor7bjzva912qcj/AKJBu4Iu0B260pwwLLvrJiY?rlkey=6qmbk1dh78fwlrpup3w9ohzdd&dl=0",
+  clingin: "https://www.dropbox.com/scl/fo/y854w9lzhac7qvd49l1so/AB8AnIS7-uFDcTZwWaVBRS8?rlkey=ryduqv5dp9qv3nizchjqmhecd&dl=0",
+  rosebud: "https://www.dropbox.com/scl/fo/ltwzcj9t4gk76z5m2svkn/AORLzhri49-qZdlNko-XiK4?rlkey=b7tqggnbti0d1ltzl077tgbxw&dl=0",
+  corio: "https://www.dropbox.com/scl/fo/40l5qspnvinq4ml9rjsq8/AEtUVvNcTToiENRwx0q5xnk?rlkey=xa16lz9wxnxrifc8ck0dkmyya&dl=0",
+  sparrowhawk: "https://www.dropbox.com/scl/fo/yx6y1zplns6qwszuu3tmu/AEIcRNZwIlvVA_kBda-dHiM?rlkey=g41kpazcffwgh6g0u2xdfyzlb&dl=0",
+  ceduna: "https://www.dropbox.com/scl/fo/lgozqzx624mznvccin3rx/AA88WnIwATCLfLUrKzr5Cls?rlkey=738pzcw6o8mfw3oep5dm5qjw6&dl=0",
+  launceston: "https://www.dropbox.com/scl/fo/t48v8ei5uxam49izu60hf/AOtwfBntM93FzJcGtBt1-t4?rlkey=ilsg48gg6772um7a7umuoyf16&dl=0",
+  leakes: "https://www.dropbox.com/scl/fo/fzegfiweh6b9q34je6fxb/APwRowDSGS9EyF8ISnRyjDc?rlkey=4abe9err7v7cyc26zjkc1jmnv&dl=0",
+  cardross: "https://www.dropbox.com/scl/fo/qyobtvbssh1cb2fq7kwzv/AL6_zxGFGQ6AAHHa2rcgLl0?rlkey=g9x4ndh1jb7987uqetuc5518h&dl=0",
+} as const;
+
+function c(partial: AxtraCampaign): AxtraCampaign {
+  return partial;
+}
+
+const PART2 = [
+  ...campaignListings(
+    c({
+      suburb: "Murrumbeena",
+      postcode: "3163",
+      type: "apartment",
+      firb: "YES",
+      completion: "Brand-new apartment (Rosella, 93–101 Poath Road)",
+      primary: "Oakleigh Primary School",
+      secondary: "South Oakleigh College",
+      commission: "3.3% inc GST, payment at settlement",
+      pack: pack.rosella,
+      extraCampaign:
+        "Limited promotion: cash rebate up to $5,000. Residential body corporate about $3,900 pa. Confirm terms in writing.",
+    }),
+    [
+      { slug: "93-101-poath-road-murrumbeena-114", address: "Unit 114, 93-101 Poath Road", price: 999000, floor: 99, beds: 3, baths: 2, cars: 2, specNote: "Internal 87 m² plus 12 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-115", address: "Unit 115, 93-101 Poath Road", price: 999000, floor: 99, beds: 3, baths: 2, cars: 2, specNote: "Internal 87 m² plus 12 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-116", address: "Unit 116, 93-101 Poath Road", price: 1085000, floor: 102, beds: 3, baths: 2, cars: 2, specNote: "Internal 89 m² plus 13 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-206", address: "Unit 206, 93-101 Poath Road", price: 899000, floor: 87, beds: 2, baths: 2, cars: 1, specNote: "Internal 78 m² plus 9 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-301", address: "Unit 301, 93-101 Poath Road", price: 970000, floor: 136, beds: 2, baths: 2, cars: 1, specNote: "Internal 79 m² plus 57 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-302", address: "Unit 302, 93-101 Poath Road", price: 799000, floor: 100, beds: 2, baths: 1, cars: 1, specNote: "Internal 68 m² plus 32 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-307", address: "Unit 307, 93-101 Poath Road", price: 970000, floor: 130, beds: 2, baths: 2, cars: 1, specNote: "Internal 79 m² plus 51 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-311", address: "Unit 311, 93-101 Poath Road", price: 988000, floor: 98, beds: 2, baths: 2, cars: 1, specNote: "Internal 80 m² plus 18 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-401", address: "Unit 401, 93-101 Poath Road", price: 985000, floor: 114, beds: 2, baths: 2, cars: 1, specNote: "Internal 82 m² plus 32 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-403", address: "Unit 403, 93-101 Poath Road", price: 680000, floor: 70, beds: 1, baths: 1, cars: 1, specNote: "One bedroom plus study. Internal 62 m² plus 8 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-404", address: "Unit 404, 93-101 Poath Road", price: 828000, floor: 80, beds: 2, baths: 2, cars: 1, specNote: "Internal 70 m² plus 10 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-405", address: "Unit 405, 93-101 Poath Road", price: 828000, floor: 80, beds: 2, baths: 2, cars: 1, specNote: "Internal 70 m² plus 10 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-406", address: "Unit 406, 93-101 Poath Road", price: 899000, floor: 89, beds: 2, baths: 2, cars: 1, specNote: "Internal 81 m² plus 8 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-408", address: "Unit 408, 93-101 Poath Road", price: 940000, floor: 104, beds: 2, baths: 2, cars: 1, specNote: "Internal 78 m² plus 26 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-602", address: "Unit 602, 93-101 Poath Road", price: 975000, floor: 89, beds: 2, baths: 1, cars: 1, specNote: "Two bedrooms plus study. Internal 81 m² plus 8 m² external.", outgoingsPa: 3900 },
+      { slug: "93-101-poath-road-murrumbeena-605", address: "Unit 605, 93-101 Poath Road", price: 985000, floor: 92, beds: 2, baths: 2, cars: 2, specNote: "Internal 82 m² plus 10 m² external.", outgoingsPa: 3900 },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Ringwood",
+      postcode: "3134",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q3 2026",
+      primary: "Great Ryrie Primary School",
+      secondary: "Ringwood Secondary College",
+      commission: "2.2% inc GST, payment at settlement",
+      pack: pack.pitt,
+      extraCampaign: "Prices have been adjusted on the current list.",
+    }),
+    [
+      { slug: "26-pitt-street-ringwood-lot-1", address: "Lot 1, 26 Pitt Street", status: "sold", price: null, floor: 154.3, beds: 3, baths: 2, cars: 1, specNote: "One living area and a balcony." },
+      { slug: "26-pitt-street-ringwood-lot-2", address: "Lot 2, 26 Pitt Street", price: 890000, floor: 154.9, beds: 3, baths: 2.5, cars: 1, specNote: "Three bedrooms plus study, one living and a balcony." },
+      { slug: "26-pitt-street-ringwood-lot-3", address: "Lot 3, 26 Pitt Street", price: 890000, floor: 154.9, beds: 3, baths: 2.5, cars: 1, specNote: "Three bedrooms plus study, one living and a balcony." },
+      { slug: "26-pitt-street-ringwood-lot-4", address: "Lot 4, 26 Pitt Street", price: 890000, floor: 154.9, beds: 3, baths: 2.5, cars: 1, specNote: "Three bedrooms plus study, one living and a balcony." },
+      { slug: "26-pitt-street-ringwood-lot-5", address: "Lot 5, 26 Pitt Street", price: 890000, floor: 154.9, beds: 3, baths: 2.5, cars: 1, specNote: "Three bedrooms plus study, one living and a balcony." },
+      { slug: "26-pitt-street-ringwood-lot-6", address: "Lot 6, 26 Pitt Street", price: 890000, floor: 154.9, beds: 3, baths: 2.5, cars: 1, specNote: "Three bedrooms plus study, one living and a balcony." },
+      { slug: "26-pitt-street-ringwood-lot-7", address: "Lot 7, 26 Pitt Street", status: "sold", price: null, floor: 117.1, beds: 2, baths: 2, cars: 1, specNote: "One living area and a balcony." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Werribee",
+      postcode: "3030",
+      type: "house",
+      firb: "YES",
+      completion: "Ready to settle — single-level house, Riverwalk Estate",
+      primary: "Riverwalk Primary School",
+      secondary: "Werribee Secondary College",
+      commission: "$30,000 inc GST, payment at settlement",
+      pack: pack.riverwalk,
+    }),
+    [
+      {
+        slug: "12-kuvera-street-werribee",
+        address: "Lot 4234, 12 Kuvera Street",
+        status: "sold",
+        price: null,
+        floor: 165.89,
+        land: 262.43,
+        beds: 4,
+        baths: 2,
+        cars: 2,
+        carNote: "1 + 1",
+        occupancy: "Sold. Tenanted at $2,513 per month when last advised.",
+        evidenceLine: "Sold — tenanted $2,513/month",
+      },
+      { slug: "7-ketu-street-werribee", address: "Lot 4309, 7 Ketu Street", price: 720000, floor: 166.63, land: 263, beds: 4, baths: 3, cars: 2, carNote: "1 + 1" },
+      { slug: "29-gambusia-road-werribee", address: "Lot 4313, 29 Gambusia Road", status: "under-offer", price: null, floor: 204.12, land: 315, beds: 4, baths: 3, cars: 2, carNote: "1 + 1" },
+      {
+        slug: "37-gambusia-road-werribee",
+        address: "Lot 4317, 37 Gambusia Road",
+        price: 675000,
+        floor: 144.97,
+        land: 212,
+        beds: 4,
+        baths: 2,
+        cars: 2,
+        carNote: "1 + 1",
+        occupancy: "Tenanted at $2,200 per month.",
+        yieldPercent: monthlyYield(675000, 2200),
+        evidenceLine: "Tenanted $2,200/month",
+      },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Balwyn North",
+      postcode: "3104",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Early 2027",
+      primary: "Birralee Primary School",
+      secondary: "Koonung Secondary College",
+      commission: "4% inc GST, payment term 50/50",
+      pack: pack.winfield,
+    }),
+    [
+      { slug: "91-winfield-road-balwyn-north-unit-2", address: "Unit 2, 91 Winfield Road", price: 2280000, floor: 259.04, beds: 4, baths: 3.5, cars: 2, specNote: "Two living areas." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Boronia",
+      postcode: "3155",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q3 2026",
+      primary: "Boronia K-12 College",
+      commission: "3.3% inc GST, payment at settlement",
+      pack: pack.laurel,
+    }),
+    [
+      { slug: "17-laurel-avenue-boronia-unit-1", address: "Unit 1, 17 Laurel Avenue", price: 1250000, floor: 209.93, beds: 4, baths: 3.5, cars: 2, specNote: "One living area." },
+      { slug: "17-laurel-avenue-boronia-unit-2", address: "Unit 2, 17 Laurel Avenue", price: 1180000, floor: 184.6, beds: 3, baths: 2.5, cars: 2, specNote: "Two living areas." },
+      { slug: "17-laurel-avenue-boronia-unit-3", address: "Unit 3, 17 Laurel Avenue", price: 1120000, floor: 180.61, beds: 4, baths: 3, cars: 2, carNote: "two carports", specNote: "One living area." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Bulleen",
+      postcode: "3105",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q3 2026",
+      primary: "Templestowe Valley Primary School",
+      secondary: "Templestowe College",
+      commission: "3.3% inc GST, payment at settlement",
+      pack: pack.thompsons,
+    }),
+    [
+      { slug: "198-thompsons-road-bulleen-unit-1", address: "Unit 1, 198 Thompsons Road", price: 1298000, floor: 190, land: 194, beds: 3, baths: 3, cars: 2, specNote: "Study included." },
+      { slug: "198-thompsons-road-bulleen-unit-2", address: "Unit 2, 198 Thompsons Road", price: 1260000, floor: 195, land: 147, beds: 3, baths: 2.5, cars: 2, specNote: "Study included." },
+      { slug: "198-thompsons-road-bulleen-unit-3", address: "Unit 3, 198 Thompsons Road", price: 1280000, floor: 188, land: 158, beds: 3, baths: 3, cars: 2 },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Burwood East",
+      postcode: "3151",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q3 2026",
+      primary: "Burwood East Primary School",
+      secondary: "Forest Hill College",
+      commission: "4% inc GST, payment at settlement",
+      pack: pack.travers,
+      extraCampaign:
+        "Cash rebate up to $10,000 plus a 5% rental guarantee for 12 months, limited to the first five units sold. Confirm written terms.",
+    }),
+    [
+      { slug: "11-13-travers-crescent-burwood-east-lot-2", address: "Lot 2, 11-13 Travers Crescent", price: 1185000, floor: 194, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 17.1 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-3", address: "Lot 3, 11-13 Travers Crescent", price: 1185000, floor: 193.5, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 17.5 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-4", address: "Lot 4, 11-13 Travers Crescent", price: 1185000, floor: 193.3, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 17.3 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-5", address: "Lot 5, 11-13 Travers Crescent", status: "under-offer", price: null, floor: 186, beds: 2, baths: 3, cars: 1, specNote: "One living. Balcony 22.4 m². Under contract." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-6", address: "Lot 6, 11-13 Travers Crescent", price: 1285000, floor: 232.3, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 12.2 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-7", address: "Lot 7, 11-13 Travers Crescent", status: "under-offer", price: null, floor: 225.6, beds: 4, baths: 4.5, cars: 2, specNote: "Two living areas. Balcony 8.4 m². Under contract." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-8", address: "Lot 8, 11-13 Travers Crescent", status: "sold", price: null, floor: 161.9, beds: 4, baths: 2, cars: 2, specNote: "One living. Balcony 14.6 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-12", address: "Lot 12, 11-13 Travers Crescent", price: 1150000, floor: 174.2, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 16.7 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-13", address: "Lot 13, 11-13 Travers Crescent", price: 1150000, floor: 174.3, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 16.7 m²." },
+      { slug: "11-13-travers-crescent-burwood-east-lot-14", address: "Lot 14, 11-13 Travers Crescent", price: 1150000, floor: 174.1, beds: 4, baths: 3, cars: 2, specNote: "One living. Balcony 11.9 m²." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Cobblebank",
+      postcode: "3338",
+      type: "house",
+      firb: "YES",
+      completion: "September–October 2026 — awaiting occupancy permit",
+      primary: "Strathtulloh Primary School",
+      secondary: "Kolorer College",
+      commission: "$30,000 inc GST, payment at settlement",
+      pack: pack.willowstone,
+    }),
+    [
+      { slug: "70-coltan-avenue-cobblebank", address: "Lot 631, 70 Coltan Avenue", price: 715000, floor: 189.94, land: 268, beds: 4, baths: 3, cars: 2, carNote: "1 + 1", specNote: "Four bedrooms plus lounge. Campaign notes completion within about two months." },
+      { slug: "68-coltan-avenue-cobblebank", address: "Lot 630, 68 Coltan Avenue", price: 695000, floor: 194.15, land: 270, beds: 4, baths: 3, cars: 2, carNote: "1 + 1", specNote: "Four bedrooms plus lounge." },
+      { slug: "10-masa-street-cobblebank", address: "Lot 644, 10 Masa Street", status: "sold", price: null, floor: 138.47, land: 196, beds: 4, baths: 2, cars: 2, carNote: "1 + 1" },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Croydon",
+      postcode: "3136",
+      type: "house",
+      firb: "YES",
+      completion: "Q1 2027 — SDA (specialist disability accommodation)",
+      primary: "Ruskin Park Primary School",
+      secondary: "Yarra Hills Secondary College",
+      commission: "3.3% inc GST, payment at settlement",
+      pack: pack.hull,
+    }),
+    [
+      {
+        slug: "147-hull-road-croydon-unit-1",
+        address: "Unit 1, 147 Hull Road",
+        price: 2100000,
+        floor: 219,
+        beds: 4,
+        baths: 4,
+        cars: 1,
+        specNote: "One living area. SDA investment as advised.",
+        occupancy:
+          "Advised rental $160,000 pa + GST, 4% CPI, 5 + 5 year option, commencing 7 days after occupancy permit. Specialist product — buyers must do their own SDA due diligence.",
+        yieldPercent: passingYield(2100000, 160000),
+        leaseTermYears: 5,
+        evidenceLine: "SDA rent $160k pa + GST (5+5)",
+      },
+      {
+        slug: "147-hull-road-croydon-unit-2",
+        address: "Unit 2, 147 Hull Road",
+        price: 2100000,
+        floor: 230,
+        beds: 4,
+        baths: 4,
+        cars: 1,
+        specNote: "One living area. SDA investment as advised. Confirm tenancy with the desk — passing rent sat on unit 1 of the list.",
+      },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Deanside",
+      postcode: "3336",
+      type: "house",
+      firb: "YES",
+      completion: "October 2026 — awaiting occupancy permit",
+      primary: "Deanside Primary School",
+      secondary: "Springside West Secondary College",
+      commission: "$30,000 inc GST, payment at settlement",
+      pack: pack.spring,
+    }),
+    [
+      { slug: "12-sparrowhawk-crescent-deanside", address: "Lot 164, 12 Sparrowhawk Crescent", price: 735000, floor: 179.68, land: 263, beds: 4, baths: 3, cars: 2 },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Doncaster",
+      postcode: "3108",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q4 2026",
+      primary: "Doncaster Primary School",
+      secondary: "Doncaster Secondary College",
+      commission: "3.3% inc GST, payment at settlement",
+      pack: pack.eden,
+    }),
+    [
+      { slug: "1-eden-court-doncaster-unit-1", address: "Unit 1, 1 Eden Court", price: 2360000, floor: 333, land: 350, beds: 4, baths: 4.5, cars: 2, specNote: "Two study spaces as advised." },
+      { slug: "marshall-avenue-doncaster-unit-2", address: "Unit 2, Marshall Avenue (1 Eden Court development)", price: 2450000, floor: 371, land: 400, beds: 4, baths: 4.5, cars: 2, specNote: "One study as advised." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Frankston",
+      postcode: "3199",
+      type: "townhouse",
+      firb: "YES",
+      completion: "End 2026",
+      primary: "Frankston Primary School",
+      secondary: "Frankston High School",
+      commission: "4% inc GST, payment term 50/50",
+      pack: pack.finlay,
+    }),
+    [
+      { slug: "8-finlay-street-frankston-unit-1", address: "Unit 1, 8 Finlay Street", price: 1280000, floor: 218.36, beds: 3, baths: 2.5, cars: 1, specNote: "Study included." },
+      { slug: "8-finlay-street-frankston-unit-2", address: "Unit 2, 8 Finlay Street", price: 1300000, floor: 225.33, beds: 3, baths: 2.5, cars: 1, specNote: "Study included." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Heidelberg Heights",
+      postcode: "3081",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q4 2026",
+      primary: "Charles La Trobe P-12 College",
+      commission: "3.3% inc GST, payment term 50/50",
+      pack: pack.northern,
+      extraCampaign:
+        "Promotion: 5% rental guarantee for 12 months or a cash rebate equivalent to the FIRB application fee — limited time. Confirm written terms. Lot 3 was reduced from $988,000 by $90,000.",
+    }),
+    [
+      { slug: "171-northern-road-heidelberg-heights-lot-1", address: "Lot 1, 171 Northern Road", status: "sold", price: null, floor: 118.8, beds: 2, baths: 2, cars: 1, specNote: "Retreat included." },
+      { slug: "171-northern-road-heidelberg-heights-lot-2", address: "Lot 2, 171 Northern Road", price: 988000, floor: 154.4, beds: 3, baths: 3, cars: 1 },
+      { slug: "171-northern-road-heidelberg-heights-lot-3", address: "Lot 3, 171 Northern Road", price: 898000, floor: 154.4, beds: 3, baths: 3, cars: 1, specNote: "Price reduced from $988,000." },
+      { slug: "171-northern-road-heidelberg-heights-lot-4", address: "Lot 4, 171 Northern Road", status: "sold", price: null, floor: 122.9, beds: 2, baths: 2, cars: 1, specNote: "Retreat included." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Reservoir",
+      postcode: "3073",
+      type: "townhouse",
+      firb: "YES",
+      completion: "August–September 2026",
+      primary: "Reservoir East Primary School",
+      secondary: "Reservoir East Primary School",
+      commission: "4% inc GST, payment term 50/50",
+      pack: pack.plenty,
+      extraCampaign: "Promotion: cash rebate up to $20,000 or 5% rental guarantee for 12 months. Confirm written terms.",
+    }),
+    [
+      { slug: "771-plenty-road-reservoir-lot-1", address: "Lot 1, 771 Plenty Road", status: "sold", price: null, floor: 132, beds: 2, baths: 1.5, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-2", address: "Lot 2, 771 Plenty Road", status: "sold", price: null, floor: 133, beds: 2, baths: 1.5, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-3", address: "Lot 3, 771 Plenty Road", price: 695000, floor: 120.5, beds: 2, baths: 1, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-4", address: "Lot 4, 771 Plenty Road", status: "sold", price: null, floor: 136, beds: 2, baths: 1, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-5", address: "Lot 5, 771 Plenty Road", status: "sold", price: null, floor: 136, beds: 2, baths: 1, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-6", address: "Lot 6, 771 Plenty Road", price: 685000, floor: 120.5, beds: 2, baths: 1, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-7", address: "Lot 7, 771 Plenty Road", price: 690000, floor: 120.5, beds: 2, baths: 1, cars: 1, specNote: "Study included." },
+      { slug: "771-plenty-road-reservoir-lot-8", address: "Lot 8, 771 Plenty Road", status: "sold", price: null, floor: 114, beds: 2, baths: 1.5, cars: 1, specNote: "Study included." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Ringwood",
+      postcode: "3134",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q3 2026",
+      primary: "Mullum Primary School",
+      secondary: "Norwood Secondary College",
+      commission: "4% inc GST, payment term 50/50",
+      pack: pack.norman,
+    }),
+    [
+      { slug: "4-norman-court-ringwood-lot-1", address: "Lot 1, 4 Norman Court", price: 1450000, floor: 222, beds: 4, baths: 2.5, cars: 2, specNote: "One living area." },
+      { slug: "4-norman-court-ringwood-lot-2", address: "Lot 2, 4 Norman Court", price: 1350000, floor: 203, beds: 4, baths: 3, cars: 2, specNote: "One living area." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Reservoir",
+      postcode: "3073",
+      type: "townhouse",
+      firb: "YES",
+      completion: "Q2 2027, off the plan",
+      primary: "Preston North East Primary",
+      secondary: "Reservoir High School",
+      commission: "4% inc GST, payment term 50/50",
+      pack: pack.clingin,
+    }),
+    [
+      { slug: "30-32-clingin-street-reservoir-unit-1", address: "Unit 1, 30-32 Clingin Street", price: 965000, floor: 189, beds: 3, baths: 2, cars: 2, specNote: "Three bedrooms plus additional room as advised (3 + 1)." },
+      { slug: "30-32-clingin-street-reservoir-unit-2", address: "Unit 2, 30-32 Clingin Street", price: 885000, floor: 165, beds: 3, baths: 2, cars: 2 },
+      { slug: "30-32-clingin-street-reservoir-unit-3", address: "Unit 3, 30-32 Clingin Street", price: 799000, floor: 151, beds: 3, baths: 2, cars: 2, carNote: "1 + 1" },
+      { slug: "30-32-clingin-street-reservoir-unit-4", address: "Unit 4, 30-32 Clingin Street", price: 945000, floor: 193, beds: 3, baths: 2.5, cars: 2, specNote: "Three bedrooms plus additional room as advised (3 + 1)." },
+      { slug: "30-32-clingin-street-reservoir-unit-5", address: "Unit 5, 30-32 Clingin Street", price: 895000, floor: 176, beds: 3, baths: 2, cars: 2 },
+      { slug: "30-32-clingin-street-reservoir-unit-6", address: "Unit 6, 30-32 Clingin Street", price: 799000, floor: 147, beds: 3, baths: 2, cars: 2, specNote: "Three bedrooms plus study." },
+      { slug: "30-32-clingin-street-reservoir-unit-7", address: "Unit 7, 30-32 Clingin Street", price: 945000, floor: 166, beds: 4, baths: 3, cars: 2 },
+      { slug: "30-32-clingin-street-reservoir-unit-8", address: "Unit 8, 30-32 Clingin Street", price: 945000, floor: 166, beds: 4, baths: 3, cars: 2 },
+      { slug: "30-32-clingin-street-reservoir-unit-9", address: "Unit 9, 30-32 Clingin Street", status: "sold", price: null, floor: 193, beds: 3, baths: 2, cars: 2, specNote: "Three bedrooms plus study." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Rosebud",
+      postcode: "3939",
+      type: "townhouse",
+      firb: "YES",
+      completion: "End 2026, off the plan",
+      primary: "Rosebud Primary School",
+      secondary: "Rosebud Secondary College",
+      commission: "3.3% inc GST, payment term 50/50",
+      pack: pack.rosebud,
+    }),
+    [
+      { slug: "775-point-nepean-road-rosebud-lot-1", address: "Lot 1, 775 Point Nepean Road", price: 1250000, floor: 184.2, land: 285.4, beds: 4, baths: 3, specNote: "Retreat included. No car count advised." },
+      { slug: "775-point-nepean-road-rosebud-lot-2", address: "Lot 2, 775 Point Nepean Road", price: 1090000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-3", address: "Lot 3, 775 Point Nepean Road", price: 1090000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-4", address: "Lot 4, 775 Point Nepean Road", price: 1050000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-5", address: "Lot 5, 775 Point Nepean Road", price: 1080000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-6", address: "Lot 6, 775 Point Nepean Road", price: 1080000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-7", address: "Lot 7, 775 Point Nepean Road", price: 1080000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-8", address: "Lot 8, 775 Point Nepean Road", price: 1088000, floor: 169.8, land: 208.7, beds: 3, baths: 2.5, cars: 2 },
+      { slug: "775-point-nepean-road-rosebud-lot-9", address: "Lot 9, 775 Point Nepean Road", reserved: true, price: null, floor: 180, land: 276.8, beds: 3, baths: 2.5, cars: 2 },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Geelong",
+      postcode: "3220",
+      type: "development-land",
+      zoning: "C1Z",
+      firb: "NO",
+      primary: "Geelong South Primary School",
+      secondary: "Geelong High School",
+      commission: "2.2% inc GST, payment at settlement",
+      pack: pack.corio,
+    }),
+    [
+      {
+        slug: "118-corio-street-geelong",
+        address: "118 Corio Street",
+        price: 3000000,
+        land: 516,
+        occupancy: "Holding income: currently rented as a security car park at $3,000 per month.",
+        yieldPercent: monthlyYield(3000000, 3000),
+        specNote: "Permit and plans ready for a 14-storey mixed-use building.",
+        evidenceLine: "Holding rent $3,000/month",
+      },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Beveridge",
+      postcode: "3753",
+      type: "house",
+      firb: "YES",
+      completion: "End 2026 — house and land, construction advised to start in June",
+      primary: "Beveridge Primary School",
+      secondary: "Ngayuk College",
+      commission: "$30,000 inc GST, payment term 50/50",
+      pack: pack.sparrowhawk,
+    }),
+    [
+      { slug: "sparrowhawk-drive-beveridge-lot-526", address: "Lot 526, Sparrowhawk Drive", price: 619000, floor: 176.32, land: 368, beds: 3, baths: 2, cars: 2, specNote: "House and land package. Land $264,000 + build $355,000." },
+      { slug: "sparrowhawk-drive-beveridge-lot-527", address: "Lot 527, Sparrowhawk Drive", price: 624000, floor: 176.32, land: 300, beds: 3, baths: 2, cars: 2, specNote: "House and land package. Land $274,000 + build $350,000." },
+      { slug: "sparrowhawk-drive-beveridge-lot-532", address: "Lot 532, Sparrowhawk Drive", price: 625000, floor: 176.32, land: 300, beds: 3, baths: 2, cars: 2, specNote: "House and land package. Land $279,000 + build $346,000." },
+      { slug: "sparrowhawk-drive-beveridge-lot-533", address: "Lot 533, Sparrowhawk Drive", price: 629000, floor: 176.32, land: 315, beds: 3, baths: 2, cars: 2, specNote: "House and land package. Land $284,000 + build $345,000." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Clyde North",
+      postcode: "3978",
+      type: "house",
+      firb: "YES",
+      completion: "Q3 2027 house and land. Estimated land title Q4 2026",
+      primary: "Turrun Primary School",
+      secondary: "Wulerrp Secondary College",
+      commission: "$20,000 inc GST, payment term 50/50",
+      pack: pack.ceduna,
+    }),
+    [
+      { slug: "ceduna-estate-clyde-north-lot-3767", address: "Lot 3767, Ceduna Estate", price: 595300, floor: 92.9, land: 168, beds: 3, baths: 1, cars: 1, specNote: "House and land package. Land $301,500 + build $293,800." },
+      { slug: "ceduna-estate-clyde-north-lot-3768", address: "Lot 3768, Ceduna Estate", price: 595300, floor: 92.9, land: 168, beds: 3, baths: 1, cars: 1, specNote: "House and land package. Land $301,500 + build $293,800." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Williamstown North",
+      postcode: "3016",
+      type: "warehouse",
+      zoning: "IN1Z",
+      firb: "YES",
+      completion: "Newly established warehouse",
+      commission: "$30,000 inc GST, payment at settlement",
+      pack: pack.launceston,
+      extraCampaign:
+        "Price is GST exclusive ($4,200 + GST per m²). Lots 2 and 4 leased 2+2+2 at $45,000 pa with 4% annual increase. Lot 3 leased 2+2 at $45,000 pa with 4% annual increase. Confirm tenancy documents.",
+    }),
+    [
+      { slug: "14-launceston-street-williamstown-north-lot-1", address: "Lot 1, 14 Launceston Street", price: 905982, gstExclusive: true, floor: 215.71, cars: 2, carNote: "2–4", specNote: "Kitchenette and bathroom." },
+      { slug: "14-launceston-street-williamstown-north-lot-2", address: "Lot 2, 14 Launceston Street", price: 1051218, gstExclusive: true, floor: 250.29, cars: 2, carNote: "2–4", specNote: "Kitchenette and bathroom.", occupancy: "Leased at $45,000 pa (2+2+2, 4% annual increase).", yieldPercent: passingYield(1051218, 45000), leaseTermYears: 2, evidenceLine: "Leased $45k pa 2+2+2" },
+      { slug: "14-launceston-street-williamstown-north-lot-3", address: "Lot 3, 14 Launceston Street", status: "sold", price: null, gstExclusive: true, floor: 250.29, cars: 2, carNote: "2–4", specNote: "Kitchenette and bathroom. Sold. Was leased 2+2 at $45,000 pa." },
+      { slug: "14-launceston-street-williamstown-north-lot-4", address: "Lot 4, 14 Launceston Street", price: 1124802, gstExclusive: true, floor: 267.81, cars: 2, carNote: "2–4", specNote: "Kitchenette and bathroom.", occupancy: "Leased at $45,000 pa (2+2+2, 4% annual increase).", yieldPercent: passingYield(1124802, 45000), leaseTermYears: 2, evidenceLine: "Leased $45k pa 2+2+2" },
+      { slug: "14-launceston-street-williamstown-north-lot-5", address: "Lot 5, 14 Launceston Street", price: 783888, gstExclusive: true, floor: 186.64, cars: 2, carNote: "2–4", specNote: "Kitchenette and bathroom." },
+      { slug: "14-launceston-street-williamstown-north-lot-6", address: "Lot 6, 14 Launceston Street", status: "sold", price: null, gstExclusive: true, floor: 187.49, cars: 2, carNote: "2–4" },
+      { slug: "14-launceston-street-williamstown-north-lot-7", address: "Lot 7, 14 Launceston Street", status: "sold", price: null, gstExclusive: true, floor: 177.09, cars: 2, carNote: "2–4" },
+      { slug: "14-launceston-street-williamstown-north-lot-8", address: "Lot 8, 14 Launceston Street", price: 736638, gstExclusive: true, floor: 175.39, cars: 2, carNote: "2–4", specNote: "Kitchenette and bathroom." },
+      { slug: "14-launceston-street-williamstown-north-lot-9", address: "Lot 9, 14 Launceston Street", status: "sold", price: null, gstExclusive: true, floor: 175.39, cars: 2, carNote: "2–4" },
+      { slug: "14-launceston-street-williamstown-north-lot-10", address: "Lot 10, 14 Launceston Street", status: "sold", price: null, gstExclusive: true, floor: 177.09, cars: 2, carNote: "2–4" },
+      { slug: "14-launceston-street-williamstown-north-lot-11", address: "Lot 11, 14 Launceston Street", status: "sold", price: null, gstExclusive: true, floor: 245.93, cars: 2, carNote: "2–4" },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Truganina",
+      postcode: "3029",
+      type: "warehouse",
+      zoning: "IN1Z",
+      firb: "YES",
+      completion: "Q3 2026",
+      commission: "4% inc GST, payment at settlement",
+      pack: pack.leakes,
+      extraCampaign: "5% rental guarantee for 6 months. Confirm written terms.",
+    }),
+    [
+      { slug: "191-leakes-road-truganina-lot-39", address: "Lot 39, 191 Leakes Road", price: 808038, gstExclusive: true, floor: 212, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2576, extra: "Owners corporation fee advised at $2,576.10 per year for lots 39–40." },
+      { slug: "191-leakes-road-truganina-lot-40", address: "Lot 40, 191 Leakes Road", price: 808038, gstExclusive: true, floor: 212, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2576, extra: "Owners corporation fee advised at $2,576.10 per year for lots 39–40." },
+      { slug: "191-leakes-road-truganina-lot-50", address: "Lot 50, 191 Leakes Road", price: 776895, gstExclusive: true, floor: 196, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2382, extra: "Owners corporation fee advised at $2,381.68 per year for lots 50/55." },
+      { slug: "191-leakes-road-truganina-lot-55", address: "Lot 55, 191 Leakes Road", price: 776895, gstExclusive: true, floor: 196, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2382, extra: "Owners corporation fee advised at $2,381.68 per year for lots 50/55." },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Cardross",
+      postcode: "3496",
+      type: "rural",
+      zoning: "FZ",
+      firb: "YES",
+      completion: "Rural vineyard with operational infrastructure",
+      commission: "8% inc GST, payment at settlement",
+      pack: pack.cardross,
+    }),
+    [
+      {
+        slug: "387-myall-street-cardross",
+        address: "387 Myall Street",
+        price: 1200000,
+        land: 269100,
+        beds: 2,
+        baths: 1,
+        specNote: "26.91 ha approx. Water security, proven varietal demand and operational infrastructure already in place as advised.",
+      },
+    ],
+  ),
+];
+
+export const AXTRA_LISTINGS = [...PART1, ...PART2];

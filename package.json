@@ -1,0 +1,26 @@
+{
+  "name": "kestrel-commercial",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:backend": "npm run build -w @kestrel/shared && npm run dev -w backend",
+    "build": "npm run build -w @kestrel/shared && npm run build -w backend && npm run build -w frontend",
+    "seed": "npm run seed -w backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run build -w @kestrel/shared && tsx --test packages/shared/test/images.test.ts packages/shared/test/filters.test.ts frontend/test/portrait.test.ts frontend/test/contactLinks.test.ts backend/test/api.features.test.ts test/public-site.live.test.ts",
+    "typecheck": "npm run typecheck -w @kestrel/shared && npm run typecheck -w backend && npm run typecheck -w frontend"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "tsx": "^4.19.2"
+  }
+}

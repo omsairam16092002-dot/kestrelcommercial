@@ -1,0 +1,51 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch --include ../packages/shared/src src/index.ts",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "start": "tsx src/index.ts",
+    "seed": "tsx src/seed/seed.ts",
+    "seed:samples": "tsx src/seed/samples.ts",
+    "seed:infopacks": "tsx src/seed/seedInfoPacks.ts",
+    "seed:axtra": "tsx src/seed/seedAxtra.ts",
+    "seed:axtra-media": "tsx src/seed/attachAxtraMedia.ts",
+    "seed:geocode": "tsx src/seed/geocodeProperties.ts",
+    "seed:cloudinary": "tsx src/seed/uploadListingMedia.ts",
+    "worker": "tsx src/jobs/workers.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test test/api.features.test.ts test/portalParsers.test.ts test/reaxml.test.ts test/axtra.listings.test.ts test/geocodeAddress.test.ts test/infoPack.listings.test.ts"
+  },
+  "dependencies": {
+    "@kestrel/shared": "*",
+    "bcryptjs": "^3.0.3",
+    "bullmq": "^5.21.2",
+    "cloudinary": "^2.5.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "google-auth-library": "^11.0.2",
+    "helmet": "^8.0.0",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.8.1",
+    "nodemailer": "^9.0.5",
+    "pdfkit": "^0.19.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.9.0",
+    "@types/nodemailer": "^6.4.17",
+    "@types/pdfkit": "^0.13.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
