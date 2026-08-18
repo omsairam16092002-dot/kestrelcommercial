@@ -12,14 +12,14 @@ export function isLocalImageId(publicId?: string | null): boolean {
 
 /**
  * Cloudinary URLs only. Backend never proxies image bytes.
- * Use f_auto,q_auto on every delivery URL.
+ * Use f_auto,q_auto:good,c_limit,dpr_auto on every delivery URL.
  */
 export function cloudinaryUrl(
   cloudName: string,
   publicId: string,
   options?: { width?: number; height?: number; crop?: string },
 ): string {
-  const transforms = ["f_auto", "q_auto"];
+  const transforms = ["f_auto", "q_auto:good", "c_limit", "dpr_auto"];
   if (options?.width) transforms.push(`w_${options.width}`);
   if (options?.height) transforms.push(`h_${options.height}`);
   if (options?.crop) transforms.push(`c_${options.crop}`);

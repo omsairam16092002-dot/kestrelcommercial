@@ -1,29 +1,46 @@
-import { HERO_SRCSET, HERO_STOCK } from "@/lib/images";
+"use client";
+
+import { useState } from "react";
 
 export const HERO_VIDEO_SRC = "/assets/hero/footscray-drone.mp4";
 
 /** Full-bleed muted loop for the homepage hero. Still image is the fallback. */
-export function HeroVideo({ alt }: { alt: string }) {
+export function HeroVideo({ alt, posterSrc }: { alt: string; posterSrc?: string }) {
+  const [ready, setReady] = useState(false);
+
   return (
     <div className="absolute inset-0 overflow-hidden bg-oxblood">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={HERO_STOCK}
-        srcSet={HERO_SRCSET}
-        sizes="100vw"
-        alt=""
+      {posterSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={posterSrc}
+          alt=""
+          aria-hidden
+          className={`absolute inset-0 h-full w-full object-cover object-center saturate-[0.94] contrast-[1.03] brightness-[0.84] transition-opacity duration-700 ${
+            ready ? "opacity-0" : "opacity-100"
+          }`}
+        />
+      ) : null}
+      <div
         aria-hidden
-        className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-center saturate-[0.92] contrast-[1.04] brightness-[0.98]"
-      />
+        className={`absolute inset-0 transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(210,173,117,0.18),transparent_32%),radial-gradient(circle_at_80%_24%,rgba(255,255,255,0.08),transparent_24%),linear-gradient(135deg,rgba(92,31,39,0.96),rgba(61,20,26,1))]" />
+        <div className="absolute inset-0 animate-pulse bg-[linear-gradient(115deg,transparent_22%,rgba(255,255,255,0.08)_36%,transparent_52%)] bg-[length:220%_100%]" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-oxblood to-transparent" />
+      </div>
       <video
-        className="hero-video absolute inset-0 h-full w-full object-cover object-center saturate-[0.92] contrast-[1.04] brightness-[0.98]"
+        className={`hero-video absolute inset-0 h-full w-full object-cover object-center saturate-[0.92] contrast-[1.04] brightness-[0.98] transition-opacity duration-700 ${
+          ready ? "opacity-100" : "opacity-0"
+        }`}
         autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-        poster={HERO_STOCK}
         aria-label={alt}
+        onCanPlay={() => setReady(true)}
+        onLoadedData={() => setReady(true)}
       >
         <source src={HERO_VIDEO_SRC} type="video/mp4" />
       </video>

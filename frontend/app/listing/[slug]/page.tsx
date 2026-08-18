@@ -13,6 +13,7 @@ import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { ListingJsonLd } from "@/components/listing/ListingJsonLd";
 import { getProperties, getPropertyBySlug } from "@/lib/api";
+import { compactEvidence, pickFlagship } from "@/lib/campaignPhoto";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
 
 export const revalidate = 60;
@@ -61,14 +62,18 @@ export default async function ListingPage({ params }: { params: { slug: string }
   const data = await getPropertyBySlug(params.slug);
   if (!data) notFound();
   const { property, agent } = data;
-  const similar = (await getProperties({ side: property.transactionSide })).filter(
+  const similar = compactEvidence((await getProperties({
+    side: property.transactionSide,
+    assetCategory: property.assetCategory,
+  })).filter(
     (p) =>
       p.id !== property.id &&
+      p.assetCategory === property.assetCategory &&
       p.transactionSide === property.transactionSide &&
       (p.status === "sold" || p.status === "leased"),
-  );
-  const flagship = similar[0];
-  const rest = similar.slice(1, 4);
+  ));
+  const flagship = pickFlagship(similar);
+  const rest = similar.filter((p) => p.id !== flagship?.id).slice(0, 3);
   const similarLabel = property.transactionSide === "lease" ? "Similar leases" : "Similar sales";
 
   return (
@@ -93,10 +98,20 @@ export default async function ListingPage({ params }: { params: { slug: string }
       </Container>
 
       <Container className="py-8 md:py-10">
-        <StatusStamp status={property.status} side={property.transactionSide} size="lg" />
-        <h1 className="t-h1 mt-5 max-w-4xl text-ink">{property.address}</h1>
-        <p className="t-mono mt-3 uppercase tracking-plate text-mauve">{fullAddress(property)}</p>
-        <p className="t-mono-lg mt-5 tabular text-oxblood">{property.priceLabel}</p>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.34fr)] lg:items-end">
+          <div>
+            <StatusStamp status={property.status} side={property.transactionSide} size="lg" />
+            <h1 className="t-h1 mt-5 max-w-4xl text-ink">{property.address}</h1>
+            <p className="t-mono mt-3 uppercase tracking-plate text-mauve">{fullAddress(property)}</p>
+            <p className="t-mono-lg mt-5 tabular text-oxblood">{property.priceLabel}</p>
+          </div>
+          <div className="premium-panel p-5 text-ink">
+            <p className="t-caption text-oxblood">Campaign read</p>
+            <p className="mt-3 text-sm leading-relaxed text-mauve">
+              Images first, key specs immediately after, then documents, map and evidence so the page answers the practical questions in the order serious buyers ask them.
+            </p>
+          </div>
+        </div>
       </Container>
 
       <ListingGallery property={property} />
@@ -106,8 +121,8 @@ export default async function ListingPage({ params }: { params: { slug: string }
           <div className="space-y-10 lg:col-span-8">
             <SpecTable property={property} />
             <section className="scroll-mt-24">
-            <p className="t-caption text-oxblood">The property</p>
-            <h2 className="t-h2 mt-5 text-ink">Campaign particulars</h2>
+              <p className="eyebrow-rule t-caption text-oxblood">The property</p>
+              <h2 className="t-h2 mt-5 text-ink">Campaign particulars</h2>
               <div className="mt-6 space-y-4 t-body text-pretty text-ink/85">
                 {property.description.split("\n\n").map((para) => (
                   <p key={para.slice(0, 48)}>{para}</p>
@@ -119,17 +134,17 @@ export default async function ListingPage({ params }: { params: { slug: string }
 
             {similar.length ? (
               <section className="scroll-mt-24 pt-4">
-                <p className="t-caption text-oxblood">Evidence</p>
+                <p className="eyebrow-rule t-caption text-oxblood">Evidence</p>
                 <h2 className="t-h2 mt-5 text-ink">{similarLabel}</h2>
                 {flagship ? (
                   <div className="mt-10">
-                    <FlagshipCaseStudy property={flagship} size="embed" />
+                    <FlagshipCaseStudy property={flagship} size="embed" imageMode="varied" />
                   </div>
                 ) : null}
                 {rest.length ? (
                   <div className="mt-6 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {rest.map((p) => (
-                      <ListingCard key={p.id} property={p} />
+                      <ListingCard key={p.id} property={p} imageMode="varied" />
                     ))}
                   </div>
                 ) : null}

@@ -31,7 +31,9 @@ export function SearchResultRow({
       onMouseLeave={() => onHover(null)}
       onClick={() => onSelect(property.slug)}
       className={`surface flex cursor-pointer gap-4 overflow-hidden p-3 transition duration-150 ease-out ${
-        selected ? "ring-2 ring-oxblood ring-offset-2 ring-offset-paper" : "hover:bg-white"
+        selected
+          ? "ring-2 ring-oxblood ring-offset-2 ring-offset-paper shadow-[0_16px_42px_rgba(42,20,24,0.08)]"
+          : "hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_16px_42px_rgba(42,20,24,0.06)]"
       }`}
     >
       <PrefetchLink
@@ -49,7 +51,7 @@ export function SearchResultRow({
       <div className="min-w-0 flex-1 py-0.5">
         <div className="flex flex-wrap items-center gap-2">
           <StatusStamp status={property.status} side={property.transactionSide} size="sm" />
-          <p className="t-mono tabular text-[12px] text-oxblood">{property.priceLabel}</p>
+          <p className="t-mono tabular text-[12px] uppercase tracking-[0.12em] text-oxblood">{property.priceLabel}</p>
         </div>
         <h3 className="t-h3 mt-1.5 text-ink">
           <PrefetchLink href={href} className="hover:text-oxblood" onClick={(e) => e.stopPropagation()}>

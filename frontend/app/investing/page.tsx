@@ -25,8 +25,8 @@ export default async function InvestingPage() {
       />
 
       <Container className="grid items-stretch gap-8 py-14 md:grid-cols-2 md:py-20">
-        <article className="flex h-full flex-col border-t-2 border-oxblood bg-paper pt-6">
-          <p className="t-caption text-oxblood">SMSF</p>
+        <article className="premium-panel flex h-full flex-col border-t-2 border-oxblood p-6 pt-6 md:p-8">
+          <p className="eyebrow-rule t-caption text-oxblood">SMSF</p>
           <h2 className="t-h2 mt-5 text-ink">Why so much industrial sits inside super</h2>
           <div className="t-body mt-5 flex-1 space-y-4 text-ink/85">
             <p>
@@ -59,8 +59,8 @@ export default async function InvestingPage() {
           </ul>
         </article>
 
-        <article className="flex h-full flex-col border-t-2 border-oxblood bg-paper pt-6">
-          <p className="t-caption text-oxblood">AML / CTF</p>
+        <article className="premium-panel flex h-full flex-col border-t-2 border-oxblood p-6 pt-6 md:p-8">
+          <p className="eyebrow-rule t-caption text-oxblood">AML / CTF</p>
           <h2 className="t-h2 mt-5 text-ink">Tranche 2. Identity first. Settlement later.</h2>
           <div className="t-body mt-5 flex-1 space-y-4 text-ink/85">
             <p>

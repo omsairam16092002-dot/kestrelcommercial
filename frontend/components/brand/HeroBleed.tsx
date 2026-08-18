@@ -28,10 +28,11 @@ export function HeroBleed({
         height={1280}
         fetchPriority="high"
         decoding="async"
-        className="absolute inset-0 h-full w-full object-cover object-center saturate-[0.94] contrast-[1.03] brightness-[1.02]"
+        className="absolute inset-0 h-full w-full scale-[1.015] object-cover object-center saturate-[0.96] contrast-[1.04] brightness-[0.97]"
       />
-      <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.12] mix-blend-multiply" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-oxblood/70 via-oxblood/15 to-oxblood/20" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,rgba(42,20,24,0.72),rgba(42,20,24,0.18)_42%,rgba(42,20,24,0.68))]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-oxblood/88 via-oxblood/22 to-oxblood/10" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-ink/25 to-transparent" />
     </div>
   );
 }

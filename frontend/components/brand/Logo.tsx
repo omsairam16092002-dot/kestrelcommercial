@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 export function Logo({
   href = "/",
@@ -16,15 +16,15 @@ export function Logo({
   const h = variant === "footer" ? 44 : 52;
 
   return (
-    <Link href={href} className={`shrink-0 leading-none ${className}`.trim()} onClick={onClick}>
+    <PrefetchLink href={href} className={`shrink-0 leading-none ${className}`.trim()} onClick={onClick}>
       <Image
-        src="/assets/logo.png"
+        src="/assets/logo-flat.png"
         alt="Kestrel Commercial"
         width={w}
         height={h}
         className="h-auto"
         priority
       />
-    </Link>
+    </PrefetchLink>
   );
 }

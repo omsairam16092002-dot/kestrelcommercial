@@ -13,7 +13,7 @@ export function ListingDocuments({ property }: { property: Property }) {
     : null;
 
   return (
-    <section id="documents" className="surface scroll-mt-24 p-5 sm:p-7">
+    <section id="documents" className="premium-panel scroll-mt-24 p-5 sm:p-7">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="t-caption text-oxblood">Documents</p>
@@ -39,10 +39,10 @@ export function ListingDocuments({ property }: { property: Property }) {
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <a
-          href={unlocked ? apiUrl(`/api/properties/${property.slug}/brochure?lead=${leadId}`) : "#brochure"}
-          className="bg-paper p-4 transition duration-150 ease-out hover:bg-white"
-        >
+          <a
+            href={unlocked ? apiUrl(`/api/properties/${property.slug}/brochure?lead=${leadId}`) : "#brochure"}
+            className="bg-paper p-4 transition duration-150 ease-out hover:bg-white"
+          >
           <p className="t-caption text-mauve">PDF</p>
           <p className="mt-2 text-base font-semibold text-ink">Information memorandum</p>
           <p className="mt-1 text-sm text-mauve">

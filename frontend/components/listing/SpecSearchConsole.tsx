@@ -146,7 +146,7 @@ export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "
   return (
     <form
       onSubmit={onSubmit}
-      className="surface p-4 sm:p-6 md:p-7"
+      className="premium-panel p-4 sm:p-6 md:p-7"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>

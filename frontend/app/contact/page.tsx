@@ -100,7 +100,7 @@ export default async function ContactPage() {
             })}
           </dl>
 
-          <div id="enquire" className="bg-paper p-6 text-ink md:col-span-8 md:p-9">
+          <div id="enquire" className="premium-panel bg-paper p-6 text-ink md:col-span-8 md:p-9">
             <h2 className="t-h2 text-ink">If you would rather write</h2>
             <p className="t-body mt-2 text-mauve">One business day. Sooner if you WhatsApp.</p>
             <div className="mt-6">

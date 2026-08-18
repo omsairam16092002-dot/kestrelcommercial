@@ -16,8 +16,7 @@ export const metadata: Metadata = {
     "Jignesh Jhanjaria, Director of Kestrel Commercial — 15+ years and 700+ transactions across industrial, commercial, residential and development property.",
 };
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function AboutPage() {
   const agent = (await getAgents())[0] ?? AGENTS[0];
@@ -40,8 +39,8 @@ export default async function AboutPage() {
       <ReasonCards />
 
       <section className="bg-ink text-paper">
-        <Container className="py-14 md:py-20">
-          <p className="t-mono text-tan">Licence {agent.licenceNumber}</p>
+        <Container className="section-pad">
+          <p className="eyebrow-rule t-mono text-tan">Licence {agent.licenceNumber}</p>
           <div className="mt-8 grid items-stretch gap-8 lg:grid-cols-2 lg:gap-14">
             <div className="relative isolate aspect-[4/5] overflow-hidden bg-oxblood sm:aspect-[5/6] lg:aspect-auto lg:min-h-[520px]">
               <DuotoneImage

@@ -8,7 +8,7 @@ import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 import { SpecSearchConsole } from "@/components/listing/SpecSearchConsole";
 import { SearchResultsWorkspace } from "@/components/listing/SearchResultsWorkspace";
 import { getProperties } from "@/lib/api";
-import { campaignPhotos, pickFlagship } from "@/lib/campaignPhoto";
+import { campaignPhotos, compactEvidence, pickFlagship } from "@/lib/campaignPhoto";
 
 export async function SearchPage({
   side,
@@ -39,7 +39,7 @@ export async function SearchPage({
   const merged: SpecFilters = { ...filters, side, assetCategory };
   const results = filterProperties(await getProperties(merged), merged);
   const available = results.filter((p) => p.status !== "sold" && p.status !== "leased");
-  const evidence = results.filter((p) => p.status === "sold" || p.status === "leased");
+  const evidence = compactEvidence(results.filter((p) => p.status === "sold" || p.status === "leased"));
   const page = pageKey ?? (side === "lease" ? "lease" : "buy");
   const flagship = pickFlagship(evidence);
   const rest = evidence.filter((p) => p.id !== flagship?.id);
@@ -47,23 +47,33 @@ export async function SearchPage({
 
   return (
     <div>
-      <section className="relative flex min-h-[70vh] flex-col justify-end overflow-hidden bg-oxblood text-paper lg:min-h-[82vh]">
+      <section className="relative flex min-h-[76vh] flex-col justify-end overflow-hidden bg-oxblood text-paper lg:min-h-[88vh]">
         <HeroBleed alt={bleed?.alt ?? ""} src={bleed?.src} />
         <Container className="relative z-10 pb-16 pt-28 md:pb-24 md:pt-40">
-          <p className="t-caption text-tan">
-            {heroKicker ?? `${category.short} · ${side === "lease" ? "Leasing" : "Sales"}`}
-          </p>
-          <h1 className="t-h1 mt-5 max-w-3xl text-paper">
-            {heroTitle ?? (side === "lease" ? `${category.short} for lease.` : `${category.short} for sale.`)}
-          </h1>
-          <p className="t-body-lg mt-6 max-w-2xl text-pretty text-paper/90">
-            {heroDescription ??
-              (assetCategory === "commercial"
-                ? "Floor, span, door, power, yard. Click a pin for the card. If it does not clear the spec, it is not on this grid."
-                : assetCategory === "residential"
-                  ? "Beds, baths, cars, land and price. Use the map and list together to narrow the right home or investment."
-                  : "Land area, zoning, permit status and price. Development stock stays separate from operational buildings for a reason.")}
-          </p>
+          <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.5fr)]">
+            <div>
+              <p className="eyebrow-rule t-caption text-tan">
+                {heroKicker ?? `${category.short} · ${side === "lease" ? "Leasing" : "Sales"}`}
+              </p>
+              <h1 className="t-h1 mt-5 max-w-4xl text-paper">
+                {heroTitle ?? (side === "lease" ? `${category.short} for lease.` : `${category.short} for sale.`)}
+              </h1>
+              <p className="t-body-lg mt-6 max-w-2xl text-pretty text-paper/90">
+                {heroDescription ??
+                  (assetCategory === "commercial"
+                    ? "Floor, span, door, power, yard. Click a pin for the card. If it does not clear the spec, it is not on this grid."
+                    : assetCategory === "residential"
+                      ? "Beds, baths, cars, land and price. Use the map and list together to narrow the right home or investment."
+                      : "Land area, zoning, permit status and price. Development stock stays separate from operational buildings for a reason.")}
+              </p>
+            </div>
+            <div className="premium-panel border-paper/15 bg-paper/10 p-5 text-paper backdrop-blur-sm lg:ml-auto lg:max-w-sm">
+              <p className="t-caption text-tan">Search posture</p>
+              <p className="mt-3 text-sm leading-relaxed text-paper/82">
+                Persistent filters, map continuity, and listing cards that keep the most important commercial details visible immediately.
+              </p>
+            </div>
+          </div>
         </Container>
       </section>
 
@@ -80,12 +90,12 @@ export async function SearchPage({
               {evidenceTitle ?? (side === "lease" ? "Recently leased" : "Recently sold")}
             </h2>
           </Container>
-          <FlagshipCaseStudy property={flagship} />
+          <FlagshipCaseStudy property={flagship} imageMode="varied" />
           {rest.length ? (
             <Container className="py-10 md:py-14">
               <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {rest.map((p) => (
-                  <ListingCard key={p.id} property={p} />
+                  <ListingCard key={p.id} property={p} imageMode="varied" />
                 ))}
               </div>
             </Container>

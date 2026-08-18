@@ -43,7 +43,7 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
   }
 
   return (
-    <div id="enquire" className="surface scroll-mt-24 p-5 sm:p-6">
+    <div id="enquire" className="premium-panel scroll-mt-24 p-5 sm:p-6">
       <div id="inspect" className="sr-only" />
       <div id="brochure" className="sr-only" />
 
@@ -63,7 +63,9 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="premium-divider mt-5" />
+
+      <div className="mt-5">
         <a
           href={AGENCY.whatsappHref}
           target="_blank"

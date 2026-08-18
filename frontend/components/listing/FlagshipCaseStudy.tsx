@@ -3,17 +3,20 @@ import { StatusStamp } from "@/components/brand/StatusStamp";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
+import { showcaseImage } from "@/lib/campaignPhoto";
 
 export function FlagshipCaseStudy({
   property,
   priority = false,
   size = "feature",
+  imageMode = "hero",
 }: {
   property: Property;
   priority?: boolean;
   size?: "feature" | "embed";
+  imageMode?: "hero" | "varied";
 }) {
-  const hero = property.images.find((i) => i.isHero) ?? property.images[0];
+  const visual = showcaseImage(property, imageMode);
   const href = `/listing/${property.slug}`;
   const result = property.evidenceLine || property.priceLabel;
   const cta = property.status === "leased" ? "View this lease →" : "View this sale →";
@@ -26,8 +29,8 @@ export function FlagshipCaseStudy({
       }`}
     >
       <DuotoneImage
-        src={hero ? listingImageSrc(hero.publicId, 2400) : listingPlaceholderSrc(property, 2400)}
-        alt={hero?.alt ?? fullAddress(property)}
+        src={visual?.src ?? (property.images[0] ? listingImageSrc(property.images[0].publicId, 2400) : listingPlaceholderSrc(property, 2400))}
+        alt={visual?.alt ?? fullAddress(property)}
         sizes="100vw"
         priority={priority}
         tone="photo"

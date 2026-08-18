@@ -22,7 +22,7 @@ export default async function PrivacyPage() {
         imageSrc={bleed?.src}
         imageAlt={bleed?.alt}
       />
-      <div className="surface mx-auto mt-10 max-w-3xl space-y-5 px-6 py-10 t-body text-ink/90 sm:px-10">
+      <div className="premium-panel mx-auto mt-10 max-w-3xl space-y-5 px-6 py-10 t-body text-ink/90 sm:px-10">
         <p>
           {AGENCY.legalName} (ACN {AGENCY.acn}) trading as Kestrel Commercial collects personal
           information to respond to enquiries, market and sell or lease property, and to meet our

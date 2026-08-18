@@ -37,7 +37,7 @@ export default async function SellPage() {
 
       <section id="evidence" className="scroll-mt-24 bg-paper">
         <Container className="pb-8 pt-16 md:pb-10 md:pt-24">
-          <p className="t-caption text-oxblood">Track record</p>
+          <p className="eyebrow-rule t-caption text-oxblood">Track record</p>
           <h2 className="t-h2 mt-5 text-ink">Sold and leased on this corridor</h2>
           <p className="t-body mt-5 max-w-xl text-pretty text-mauve">
             Vendors want proof before they hand over an address. Here it is.
@@ -88,7 +88,7 @@ export default async function SellPage() {
               </div>
             </dl>
           </div>
-          <div className="border border-paper/15 bg-paper p-6 text-ink md:col-span-7 md:p-9">
+          <div className="premium-panel border-paper/15 bg-paper p-6 text-ink md:col-span-7 md:p-9">
             <p className="t-caption text-oxblood">Appraisal request</p>
             <h2 className="t-h3 mt-2 text-ink">Request an appraisal</h2>
             <p className="t-body mt-2 text-mauve">Address, GFA, tenure. I will call you back.</p>

@@ -79,7 +79,7 @@ export function SearchResultsWorkspace({
 
   return (
     <div>
-      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="premium-panel mb-5 flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
         <div className="min-w-0 flex-1">
           <p className="t-mono text-oxblood">
             {String(visible.length).padStart(2, "0")} of {String(properties.length).padStart(2, "0")} building
@@ -92,7 +92,7 @@ export function SearchResultsWorkspace({
               className="dial t-mono w-full bg-white px-4 py-3 text-ink placeholder:text-mauve"
               value={listQuery}
               onChange={(e) => setListQuery(e.target.value)}
-              placeholder="Filter: Williamstown North, Truganina, Launceston…"
+              placeholder="Filter by suburb or street"
             />
           </label>
         </div>
@@ -117,7 +117,7 @@ export function SearchResultsWorkspace({
         </div>
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,42%)]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(360px,42%)]">
         <div className={mobileView === "map" ? "hidden lg:block" : ""}>
           <div className="max-h-[calc(100dvh-12rem)] space-y-3 overflow-y-auto pr-1 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)]">
             {visible.length ? (
@@ -141,7 +141,7 @@ export function SearchResultsWorkspace({
         </div>
 
         <div className={mobileView === "list" ? "hidden lg:block" : ""}>
-          <div className="surface h-[calc(100dvh-12rem)] overflow-hidden lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
+          <div className="surface h-[calc(100dvh-12rem)] overflow-hidden shadow-[0_24px_60px_rgba(42,20,24,0.08)] lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
             {isDesktop === true || mobileView === "map" ? (
               <SearchMap
                 properties={visible}

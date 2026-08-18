@@ -30,8 +30,8 @@ export default async function ServicesPage() {
       />
 
       <section className="bg-paper">
-        <Container className="py-16 md:py-24">
-          <p className="t-caption text-oxblood">Four lines</p>
+        <Container className="section-pad">
+          <p className="eyebrow-rule t-caption text-oxblood">Four lines</p>
           <h2 className="t-h2 mt-5 text-ink">How the desk works.</h2>
           <div className="mt-12">
             <ServicesGrid columns={4} />
@@ -50,7 +50,7 @@ export default async function ServicesPage() {
               ))}
             </div>
           </div>
-          <div className="relative min-h-[46vh] overflow-hidden bg-oxblood md:col-span-7 lg:min-h-[70vh]">
+          <div className="relative min-h-[46vh] overflow-hidden bg-oxblood shadow-[0_24px_60px_rgba(0,0,0,0.18)] md:col-span-7 lg:min-h-[70vh]">
             {projectPhoto ? (
               <DuotoneImage
                 src={projectPhoto.src}

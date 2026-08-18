@@ -26,7 +26,8 @@ export function StickyCallBar({
   return (
     <nav
       aria-label="Contact the desk"
-      className="fixed inset-x-0 bottom-0 z-40 md:hidden"
+      id="sticky-call-bar"
+      className="fixed inset-x-0 bottom-0 z-40 transition-opacity duration-150 md:hidden"
     >
       <div className="border-t-2 border-tan bg-paper pb-[env(safe-area-inset-bottom)]">
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">

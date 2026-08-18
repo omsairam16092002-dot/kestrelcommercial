@@ -19,7 +19,7 @@ export function ListingMap({ property }: { property: Property }) {
 
   if (!pair) {
     return (
-      <section className="surface px-5 py-8">
+      <section className="premium-panel px-5 py-8">
         <p className="t-caption text-oxblood">Location</p>
         <h2 className="mt-2 text-base font-semibold text-ink">{fullAddress(property)}</h2>
         <p className="t-body mt-3 text-mauve">
@@ -39,7 +39,7 @@ export function ListingMap({ property }: { property: Property }) {
   }
 
   return (
-    <section className="surface overflow-hidden">
+    <section className="premium-panel overflow-hidden">
       <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-4">
         <div>
           <p className="t-caption text-oxblood">Location</p>

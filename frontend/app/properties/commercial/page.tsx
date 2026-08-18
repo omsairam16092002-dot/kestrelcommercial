@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SearchPage } from "@/components/listing/SearchPage";
 import { filtersFromSearchParams } from "@/lib/api";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Commercial properties",

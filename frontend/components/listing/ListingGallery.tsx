@@ -3,7 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fullAddress, type Property } from "@kestrel/shared";
 import { PhotoCut } from "@/components/brand/PhotoCut";
-import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
+import { IconArrowRight } from "@/components/icons";
+import { listingImageSrc, listingImageSrcSet, listingPlaceholderSrc } from "@/lib/images";
+
+const GALLERY_WIDTH = 1600;
+const THUMB_WIDTH = 480;
+
+function gallerySrc(property: Property, publicId?: string) {
+  return publicId ? listingImageSrc(publicId, GALLERY_WIDTH) : listingPlaceholderSrc(property, GALLERY_WIDTH);
+}
+
+function gallerySrcSet(publicId?: string) {
+  return publicId ? listingImageSrcSet(publicId) : undefined;
+}
 
 export function ListingGallery({ property }: { property: Property }) {
   const images = property.images;
@@ -39,7 +51,34 @@ export function ListingGallery({ property }: { property: Property }) {
     return () => el.removeEventListener("keydown", onKey);
   }, [prev, next]);
 
-  const src = current?.publicId ? listingImageSrc(current.publicId, 2400) : listingPlaceholderSrc(property, 2400);
+  useEffect(() => {
+    setActive(0);
+  }, [property.slug]);
+
+  useEffect(() => {
+    setActive((i) => (images.length ? Math.min(i, images.length - 1) : 0));
+  }, [images.length]);
+
+  useEffect(() => {
+    if (images.length < 2) return;
+    const neighbors = [images[(active + 1) % images.length], images[(active - 1 + images.length) % images.length]];
+    const probes = neighbors.filter(Boolean).map((img) => {
+      const probe = new Image();
+      probe.decoding = "async";
+      probe.srcset = listingImageSrcSet(img.publicId);
+      probe.sizes = "100vw";
+      probe.src = listingImageSrc(img.publicId, GALLERY_WIDTH);
+      return probe;
+    });
+    return () => {
+      probes.forEach((probe) => {
+        probe.src = "";
+      });
+    };
+  }, [active, images]);
+
+  const src = gallerySrc(property, current?.publicId);
+  const srcSet = gallerySrcSet(current?.publicId);
 
   return (
     <div ref={rootRef} tabIndex={0} role="region" aria-label={`Photos of ${address}`}>
@@ -56,25 +95,31 @@ export function ListingGallery({ property }: { property: Property }) {
           else if (dx < -48) next();
         }}
       >
-        <PhotoCut src={src} alt={current?.alt ?? address} />
+        <PhotoCut
+          src={src}
+          srcSet={srcSet}
+          sizes="100vw"
+          alt={current?.alt ?? address}
+          priority={active === 0}
+        />
         <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.05] mix-blend-multiply" />
         {images.length > 1 ? (
           <>
             <button
               type="button"
-              className="absolute left-3 top-1/2 z-10 min-h-11 -translate-y-1/2 bg-paper px-4 py-2 t-caption text-oxblood transition-colors duration-150 ease-out hover:bg-tan active:scale-[0.985] md:left-6"
+              className="absolute left-3 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center bg-paper text-oxblood transition-colors duration-150 ease-out hover:bg-tan active:scale-[0.985] md:left-6"
               onClick={prev}
               aria-label="Previous image"
             >
-              Prev
+              <IconArrowRight className="h-5 w-5 rotate-180" />
             </button>
             <button
               type="button"
-              className="absolute right-3 top-1/2 z-10 min-h-11 -translate-y-1/2 bg-paper px-4 py-2 t-caption text-oxblood transition-colors duration-150 ease-out hover:bg-tan active:scale-[0.985] md:right-6"
+              className="absolute right-3 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center bg-paper text-oxblood transition-colors duration-150 ease-out hover:bg-tan active:scale-[0.985] md:right-6"
               onClick={next}
               aria-label="Next image"
             >
-              Next
+              <IconArrowRight className="h-5 w-5" />
             </button>
           </>
         ) : null}
@@ -98,7 +143,7 @@ export function ListingGallery({ property }: { property: Property }) {
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={listingImageSrc(img.publicId, 480)} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <img src={listingImageSrc(img.publicId, THUMB_WIDTH)} alt="" className="absolute inset-0 h-full w-full object-cover" />
             </button>
           ))}
         </div>

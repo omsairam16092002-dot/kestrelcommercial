@@ -2,9 +2,29 @@ import { isStockImageId, resolveImageSrc, type Property } from "@kestrel/shared"
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dne4fejan";
 
-/** Request 2x source width so images fill their box on retina. */
+/** Widths allowed by next.config images.deviceSizes — required for /_next/image. */
+const NEXT_IMAGE_WIDTHS = [390, 640, 750, 828, 1080, 1200, 1920];
+
+function nearestNextWidth(width: number) {
+  return NEXT_IMAGE_WIDTHS.reduce((best, n) =>
+    Math.abs(n - width) < Math.abs(best - width) ? n : best,
+  );
+}
+
+function optimizedLocalSrc(path: string, width: number) {
+  const w = nearestNextWidth(width);
+  return `/_next/image?url=${encodeURIComponent(path)}&w=${w}&q=70`;
+}
+
+/** Request a bounded width so gallery/list photos are not original 8–20MB files. */
 export function listingImageSrc(publicId: string, width = 1200) {
-  return resolveImageSrc(publicId, CLOUD, { width });
+  const src = resolveImageSrc(publicId, CLOUD, { width });
+  if (src.startsWith("/")) return optimizedLocalSrc(src, width);
+  return src;
+}
+
+export function listingImageSrcSet(publicId: string, widths = [640, 1080, 1920]) {
+  return widths.map((width) => `${listingImageSrc(publicId, width)} ${width}w`).join(", ");
 }
 
 const HERO_ID = "photo-1586528116311-ad8dd3c8310d";

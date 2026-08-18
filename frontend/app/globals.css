@@ -10,7 +10,7 @@
   --ink: #2a1418;
   --motion: 150ms;
   --motion-press: 120ms;
-  --motion-photo: 240ms;
+  --motion-photo: 420ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -24,6 +24,11 @@ html,
 body {
   background-color: var(--paper);
   color: var(--ink);
+}
+
+body[data-mobile-menu-open="true"] #sticky-call-bar {
+  opacity: 0;
+  pointer-events: none;
 }
 
 ::selection {
@@ -138,6 +143,64 @@ textarea:focus:not(:focus-visible) {
   box-shadow: none;
 }
 
+.page-shell {
+  background:
+    linear-gradient(to bottom, rgba(92, 31, 39, 0.03), transparent 14rem),
+    var(--paper);
+}
+
+.section-pad {
+  padding-top: clamp(3.75rem, 8vw, 6.5rem);
+  padding-bottom: clamp(3.75rem, 8vw, 6.5rem);
+}
+
+.section-intro {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.section-intro > p:last-child {
+  max-width: 46rem;
+}
+
+.premium-panel {
+  border: 1px solid rgba(92, 31, 39, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.86));
+  box-shadow: 0 24px 60px rgba(42, 20, 24, 0.08);
+}
+
+.premium-panel-dark {
+  border: 1px solid rgba(217, 162, 107, 0.18);
+  background: linear-gradient(180deg, rgba(53, 24, 29, 0.9), rgba(42, 20, 24, 0.96));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.premium-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(92, 31, 39, 0.18), rgba(92, 31, 39, 0.04));
+}
+
+.editorial-grid {
+  display: grid;
+  gap: clamp(1.25rem, 2vw, 2rem);
+}
+
+.eyebrow-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.eyebrow-rule::before {
+  content: "";
+  display: inline-block;
+  height: 1px;
+  width: 2.75rem;
+  background: currentColor;
+  opacity: 0.45;
+}
+
 .band-ink {
   background: var(--ink);
   color: var(--paper);
@@ -157,12 +220,17 @@ textarea:focus:not(:focus-visible) {
     background-color var(--motion) var(--ease-out),
     color var(--motion) var(--ease-out),
     border-color var(--motion) var(--ease-out),
+    box-shadow var(--motion) var(--ease-out),
     transform var(--motion-press) var(--ease-out);
 }
 
 .btn-pill:active:not(:disabled),
 .btn-sharp:active:not(:disabled) {
   transform: scale(0.985);
+}
+
+.btn-sharp:hover {
+  box-shadow: 0 12px 30px rgba(42, 20, 24, 0.12);
 }
 
 .kc-field-sharp,

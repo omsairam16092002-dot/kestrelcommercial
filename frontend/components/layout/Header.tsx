@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AGENCY, ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { Logo } from "@/components/brand/Logo";
 import { IconChevronDown, IconClose, IconMenu, IconWhatsApp } from "@/components/icons";
+import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const NAV = [
   { href: "/about", label: "About", match: ["/about"] },
@@ -22,11 +22,11 @@ const PROPERTY_LINKS = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [mobilePropertiesOpen, setMobilePropertiesOpen] = useState(false);
   const pathname = usePathname();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
@@ -52,12 +52,14 @@ export function Header() {
         first.focus();
       }
     };
-    document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = open ? "hidden" : prev;
+    document.body.dataset.mobileMenuOpen = open ? "true" : "false";
+    document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      delete document.body.dataset.mobileMenuOpen;
     };
   }, [open]);
 
@@ -65,16 +67,22 @@ export function Header() {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease") {
+      setMobilePropertiesOpen(true);
+    }
+  }, [pathname]);
+
   return (
-    <header id="site-header" className="sticky top-0 z-50 border-b border-oxblood/10 bg-paper/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+    <header id="site-header" className="sticky top-0 z-50 border-b border-oxblood/10 bg-paper/92 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Logo onClick={() => setOpen(false)} />
 
-        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
           <div className="group relative">
-            <Link
+            <PrefetchLink
               href="/properties/commercial"
-              className={`relative inline-flex items-center gap-1 pb-0.5 text-[13px] font-medium tracking-[0.04em] transition-colors duration-150 ease-out ${
+              className={`relative inline-flex items-center gap-1.5 pb-0.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition-colors duration-150 ease-out ${
                 pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease"
                   ? "text-oxblood"
                   : "text-ink/80 hover:text-ink"
@@ -85,18 +93,18 @@ export function Header() {
               {pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease" ? (
                 <span className="absolute inset-x-0 -bottom-1 h-px bg-tan" aria-hidden />
               ) : null}
-            </Link>
-            <div className="invisible absolute left-1/2 top-full z-20 mt-4 w-[380px] -translate-x-1/2 border border-oxblood/10 bg-paper p-3 opacity-0 shadow-[0_12px_30px_rgba(42,20,24,0.12)] transition-all duration-150 group-hover:visible group-hover:opacity-100">
+            </PrefetchLink>
+            <div className="invisible absolute left-1/2 top-full z-20 mt-5 w-[420px] -translate-x-1/2 border border-oxblood/10 bg-paper p-3 opacity-0 shadow-[0_24px_60px_rgba(42,20,24,0.14)] transition-all duration-150 group-hover:visible group-hover:opacity-100">
               <div className="grid gap-2">
                 {PROPERTY_LINKS.map((item) => (
-                  <Link
+                  <PrefetchLink
                     key={item.path}
                     href={item.path}
-                    className="block border border-transparent px-4 py-3 transition-colors duration-150 ease-out hover:border-oxblood/10 hover:bg-white"
+                    className="block border border-transparent px-4 py-3.5 transition-colors duration-150 ease-out hover:border-oxblood/10 hover:bg-white"
                   >
                     <p className="text-sm font-semibold text-ink">{item.title}</p>
                     <p className="mt-1 text-xs text-mauve">{item.description}</p>
-                  </Link>
+                  </PrefetchLink>
                 ))}
               </div>
             </div>
@@ -104,16 +112,16 @@ export function Header() {
           {NAV.map((item) => {
             const active = item.match.some((m) => pathname === m || pathname.startsWith(`${m}/`));
             return (
-              <Link
+              <PrefetchLink
                 key={item.href}
                 href={item.href}
-                className={`relative pb-0.5 text-[13px] font-medium tracking-[0.04em] transition-colors duration-150 ease-out ${
+                className={`relative pb-0.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition-colors duration-150 ease-out ${
                   active ? "text-oxblood" : "text-ink/80 hover:text-ink"
                 }`}
               >
                 {item.label}
                 {active ? <span className="absolute inset-x-0 -bottom-1 h-px bg-tan" aria-hidden /> : null}
-              </Link>
+              </PrefetchLink>
             );
           })}
         </nav>
@@ -123,18 +131,18 @@ export function Header() {
             href={AGENCY.whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden items-center gap-1.5 text-[12px] font-semibold tracking-[0.04em] text-ink/80 transition-colors duration-150 ease-out hover:text-oxblood lg:inline-flex"
+            className="hidden items-center gap-1.5 border border-oxblood/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/80 transition-colors duration-150 ease-out hover:border-oxblood/25 hover:text-oxblood lg:inline-flex"
             aria-label={`WhatsApp ${AGENCY.whatsapp}`}
           >
             <IconWhatsApp className="h-3.5 w-3.5 text-oxblood" />
             {AGENCY.whatsapp}
           </a>
-          <Link
+          <PrefetchLink
             href="/sell"
             className="hidden lg:inline-flex items-center bg-tan px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper active:scale-[0.985]"
           >
             Sell my asset
-          </Link>
+          </PrefetchLink>
           <button
             ref={menuButtonRef}
             type="button"
@@ -152,27 +160,48 @@ export function Header() {
       <div
         id="mobile-nav"
         hidden={!open}
-        className={`border-t border-oxblood/10 bg-paper px-4 pb-5 lg:hidden ${open ? "" : "hidden"}`}
+        className={`fixed inset-x-0 bottom-0 top-[69px] z-40 overflow-y-auto border-t border-oxblood/10 bg-paper px-4 pb-6 shadow-[0_20px_50px_rgba(42,20,24,0.12)] lg:hidden ${
+          open ? "" : "hidden"
+        }`}
       >
-          <nav className="flex flex-col gap-1 pt-3" aria-label="Mobile">
+          <nav className="flex min-h-full flex-col gap-1 pt-3" aria-label="Mobile">
             {NAV.map((item) => {
               const active = item.match.some((m) => pathname === m || pathname.startsWith(`${m}/`));
               return (
-                <Link
+                <PrefetchLink
                   key={item.href}
                   href={item.href}
                   className={`min-h-11 px-4 py-3 text-base font-semibold ${active ? "bg-oxblood text-paper" : "text-ink hover:bg-white"}`}
                   onClick={() => setOpen(false)}
                 >
                   {item.label}
-                </Link>
+                </PrefetchLink>
               );
             })}
             <div className="px-4 pt-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-mauve">Properties</p>
-              <div className="mt-2 grid gap-1">
+              <button
+                type="button"
+                className={`flex min-h-11 w-full items-center justify-between px-4 py-3 text-left text-base font-semibold ${
+                  pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease"
+                    ? "bg-oxblood text-paper"
+                    : "text-ink hover:bg-white"
+                }`}
+                aria-expanded={mobilePropertiesOpen}
+                aria-controls="mobile-properties-links"
+                onClick={() => setMobilePropertiesOpen((v) => !v)}
+              >
+                <span>Properties</span>
+                <IconChevronDown
+                  className={`h-4 w-4 transition-transform duration-150 ${
+                    pathname.startsWith("/properties") || pathname === "/buy" || pathname === "/lease"
+                      ? "text-paper"
+                      : "text-mauve"
+                  } ${mobilePropertiesOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div id="mobile-properties-links" className={`mt-2 grid gap-1 ${mobilePropertiesOpen ? "" : "hidden"}`}>
                 {PROPERTY_LINKS.map((item) => (
-                  <Link
+                  <PrefetchLink
                     key={item.path}
                     href={item.path}
                     className={`min-h-11 px-4 py-3 text-base font-semibold ${
@@ -181,17 +210,17 @@ export function Header() {
                     onClick={() => setOpen(false)}
                   >
                     {item.title}
-                  </Link>
+                  </PrefetchLink>
                 ))}
               </div>
             </div>
-            <Link
+            <PrefetchLink
               href="/sell"
               className="mx-1 mt-2 btn-sharp bg-tan text-ink"
               onClick={() => setOpen(false)}
             >
               Sell my asset
-            </Link>
+            </PrefetchLink>
             <div className="mt-2 grid grid-cols-2 gap-2 px-1 pb-1">
               <a
                 href={AGENCY.whatsappHref}

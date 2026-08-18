@@ -17,7 +17,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   return (
     <>
       <Header />
-      {children}
+      <div className="page-shell">{children}</div>
       <StickyCallBar
         page={pathname}
         listing={onListing ? pathname.replace("/listing/", "") : undefined}

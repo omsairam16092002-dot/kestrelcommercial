@@ -21,11 +21,10 @@ import {
 } from "@/components/icons";
 import { getAgents, getFeaturedProperties, getProperties } from "@/lib/api";
 import { agentPortraitSrc } from "@/lib/images";
-import { corridorProof, pickFlagship } from "@/lib/campaignPhoto";
+import { campaignPhotos, corridorProof, hasCompleteCommercialShowcaseSpecs, pickFlagship } from "@/lib/campaignPhoto";
 import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 const STATS = [
   { n: 700, suffix: "+", l: "Property transactions", decimals: 0 },
@@ -46,15 +45,22 @@ const TRANSFER_POINTS = [
 ];
 
 export default async function HomePage() {
+  const commercial = await getProperties({ assetCategory: "commercial" });
   const featured = (await getFeaturedProperties()).filter(
+    (p) => isAvailableStatus(p.status) && p.assetCategory === "commercial" && hasCompleteCommercialShowcaseSpecs(p),
+  );
+  const availableCommercial = commercial.filter(
     (p) => isAvailableStatus(p.status) && p.assetCategory === "commercial",
   );
-  const market = featured.slice(0, 3);
-  const evidence = (await getProperties({ assetCategory: "commercial" })).filter(
+  const completeAvailable = availableCommercial.filter(hasCompleteCommercialShowcaseSpecs);
+  const marketPool = featured.length ? featured : completeAvailable.length ? completeAvailable : availableCommercial;
+  const market = marketPool.slice(0, 3);
+  const evidence = commercial.filter(
     (p) => p.status === "sold" || p.status === "leased",
   );
   const flagship = pickFlagship(evidence);
   const proof = corridorProof(evidence);
+  const heroBleed = campaignPhotos(marketPool.length ? marketPool : completeAvailable, 1)[0];
   const agent = (await getAgents())[0] ?? AGENTS[0];
   const portrait = agentPortraitSrc(agent.photoPublicId, 1400);
 
@@ -62,46 +68,65 @@ export default async function HomePage() {
     <>
       {/* 1 — Hero */}
       <section className="relative overflow-hidden bg-oxblood text-paper">
-        <HeroVideo alt="Drone footage over Footscray, Melbourne west" />
-        <Container className="relative z-10 flex min-h-[100svh] flex-col justify-end pb-20 pt-28 sm:pb-24 md:pb-28">
-          <p className="hero-enter t-caption text-tan">
-            Kestrel Commercial · Melbourne west
-          </p>
-          <h1 className="hero-enter t-display mt-4 max-w-4xl uppercase tracking-[-0.02em] text-paper sm:mt-5">
-            Buildings that{" "}
-            <em className="font-serif font-normal italic normal-case tracking-normal text-tan">work</em>{" "}
-            for the business inside them
-          </h1>
-          <p className="hero-enter-delay mt-5 max-w-xl text-base leading-relaxed text-paper/90 sm:mt-6 sm:text-lg">
-            Industrial and commercial assets across Melbourne’s west — sales, leasing and management,
-            priced properly the first time.
-          </p>
-          <div className="hero-enter-delay mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
-            <CtaLink
-              href="/buy"
-              id="cta-home-hero-listings"
-              page="home"
-              className="btn-sharp bg-tan px-7 py-3.5 text-ink hover:bg-paper"
-            >
-              View listings
-            </CtaLink>
-            <CtaLink
-              href="/sell"
-              id="cta-home-hero-appraisal"
-              page="home"
-              className="btn-sharp border border-tan/70 bg-transparent px-6 py-3.5 text-tan hover:bg-tan hover:text-ink"
-            >
-              Request appraisal
-            </CtaLink>
-            <a
-              href={AGENCY.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2 text-sm font-semibold text-paper/85 hover:text-tan"
-            >
-              <IconWhatsApp className="h-4 w-4" />
-              WhatsApp
-            </a>
+        <HeroVideo alt="Drone footage over Footscray, Melbourne west" posterSrc={heroBleed?.src} />
+        <Container className="relative z-10 flex min-h-[100svh] flex-col justify-end pb-16 pt-28 sm:pb-20 md:pb-24">
+          <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(290px,0.52fr)]">
+            <div>
+              <p className="hero-enter eyebrow-rule t-caption text-tan">Kestrel Commercial · Melbourne west</p>
+              <h1 className="hero-enter t-display mt-4 max-w-5xl uppercase tracking-[-0.03em] text-paper sm:mt-5">
+                Buildings that{" "}
+                <em className="font-serif font-normal italic normal-case tracking-normal text-tan">work</em>{" "}
+                for the business inside them
+              </h1>
+              <p className="hero-enter-delay mt-5 max-w-2xl text-base leading-relaxed text-paper/88 sm:mt-6 sm:text-lg">
+                Industrial and commercial assets across Melbourne’s west, handled by one direct desk with
+                evidence-led pricing, sharper leasing campaigns, and cleaner execution from first enquiry to completion.
+              </p>
+              <div className="hero-enter-delay mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+                <CtaLink
+                  href="/buy"
+                  id="cta-home-hero-listings"
+                  page="home"
+                  className="btn-sharp bg-tan px-7 py-3.5 text-ink hover:bg-paper"
+                >
+                  View listings
+                </CtaLink>
+                <CtaLink
+                  href="/sell"
+                  id="cta-home-hero-appraisal"
+                  page="home"
+                  className="btn-sharp border border-tan/70 bg-transparent px-6 py-3.5 text-tan hover:bg-tan hover:text-ink"
+                >
+                  Request appraisal
+                </CtaLink>
+                <a
+                  href={AGENCY.whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2 text-sm font-semibold text-paper/85 hover:text-tan"
+                >
+                  <IconWhatsApp className="h-4 w-4" />
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+            <div className="hero-enter-delay premium-panel border-paper/15 bg-paper/10 p-5 text-paper backdrop-blur-sm">
+              <p className="t-caption text-tan">Why this desk</p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+                <div className="border-t border-paper/15 pt-3">
+                  <p className="t-mono text-tan">700+</p>
+                  <p className="mt-1 text-sm text-paper/78">Transactions shaped by real west-side evidence.</p>
+                </div>
+                <div className="border-t border-paper/15 pt-3">
+                  <p className="t-mono text-tan">15+ years</p>
+                  <p className="mt-1 text-sm text-paper/78">Industrial, commercial, residential and development work.</p>
+                </div>
+                <div className="border-t border-paper/15 pt-3">
+                  <p className="t-mono text-tan">One desk</p>
+                  <p className="mt-1 text-sm text-paper/78">WhatsApp first, then the strategy, campaign and close.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </Container>
       </section>
@@ -135,11 +160,11 @@ export default async function HomePage() {
       ) : null}
 
       {/* 4 — On the market now */}
-      <section className="bg-paper py-14 md:py-20">
-        <Container>
+      <section className="bg-paper">
+        <Container className="section-pad">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="t-caption text-oxblood">Stock</p>
+              <p className="eyebrow-rule t-caption text-oxblood">Stock</p>
               <h2 className="t-h2 mt-5 text-ink">On the market now</h2>
             </div>
             <CtaLink href="/buy" id="cta-home-market-all" page="home" className="text-sm font-semibold text-oxblood hover:underline">
@@ -168,9 +193,9 @@ export default async function HomePage() {
       </section>
 
       {/* 4 — Spec search */}
-      <section className="border-y border-oxblood/10 bg-white/50 py-14 md:py-20">
-        <Container>
-          <p className="t-caption text-oxblood">Find stock</p>
+      <section className="border-y border-oxblood/10 bg-white/50">
+        <Container className="section-pad">
+          <p className="eyebrow-rule t-caption text-oxblood">Find stock</p>
           <h2 className="t-h2 mt-5 text-ink">Search by spec, not by suburb</h2>
           <p className="t-body mt-5 max-w-2xl text-pretty text-ink/80">
             Floor area, clear span, door height, power and yard — the filters industrial buyers actually use.
@@ -183,7 +208,7 @@ export default async function HomePage() {
 
       {/* 5 — Agent */}
       <section className="bg-ink text-paper">
-        <Container className="py-14 md:py-20">
+        <Container className="section-pad">
           <div className="grid items-stretch gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
             <div className="relative isolate aspect-[4/5] overflow-hidden bg-oxblood sm:aspect-[5/6] lg:aspect-auto lg:min-h-[520px]">
               <DuotoneImage
@@ -197,7 +222,7 @@ export default async function HomePage() {
               />
             </div>
             <div className="flex min-h-0 flex-col justify-center">
-              <p className="t-caption text-tan">Listing agent</p>
+              <p className="eyebrow-rule t-caption text-tan">Listing agent</p>
               <h2 className="t-h1 mt-5 text-paper">{agent.name}</h2>
               <p className="t-mono mt-3 text-tan">
                 {agent.title} · Licence {agent.licenceNumber}
@@ -286,9 +311,9 @@ export default async function HomePage() {
       </section>
 
       {/* 6 — What we do */}
-      <section className="bg-paper py-14 md:py-20">
-        <Container>
-          <p className="t-caption text-oxblood">Services</p>
+      <section className="bg-paper">
+        <Container className="section-pad">
+          <p className="eyebrow-rule t-caption text-oxblood">Services</p>
           <h2 className="t-h2 mt-5 text-ink">What we do</h2>
           <p className="t-body mt-5 max-w-2xl text-ink/80">Sales. Leasing. Management. Advisory.</p>
           <div className="mt-10">
@@ -300,10 +325,10 @@ export default async function HomePage() {
       {/* 7 — Two things worth knowing */}
       <section className="bg-paper pb-14 md:pb-20">
         <Container>
-          <p className="t-caption text-oxblood">Straight talk</p>
+          <p className="eyebrow-rule t-caption text-oxblood">Straight talk</p>
           <h2 className="t-h2 mt-5 text-ink">Two things worth knowing</h2>
           <div className="mt-10 grid items-stretch gap-5 md:grid-cols-2">
-            <article className="flex h-full flex-col bg-oxblood px-6 py-8 text-paper md:px-8 md:py-10">
+            <article className="premium-panel-dark flex h-full flex-col px-6 py-8 text-paper md:px-8 md:py-10">
               <h3 className="t-h3 text-paper">Why we are the only choice for a straight deal in the west</h3>
               <p className="t-body mt-4 text-paper/85">
                 Occupiers and investors come for corridor knowledge — not a marketing brochure. We price
@@ -320,7 +345,7 @@ export default async function HomePage() {
                 About the desk →
               </CtaLink>
             </article>
-            <article className="flex h-full flex-col bg-oxblood px-6 py-8 text-paper md:px-8 md:py-10">
+            <article className="premium-panel-dark flex h-full flex-col px-6 py-8 text-paper md:px-8 md:py-10">
               <h3 className="t-h3 text-paper">What the transfer of land process means for your transaction</h3>
               <p className="t-body mt-4 text-paper/85">
                 Commercial sales are not residential auctions. Identity, funds and settlement paperwork
@@ -390,7 +415,7 @@ export default async function HomePage() {
               </div>
             </dl>
           </div>
-          <div className="border border-oxblood/10 border-t-2 border-t-oxblood bg-white/60 p-6 text-ink shadow-[0_1px_0_rgba(92,31,39,0.04)] md:col-span-7 md:p-9">
+          <div className="premium-panel border-t-2 border-t-oxblood p-6 text-ink md:col-span-7 md:p-9">
             <h3 className="t-h3 text-ink">Send a message</h3>
             <p className="t-body mt-2 text-ink/70">One business day. Sooner if you WhatsApp.</p>
             <div className="mt-6">

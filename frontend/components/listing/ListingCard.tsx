@@ -5,15 +5,24 @@ import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { CtaLink } from "@/components/ui/CtaLink";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
+import { showcaseImage } from "@/lib/campaignPhoto";
+import { IconArrowRight } from "@/components/icons";
 
-export function ListingCard({ property }: { property: Property }) {
+export function ListingCard({
+  property,
+  imageMode = "hero",
+}: {
+  property: Property;
+  imageMode?: "hero" | "varied";
+}) {
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
+  const visual = showcaseImage(property, imageMode);
   const href = `/listing/${property.slug}`;
-  const imageSrc = hero ? listingImageSrc(hero.publicId, 1200) : listingPlaceholderSrc(property, 1200);
-  const imageAlt = hero?.alt ?? fullAddress(property);
+  const imageSrc = visual?.src ?? (hero ? listingImageSrc(hero.publicId, 1200) : listingPlaceholderSrc(property, 1200));
+  const imageAlt = visual?.alt ?? hero?.alt ?? fullAddress(property);
 
   return (
-    <article className="surface group flex h-full flex-col overflow-hidden border-t-2 border-t-oxblood transition-[border-color,box-shadow] duration-150 ease-out hover:border-oxblood/25">
+    <article className="surface group flex h-full flex-col overflow-hidden border-t-2 border-t-oxblood transition-[transform,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:border-oxblood/25 hover:shadow-[0_20px_50px_rgba(42,20,24,0.08)]">
       <PrefetchLink href={href} className="group relative block aspect-[4/3] overflow-hidden bg-oxblood">
         <DuotoneImage
           src={imageSrc}
@@ -45,9 +54,10 @@ export function ListingCard({ property }: { property: Property }) {
           id={`cta-card-enquire-${property.slug}`}
           page="listing-card"
           listing={property.slug}
-          className="mt-5 inline-flex text-sm font-semibold text-oxblood hover:underline"
+          className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-oxblood hover:underline"
         >
-          Contact agent →
+          Contact agent
+          <IconArrowRight className="h-4 w-4" />
         </CtaLink>
       </div>
     </article>

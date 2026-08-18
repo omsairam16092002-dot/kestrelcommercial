@@ -64,9 +64,7 @@ export async function getProperties(filters: SpecFilters = {}): Promise<Property
   if (filters.featured) params.set("featured", "1");
 
   const qs = params.toString();
-  const data = await apiFetch<Property[]>(`/api/properties${qs ? `?${qs}` : ""}`, {
-    cache: "no-store",
-  });
+  const data = await apiFetch<Property[]>(`/api/properties${qs ? `?${qs}` : ""}`);
   if (data) return filterProperties(data, filters);
   return filterProperties(PROPERTIES, filters);
 }
@@ -91,7 +89,7 @@ export async function getPropertyBySlug(
 }
 
 export async function getAgents(): Promise<Agent[]> {
-  const data = await apiFetch<Agent[]>("/api/agents", { cache: "no-store" });
+  const data = await apiFetch<Agent[]>("/api/agents");
   return data?.length ? data : AGENTS;
 }
 

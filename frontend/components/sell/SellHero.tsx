@@ -9,7 +9,7 @@ export function SellHero({ imageSrc, imageAlt }: { imageSrc?: string; imageAlt?:
       <HeroBleed alt={imageAlt || "Industrial warehouse, Melbourne west"} src={imageSrc} />
       <Container className="relative z-10 grid items-end gap-10 pb-16 pt-28 md:grid-cols-12 md:pb-24 md:pt-36">
         <div className="md:col-span-7 lg:col-span-7">
-          <p className="t-caption text-tan">Selling</p>
+          <p className="eyebrow-rule t-caption text-tan">Selling</p>
           <h1 className="t-h1 mt-5 max-w-3xl">
             Price it <em className="font-serif text-[1.05em] font-normal italic text-tan">properly</em>, from day one.
           </h1>
@@ -27,7 +27,7 @@ export function SellHero({ imageSrc, imageAlt }: { imageSrc?: string; imageAlt?:
           </CtaLink>
         </div>
 
-        <div className="border border-oxblood bg-paper p-5 text-ink md:col-span-5 lg:col-span-5 md:p-7">
+        <div className="premium-panel border-oxblood bg-paper p-5 text-ink md:col-span-5 lg:col-span-5 md:p-7">
           <p className="t-caption text-oxblood">Appraisal</p>
           <h2 className="t-h3 mt-2 text-ink">Talk to the desk</h2>
           <p className="t-body mt-2 text-mauve">Name, number, address. I will call you back.</p>
