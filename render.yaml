@@ -5,7 +5,7 @@ services:
     plan: starter
     region: oregon
     rootDir: .
-    buildCommand: npm install && npm run build -w @kestrel/shared
+    buildCommand: npm install --include=dev --workspace=@kestrel/shared --workspace=backend --include-workspace-root && npm run build -w @kestrel/shared
     startCommand: npm run start -w backend
     healthCheckPath: /health
     envVars:

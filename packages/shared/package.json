@@ -17,7 +17,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test test/images.test.ts test/filters.test.ts"
   },
-  "devDependencies": {
-    "typescript": "^5.6.3"
+  "dependencies": {
+    "typescript": "~5.9.3"
   }
 }
