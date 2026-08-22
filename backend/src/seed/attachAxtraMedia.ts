@@ -40,8 +40,10 @@ function pickImages(files: string[]) {
     .map((file) => {
       const n = basename(file).toLowerCase();
       let score = 0;
-      if (/(hero|front|facade|street|render|external|elevat)/.test(n)) score += 5;
-      if (/(living|kitchen|bedroom|interior)/.test(n)) score += 2;
+      if (/(hero|front|facade|street|external|elevat)/.test(n)) score += 5;
+      if (/(living|kitchen|bedroom|interior|bathroom)/.test(n)) score += 2;
+      if (/(flyer|banner|promo|promotion|completion|contemporary|option|incentive|guarantee|rebate|marketing|campaign)/.test(n))
+        score -= 20;
       if (/(plan|site|lot)/.test(n)) score -= 1;
       const size = statSync(file).size;
       if (size < 40_000 || size > 12_000_000) score -= 8;

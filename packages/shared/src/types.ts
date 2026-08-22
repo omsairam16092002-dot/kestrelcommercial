@@ -82,6 +82,10 @@ export interface PropertyImage {
   publicId: string;
   isHero?: boolean;
   alt?: string;
+  width?: number;
+  height?: number;
+  /** When true, hidden from public listing galleries. */
+  excludeFromGallery?: boolean;
 }
 
 export interface Property {

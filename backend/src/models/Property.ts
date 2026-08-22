@@ -5,6 +5,9 @@ const ImageSchema = new Schema(
     publicId: { type: String, required: true },
     isHero: { type: Boolean, default: false },
     alt: { type: String },
+    width: { type: Number },
+    height: { type: Number },
+    excludeFromGallery: { type: Boolean, default: false },
   },
   { _id: false },
 );

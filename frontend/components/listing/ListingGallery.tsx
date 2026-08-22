@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { fullAddress, type Property } from "@kestrel/shared";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fullAddress, galleryImages, type Property } from "@kestrel/shared";
 import { PhotoCut } from "@/components/brand/PhotoCut";
 import { IconArrowRight } from "@/components/icons";
 import { listingImageSrc, listingImageSrcSet, listingPlaceholderSrc } from "@/lib/images";
@@ -18,7 +18,7 @@ function gallerySrcSet(publicId?: string) {
 }
 
 export function ListingGallery({ property }: { property: Property }) {
-  const images = property.images;
+  const images = useMemo(() => galleryImages(property.images), [property.images]);
   const [active, setActive] = useState(0);
   const current = images[active];
   const startX = useRef<number | null>(null);

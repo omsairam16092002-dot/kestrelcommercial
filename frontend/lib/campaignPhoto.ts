@@ -1,4 +1,4 @@
-import { fullAddress, isStockImageId, type Property } from "@kestrel/shared";
+import { fullAddress, galleryImages, isStockImageId, type Property } from "@kestrel/shared";
 import { listingImageSrc } from "@/lib/images";
 
 export type CampaignPhoto = {
@@ -8,7 +8,7 @@ export type CampaignPhoto = {
 };
 
 function firstRealImage(property: Property) {
-  return property.images.find((img) => !isStockImageId(img.publicId)) ?? null;
+  return galleryImages(property.images).find((img) => !isStockImageId(img.publicId)) ?? null;
 }
 
 function heroImage(property: Property) {
@@ -40,7 +40,7 @@ export function showcaseImage(
   property: Property,
   mode: "hero" | "varied" = "hero",
 ): { src: string; alt: string } | null {
-  const realImages = property.images.filter((img) => !isStockImageId(img.publicId));
+  const realImages = galleryImages(property.images).filter((img) => !isStockImageId(img.publicId));
   if (!realImages.length) return null;
   const image =
     mode === "varied"

@@ -3,6 +3,7 @@ import {
   formatLandArea,
   formatMetres,
   formatSqm,
+  isClosedListing,
   isIndustrialPropertyType,
   propertyTypeLabel,
   type Property,
@@ -34,7 +35,9 @@ export function SpecTable({ property }: { property: Property }) {
       { k: "Hardstand", v: property.hardstand ? "Yes" : "No" },
     );
   }
-  rows.push({ k: "Price / rent", v: property.priceLabel });
+  if (!isClosedListing(property.status)) {
+    rows.push({ k: "Price / rent", v: property.priceLabel });
+  }
   if (property.yieldPercent != null) {
     rows.push({ k: "Passing yield", v: `${property.yieldPercent.toFixed(2)}%` });
   }

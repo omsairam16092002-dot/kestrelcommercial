@@ -14,6 +14,7 @@
     "seed:axtra-media": "tsx src/seed/attachAxtraMedia.ts",
     "seed:geocode": "tsx src/seed/geocodeProperties.ts",
     "seed:cloudinary": "tsx src/seed/uploadListingMedia.ts",
+    "seed:prune-gallery": "tsx src/seed/pruneMarketingGalleryImages.ts",
     "seed:portrait": "tsx src/seed/uploadAgentPortrait.ts",
     "seed:feature-west": "tsx src/seed/featureWestCampaigns.ts",
     "seed:asset-categories": "tsx src/seed/backfillAssetCategories.ts",

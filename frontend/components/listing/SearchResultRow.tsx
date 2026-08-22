@@ -1,6 +1,6 @@
 "use client";
 
-import { listingSearchSpecs, type Property } from "@kestrel/shared";
+import { isClosedListing, listingSearchSpecs, type Property } from "@kestrel/shared";
 import { StatusStamp } from "@/components/brand/StatusStamp";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { listingImageSrc, listingImageSrcSet, listingPlaceholderSrc } from "@/lib/images";
@@ -59,8 +59,12 @@ export function SearchResultRow({
 
       <div className="min-w-0 flex-1 py-0.5">
         <div className="flex flex-wrap items-center gap-2">
-          <StatusStamp status={property.status} side={property.transactionSide} size="sm" />
-          <p className="t-mono tabular text-[12px] uppercase tracking-[0.12em] text-oxblood">{property.priceLabel}</p>
+          {!isClosedListing(property.status) ? (
+            <>
+              <StatusStamp status={property.status} side={property.transactionSide} size="sm" />
+              <p className="t-mono tabular text-[12px] uppercase tracking-[0.12em] text-oxblood">{property.priceLabel}</p>
+            </>
+          ) : null}
         </div>
         <h3 className="t-h3 mt-1.5 text-ink">
           <PrefetchLink href={href} className="hover:text-oxblood" onClick={(e) => e.stopPropagation()}>
