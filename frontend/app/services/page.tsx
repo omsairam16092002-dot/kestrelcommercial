@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AGENCY, PROJECT_MARKETING } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
-import { PageHero } from "@/components/brand/PageHero";
+import { SectionHeader } from "@/components/brand/SectionHeader";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
 import { ServicesGrid } from "@/components/brand/ServicesGrid";
 import { getProperties } from "@/lib/api";
@@ -16,17 +16,15 @@ export const metadata: Metadata = {
 
 export default async function ServicesPage() {
   const stock = await getProperties();
-  const bleed = campaignPhotos(stock, 1)[0];
-  const projectPhoto = campaignPhotos(stock.filter((p) => p.assetCategory === "development-site"), 1)[0] ?? bleed;
+  const projectPhoto = campaignPhotos(stock.filter((p) => p.assetCategory === "development-site"), 1)[0]
+    ?? campaignPhotos(stock, 1)[0];
   return (
     <div className="bg-paper">
-      <PageHero
+      <SectionHeader
         kicker="What we do"
         title="Sales. Leasing. Management. Advisory."
         description="Four lines of work. One standard: the building has to work for the business inside it."
         page="services"
-        imageSrc={bleed?.src}
-        imageAlt={bleed?.alt}
       />
 
       <section className="bg-paper">

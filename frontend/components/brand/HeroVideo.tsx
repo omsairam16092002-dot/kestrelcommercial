@@ -1,12 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const HERO_VIDEO_SRC = "/assets/hero/footscray-drone.mp4";
+
+/** Homepage hero uses only the opening clip (seconds). */
+export const HERO_VIDEO_CLIP_SECONDS = 10;
 
 /** Full-bleed muted loop for the homepage hero. Still image is the fallback. */
 export function HeroVideo({ alt, posterSrc }: { alt: string; posterSrc?: string }) {
   const [ready, setReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const markReady = useCallback(() => {
+    setReady(true);
+  }, []);
+
+  const loopClip = useCallback(() => {
+    const video = videoRef.current;
+    if (video && video.currentTime >= HERO_VIDEO_CLIP_SECONDS) {
+      video.currentTime = 0;
+    }
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const onPlaying = () => markReady();
+    const onCanPlay = () => markReady();
+
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("canplay", onCanPlay);
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      markReady();
+    }
+
+    video.play().catch(() => undefined);
+
+    return () => {
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("canplay", onCanPlay);
+    };
+  }, [markReady]);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-oxblood">
@@ -30,6 +67,7 @@ export function HeroVideo({ alt, posterSrc }: { alt: string; posterSrc?: string 
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-oxblood to-transparent" />
       </div>
       <video
+        ref={videoRef}
         className={`hero-video absolute inset-0 h-full w-full object-cover object-center saturate-[0.92] contrast-[1.04] brightness-[0.98] transition-opacity duration-700 ${
           ready ? "opacity-100" : "opacity-0"
         }`}
@@ -37,10 +75,11 @@ export function HeroVideo({ alt, posterSrc }: { alt: string; posterSrc?: string 
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
         aria-label={alt}
-        onCanPlay={() => setReady(true)}
-        onLoadedData={() => setReady(true)}
+        onPlaying={markReady}
+        onCanPlay={markReady}
+        onTimeUpdate={loopClip}
       >
         <source src={HERO_VIDEO_SRC} type="video/mp4" />
       </video>

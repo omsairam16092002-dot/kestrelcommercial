@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { AGENCY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
-import { PageHero } from "@/components/brand/PageHero";
+import { SectionHeader } from "@/components/brand/SectionHeader";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
-import { getProperties } from "@/lib/api";
-import { campaignPhotos } from "@/lib/campaignPhoto";
 
 export const metadata: Metadata = {
   title: "Investing and compliance",
@@ -12,19 +10,16 @@ export const metadata: Metadata = {
     "SMSF industrial property in Melbourne west, and what Tranche 2 AML/CTF means for your transaction.",
 };
 
-export default async function InvestingPage() {
-  const bleed = campaignPhotos(await getProperties(), 1)[0];
+export default function InvestingPage() {
   return (
     <div className="bg-paper">
-      <PageHero
+      <SectionHeader
         kicker="Investing · Compliance"
         title="Two things worth knowing before you transact."
         page="investing"
-        imageSrc={bleed?.src}
-        imageAlt={bleed?.alt}
       />
 
-      <Container className="grid items-stretch gap-8 py-14 md:grid-cols-2 md:py-20">
+      <Container className="section-pad grid items-stretch gap-8 md:grid-cols-2">
         <article className="premium-panel flex h-full flex-col border-t-2 border-oxblood p-6 pt-6 md:p-8">
           <p className="eyebrow-rule t-caption text-oxblood">SMSF</p>
           <h2 className="t-h2 mt-5 text-ink">Why so much industrial sits inside super</h2>

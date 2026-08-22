@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { AGENCY, AGENTS, SOCIAL } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
-import { PageHero } from "@/components/brand/PageHero";
+import { SectionHeader } from "@/components/brand/SectionHeader";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { ReasonCards } from "@/components/brand/ReasonCards";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
 import { IconFacebook, IconInstagram, IconLinkedIn } from "@/components/icons";
 import { getAgents, getProperties } from "@/lib/api";
 import { agentPortraitSrc } from "@/lib/images";
-import { campaignPhotos, corridorProof } from "@/lib/campaignPhoto";
+import { corridorProof } from "@/lib/campaignPhoto";
 
 export const metadata: Metadata = {
   title: "About",
@@ -22,18 +22,15 @@ export default async function AboutPage() {
   const agent = (await getAgents())[0] ?? AGENTS[0];
   const portrait = agentPortraitSrc(agent.photoPublicId, 1400);
   const stock = await getProperties();
-  const bleed = campaignPhotos(stock, 1)[0];
   const proof = corridorProof(stock);
 
   return (
     <div className="bg-paper">
-      <PageHero
+      <SectionHeader
         kicker="About us"
         title={agent.name}
         description="Director. Industrial, commercial, residential and development property. Melbourne west first."
         page="about"
-        imageSrc={bleed?.src}
-        imageAlt={bleed?.alt}
       />
 
       <ReasonCards />

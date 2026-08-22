@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { AGENCY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
-import { PageHero } from "@/components/brand/PageHero";
-import { getProperties } from "@/lib/api";
-import { campaignPhotos } from "@/lib/campaignPhoto";
+import { SectionHeader } from "@/components/brand/SectionHeader";
 import { ReasonCards, type Reason } from "@/components/brand/ReasonCards";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
 import { IconBadge, IconClock, IconMail, IconWhatsApp } from "@/components/icons";
@@ -34,17 +32,14 @@ const CONTACT_REASONS: Reason[] = [
   },
 ];
 
-export default async function ContactPage() {
-  const bleed = campaignPhotos(await getProperties(), 1)[0];
+export default function ContactPage() {
   return (
     <div className="bg-paper">
-      <PageHero
+      <SectionHeader
         kicker="Contact"
         title="Start with WhatsApp."
         description="Selling, leasing, buying, SMSF, management. Message the desk."
         page="contact"
-        imageSrc={bleed?.src}
-        imageAlt={bleed?.alt}
       />
 
       <ReasonCards kicker="The desk" title="Hours. Licence. WhatsApp." reasons={CONTACT_REASONS} />
