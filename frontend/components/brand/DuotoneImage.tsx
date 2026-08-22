@@ -8,6 +8,7 @@ export function DuotoneImage({
   src,
   alt,
   sizes,
+  srcSet,
   priority = false,
   className = "",
   zoom = false,
@@ -18,6 +19,7 @@ export function DuotoneImage({
   src: string;
   alt: string;
   sizes: string;
+  srcSet?: string;
   priority?: boolean;
   className?: string;
   zoom?: boolean;
@@ -44,9 +46,11 @@ export function DuotoneImage({
         src={current}
         alt={alt}
         sizes={sizes}
+        srcSet={srcSet}
         width={1200}
         height={900}
         data-listing-photo=""
+        loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
         decoding={priority ? "sync" : "async"}
         onError={() => {

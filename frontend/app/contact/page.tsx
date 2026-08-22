@@ -6,6 +6,8 @@ import { ReasonCards, type Reason } from "@/components/brand/ReasonCards";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
 import { IconBadge, IconClock, IconMail, IconWhatsApp } from "@/components/icons";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Contact",
   description: "WhatsApp the Kestrel Commercial desk. Melbourne west.",

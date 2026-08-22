@@ -1,11 +1,27 @@
 import { hasMapCoordinates, type Property } from "@kestrel/shared";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
+import { siteOrigin } from "@/lib/seo";
+
+function accommodationType(propertyType: Property["propertyType"]) {
+  switch (propertyType) {
+    case "house":
+    case "townhouse":
+      return "SingleFamilyResidence";
+    case "apartment":
+      return "Apartment";
+    case "development-land":
+    case "rural":
+      return "LandParcel";
+    default:
+      return "Place";
+  }
+}
 
 export function ListingJsonLd({ property }: { property: Property }) {
   const hero = property.images.find((img) => img.isHero) ?? property.images[0];
   const image = hero ? listingImageSrc(hero.publicId, 1200) : listingPlaceholderSrc(property, 1200);
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const url = `${origin.replace(/\/$/, "")}/listing/${property.slug}`;
+  const origin = siteOrigin();
+  const url = `${origin}/listing/${property.slug}`;
   const forSale = property.transactionSide === "sale";
   const availability =
     property.status === "sold" || property.status === "leased"
@@ -28,13 +44,13 @@ export function ListingJsonLd({ property }: { property: Property }) {
             price: property.priceValue,
             availability,
             businessFunction: forSale
-              ? "https://schema.org/SellAction"
-              : "https://schema.org/LeaseOutAction",
+              ? "http://purl.org/goodrelations/v1#Sell"
+              : "http://purl.org/goodrelations/v1#LeaseOut",
           },
         }
       : {}),
     about: {
-      "@type": "Place",
+      "@type": accommodationType(property.propertyType),
       name: property.address,
       address: {
         "@type": "PostalAddress",
@@ -44,6 +60,24 @@ export function ListingJsonLd({ property }: { property: Property }) {
         postalCode: property.postcode,
         addressCountry: "AU",
       },
+      ...(property.floorAreaSqm
+        ? {
+            floorSize: {
+              "@type": "QuantitativeValue",
+              value: property.floorAreaSqm,
+              unitCode: "MTK",
+            },
+          }
+        : {}),
+      ...(property.landAreaSqm
+        ? {
+            lotSize: {
+              "@type": "QuantitativeValue",
+              value: property.landAreaSqm,
+              unitCode: "MTK",
+            },
+          }
+        : {}),
       ...(hasMapCoordinates(property)
         ? {
             geo: {

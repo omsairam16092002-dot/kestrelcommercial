@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
 import { SearchPage } from "@/components/listing/SearchPage";
 import { filtersFromSearchParams } from "@/lib/api";
+import { searchHubMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Residential properties",
-  description:
-    "Residential property listings with beds, baths, cars, land size and price filters kept separate from commercial stock.",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}): Promise<Metadata> {
+  const filters = filtersFromSearchParams(searchParams);
+  const lease = filters.side === "lease";
+  return searchHubMetadata({
+    canonicalPath: "/properties/residential",
+    title: lease ? "Residential properties for lease" : "Residential properties for sale",
+    description:
+      "Residential property listings with beds, baths, cars, land size and price filters kept separate from commercial stock.",
+    filters,
+  });
+}
 
 export default function ResidentialPropertiesPage({
   searchParams,

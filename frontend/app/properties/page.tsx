@@ -1,6 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
+
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Property search",
+  description:
+    "Choose commercial, residential or development-site search — separate paths for Melbourne west property.",
+  alternates: { canonical: "/properties" },
+};
 
 const CATEGORIES = [
   ASSET_CATEGORY_LABELS.commercial,

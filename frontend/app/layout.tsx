@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
+import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import "./globals.css";
 
 const sans = localFont({
@@ -63,8 +64,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-AU" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
-      <head />
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
       <body className={`${sans.className} min-h-screen bg-paper text-ink antialiased`}>
+        <OrganizationJsonLd />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-tan focus:px-4 focus:py-2 focus:text-ink"

@@ -2,8 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { chromium, type Page } from "playwright";
 
-const SITE = process.env.FRONTEND_URL || "http://localhost:3000";
-const API = process.env.API_URL || "http://localhost:4000";
+import { SITE, API, waitForLiveServers } from "./helpers/liveServers";
 
 const STATIC_ROUTES = [
   "/",
@@ -15,6 +14,10 @@ const STATIC_ROUTES = [
   "/sell",
   "/investing",
   "/privacy",
+  "/properties",
+  "/properties/commercial",
+  "/properties/residential",
+  "/properties/development-sites",
   "/admin/login",
   "/admin/signup",
   "/admin",
@@ -44,15 +47,7 @@ async function runtimeMessage(page: Page) {
 }
 
 test("every public and desk route is free of runtime errors", async (t) => {
-  let healthOk = false;
-  try {
-    const health = await fetch(`${API}/health`);
-    const home = await fetch(SITE);
-    healthOk = health.ok && home.ok;
-  } catch {
-    healthOk = false;
-  }
-  if (!healthOk) {
+  if (!(await waitForLiveServers())) {
     t.skip("Site/API are not running");
     return;
   }

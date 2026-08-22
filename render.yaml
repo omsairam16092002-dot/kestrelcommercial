@@ -26,9 +26,9 @@ services:
       - key: CLOUDINARY_UPLOAD_FOLDER
         value: kestrel/listings
       - key: FRONTEND_ORIGIN
-        sync: false
+        value: "https://www.kestrelcommercial.com,https://kestrelcommercial.com"
       - key: SITE_URL
-        sync: false
+        value: "https://www.kestrelcommercial.com"
       - key: ADMIN_SEED_EMAIL
         sync: false
       - key: ADMIN_SEED_PASSWORD

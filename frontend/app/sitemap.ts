@@ -1,21 +1,35 @@
 import type { MetadataRoute } from "next";
+import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { getProperties } from "@/lib/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const listings = await getProperties();
-  const staticPaths = ["", "/buy", "/lease", "/sell", "/contact", "/about", "/services", "/investing", "/privacy"];
+  const staticPaths = [
+    "",
+    "/sell",
+    "/contact",
+    "/about",
+    "/services",
+    "/investing",
+    "/privacy",
+    "/properties",
+    ASSET_CATEGORY_LABELS.commercial.path,
+    ASSET_CATEGORY_LABELS.residential.path,
+    ASSET_CATEGORY_LABELS["development-site"].path,
+  ];
 
   return [
     ...staticPaths.map((path) => ({
       url: `${base}${path}`,
       changeFrequency: "weekly" as const,
-      priority: path === "" ? 1 : 0.7,
+      priority: path === "" ? 1 : path === "/properties" ? 0.9 : 0.7,
     })),
     ...listings.map((p) => ({
       url: `${base}/listing/${p.slug}`,
       changeFrequency: "daily" as const,
       priority: 0.8,
+      lastModified: p.updatedAt ? new Date(p.updatedAt) : undefined,
     })),
   ];
 }

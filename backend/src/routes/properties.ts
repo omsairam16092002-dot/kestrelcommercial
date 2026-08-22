@@ -20,6 +20,8 @@ import { EnquiryModel } from "../models/Enquiry";
 import { HttpError } from "../middleware/errorHandler";
 import { serializeProperty, serializeAgent } from "../utils/serialize";
 import { optionalAuth, requireAuth } from "../middleware/requireAuth";
+import { publicCache } from "../middleware/publicCache";
+import { getPropertyListCache, setPropertyListCache, invalidatePropertyListCache } from "../services/propertyCache";
 import { enqueueXeroSoldInvoice, enqueuePexaPoll } from "../jobs/queue";
 import { buildBrochurePdf } from "../services/brochurePdf";
 import { env } from "../config/env";
@@ -90,7 +92,11 @@ function fixtureList(query: Record<string, unknown>): Property[] {
   return filterProperties(PROPERTIES, filters);
 }
 
-propertiesRouter.get("/", optionalAuth, async (req, res, next) => {
+/** Card/list fields only — omit long description and desk-only notes from public list responses. */
+const PUBLIC_LIST_FIELDS =
+  "slug address suburb state postcode status transactionSide priceLabel priceValue floorAreaSqm landAreaSqm clearSpanM rollerDoorM threePhasePower hardstand bedrooms bathrooms carSpaces zoning propertyType assetCategory images agentLicenceNumber featured lat lng yieldPercent leaseTermYears outgoingsPa evidenceLine archived createdAt updatedAt";
+
+propertiesRouter.get("/", optionalAuth, publicCache(), async (req, res, next) => {
   try {
     const raw = sanitizeQueryKeys(req.query as Record<string, unknown>);
     const filters = parseSpecFilters(raw);
@@ -136,7 +142,15 @@ propertiesRouter.get("/", optionalAuth, async (req, res, next) => {
       q.$or = [{ address: rx }, { suburb: rx }, { slug: rx }, { priceLabel: rx }];
     }
 
-    const docs = await PropertyModel.find(q).sort({ featured: -1, updatedAt: -1 }).lean();
+    const cacheQuery = { ...raw, includeArchived: includeArchived ? "1" : "0", auth: req.user ? "1" : "0" };
+    if (!req.user) {
+      const cached = await getPropertyListCache<Property[]>(cacheQuery);
+      if (cached) return res.json(cached);
+    }
+
+    let listQuery = PropertyModel.find(q).sort({ featured: -1, updatedAt: -1 });
+    if (!req.user) listQuery = listQuery.select(PUBLIC_LIST_FIELDS);
+    const docs = await listQuery.lean();
     let serialized = docs.map((d) => serializeProperty(d as Record<string, unknown>));
     serialized = filterProperties(serialized, filters);
     if (req.user && (req.query.withLeadCounts === "1" || req.query.withLeadCounts === "true")) {
@@ -148,6 +162,7 @@ propertiesRouter.get("/", optionalAuth, async (req, res, next) => {
       const map = Object.fromEntries(counts.map((c) => [String(c._id), c.count as number]));
       serialized = serialized.map((p) => ({ ...p, leadCount: map[p.slug] ?? 0 }));
     }
+    if (!req.user) await setPropertyListCache(cacheQuery, serialized);
     res.json(serialized);
   } catch (err) {
     next(err);
@@ -267,7 +282,7 @@ propertiesRouter.get("/:slug/feed.xml", requireAuth, async (req, res, next) => {
   }
 });
 
-propertiesRouter.get("/:slug", async (req, res, next) => {
+propertiesRouter.get("/:slug", publicCache(), async (req, res, next) => {
   try {
     if (!isDbConnected()) {
       const found = PROPERTIES.find((p) => p.slug === req.params.slug);
@@ -309,6 +324,7 @@ propertiesRouter.post("/", requireAuth, async (req, res, next) => {
       summary: `Listed ${created.address}, ${created.suburb}`,
       by: req.user?.name || req.user?.email || "desk",
     });
+    await invalidatePropertyListCache();
     res.status(201).json(serializeProperty(created.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);
@@ -356,6 +372,7 @@ propertiesRouter.patch("/:id", requireAuth, async (req, res, next) => {
       summary: `Updated ${updated.address}, ${updated.suburb}`,
       by: req.user?.name || req.user?.email || "desk",
     });
+    await invalidatePropertyListCache();
     res.json(serializeProperty(updated.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);
@@ -393,6 +410,7 @@ propertiesRouter.post("/:id/duplicate", requireAuth, async (req, res, next) => {
       summary: `Duplicated ${created.address} → ${created.slug}`,
       by: req.user?.name || req.user?.email || "desk",
     });
+    await invalidatePropertyListCache();
     res.status(201).json(serializeProperty(created.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);
@@ -415,6 +433,7 @@ propertiesRouter.delete("/:id", requireAuth, async (req, res, next) => {
       summary: `Archived ${updated.address}, ${updated.suburb}`,
       by: req.user?.name || req.user?.email || "desk",
     });
+    await invalidatePropertyListCache();
     res.json(serializeProperty(updated.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);

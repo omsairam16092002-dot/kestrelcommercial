@@ -83,6 +83,11 @@ const PropertySchema = new Schema(
 );
 
 PropertySchema.index({ floorAreaSqm: 1, clearSpanM: 1, rollerDoorM: 1, priceValue: 1 });
+PropertySchema.index({ archived: 1, transactionSide: 1, status: 1, assetCategory: 1, featured: -1, updatedAt: -1 });
+PropertySchema.index({ archived: 1, propertyType: 1, transactionSide: 1 });
+PropertySchema.index({ archived: 1, zoning: 1, transactionSide: 1 });
+PropertySchema.index({ archived: 1, priceValue: 1, transactionSide: 1 });
+PropertySchema.index({ archived: 1, landAreaSqm: 1, assetCategory: 1 });
 
 export const PropertyModel =
   mongoose.models.Property || mongoose.model("Property", PropertySchema);

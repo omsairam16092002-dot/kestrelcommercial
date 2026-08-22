@@ -55,7 +55,7 @@ export function serializeProperty(
     assetCategory:
       (doc.assetCategory as Property["assetCategory"] | undefined) ??
       deriveAssetCategory(doc.propertyType as Property["propertyType"]),
-    description: String(doc.description),
+    description: doc.description != null ? String(doc.description) : "",
     images: Array.isArray(doc.images) ? (doc.images as Property["images"]) : [],
     floorplanPublicId: (doc.floorplanPublicId as string | null) ?? null,
     brochureUrl: (doc.brochureUrl as string | null) ?? null,

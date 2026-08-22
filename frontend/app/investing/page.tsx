@@ -4,6 +4,8 @@ import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Investing and compliance",
   description:

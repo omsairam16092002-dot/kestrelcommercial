@@ -3,7 +3,7 @@
 import { listingSearchSpecs, type Property } from "@kestrel/shared";
 import { StatusStamp } from "@/components/brand/StatusStamp";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
-import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
+import { listingImageSrc, listingImageSrcSet, listingPlaceholderSrc } from "@/lib/images";
 
 export function SearchResultRow({
   property,
@@ -22,7 +22,8 @@ export function SearchResultRow({
 }) {
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
   const href = `/listing/${property.slug}`;
-  const imageSrc = hero ? listingImageSrc(hero.publicId, 800) : listingPlaceholderSrc(property, 800);
+  const imageSrc = hero ? listingImageSrc(hero.publicId, 640) : listingPlaceholderSrc(property, 640);
+  const imageSrcSet = hero ? listingImageSrcSet(hero.publicId, [320, 640, 800]) : undefined;
 
   return (
     <article
@@ -42,7 +43,15 @@ export function SearchResultRow({
         onClick={(e) => e.stopPropagation()}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imageSrc} alt={hero?.alt ?? property.address} className="h-full w-full object-cover" />
+        <img
+          src={imageSrc}
+          srcSet={imageSrcSet}
+          sizes="160px"
+          alt={hero?.alt ?? property.address}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
         <span className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center bg-oxblood t-mono text-[10px] text-paper">
           {String(index).padStart(2, "0")}
         </span>

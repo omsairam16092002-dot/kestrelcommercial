@@ -12,9 +12,11 @@ import { ListingDocuments } from "@/components/listing/ListingDocuments";
 import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { ListingJsonLd } from "@/components/listing/ListingJsonLd";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { getProperties, getPropertyBySlug } from "@/lib/api";
 import { compactEvidence, pickFlagship } from "@/lib/campaignPhoto";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
+import { listingTitle } from "@/lib/seo";
 
 export const revalidate = 60;
 export const dynamicParams = true;
@@ -32,7 +34,7 @@ export async function generateMetadata({
   const data = await getPropertyBySlug(params.slug);
   if (!data) return { title: "Listing" };
   const { property } = data;
-  const title = `${property.address}, ${property.suburb}`;
+  const title = listingTitle(property);
   const description = property.description.replace(/\s+/g, " ").slice(0, 160);
   const hero = property.images.find((img) => img.isHero) ?? property.images[0];
   const ogImage = hero ? listingImageSrc(hero.publicId, 1200) : listingPlaceholderSrc(property, 1200);
@@ -79,6 +81,16 @@ export default async function ListingPage({ params }: { params: { slug: string }
   return (
     <div className="bg-paper">
       <ListingJsonLd property={property} />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          {
+            name: property.transactionSide === "lease" ? "For lease" : "For sale",
+            href: property.transactionSide === "lease" ? "/lease" : "/buy",
+          },
+          { name: property.address, href: `/listing/${property.slug}` },
+        ]}
+      />
       <Container className="pt-5 md:pt-7">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-oxblood/10 pb-4 t-mono text-[12px] uppercase tracking-plate">
           <p>

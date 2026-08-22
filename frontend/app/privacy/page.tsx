@@ -3,6 +3,8 @@ import { AGENCY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Privacy policy",
   description:

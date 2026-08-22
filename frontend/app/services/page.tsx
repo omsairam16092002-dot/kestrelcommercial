@@ -8,6 +8,8 @@ import { ServicesGrid } from "@/components/brand/ServicesGrid";
 import { getProperties } from "@/lib/api";
 import { campaignPhotos } from "@/lib/campaignPhoto";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Services",
   description:

@@ -4,13 +4,14 @@ import { isDbConnected } from "../db/mongoose";
 import { AgentModel } from "../models/Agent";
 import { serializeAgent } from "../utils/serialize";
 import { requireAuth } from "../middleware/requireAuth";
+import { publicCache } from "../middleware/publicCache";
 import { HttpError } from "../middleware/errorHandler";
 import { logActivity } from "../services/activity";
 import { z } from "zod";
 
 export const agentsRouter = Router();
 
-agentsRouter.get("/", async (_req, res, next) => {
+agentsRouter.get("/", publicCache(), async (_req, res, next) => {
   try {
     if (!isDbConnected()) return res.json(AGENTS);
     const docs = await AgentModel.find().lean();

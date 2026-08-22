@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const EnquirySchema = new Schema(
   {
     propertyId: { type: Schema.Types.ObjectId, ref: "Property", default: null },
-    propertySlug: { type: String, default: null },
+    propertySlug: { type: String, default: null, index: true },
     contactId: { type: Schema.Types.ObjectId, ref: "Contact", default: null, index: true },
     name: { type: String, required: true },
     company: { type: String, default: "" },

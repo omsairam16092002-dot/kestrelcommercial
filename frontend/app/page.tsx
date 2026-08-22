@@ -26,6 +26,13 @@ import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 
 export const revalidate = 60;
 
+export const metadata = {
+  title: "Industrial property, Melbourne west",
+  description:
+    "Search by spec, not by suburb. Industrial and commercial sales, leasing and management across Melbourne's west and north-west.",
+  alternates: { canonical: "/" },
+};
+
 const STATS = [
   { n: 700, suffix: "+", l: "Property transactions", decimals: 0 },
   { n: 15, suffix: "+", l: "Years in Australian property", decimals: 0 },

@@ -20,11 +20,13 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 
 export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
+  app.use(compression());
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: "cross-origin" },
