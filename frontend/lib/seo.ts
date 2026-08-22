@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import type { SpecFilters } from "@kestrel/shared";
+import { getSiteUrl } from "./siteUrl";
 
 export function siteOrigin() {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  return getSiteUrl();
 }
 
 /** Spec filters beyond side — these create thin/duplicate index URLs. */

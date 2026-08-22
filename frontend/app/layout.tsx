@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+import { getSiteUrl } from "@/lib/siteUrl";
 import "./globals.css";
 
 const sans = localFont({
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   },
   description:
     "Search by spec, not by suburb. Industrial and commercial sales, leasing and management across Melbourne's west and north-west. 700+ transactions.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(getSiteUrl()),
   openGraph: {
     type: "website",
     locale: "en_AU",

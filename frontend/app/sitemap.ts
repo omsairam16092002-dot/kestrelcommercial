@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { getProperties } from "@/lib/api";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const base = getSiteUrl();
   const listings = await getProperties();
   const staticPaths = [
     "",
