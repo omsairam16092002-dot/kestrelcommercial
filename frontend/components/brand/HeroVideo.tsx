@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export const HERO_VIDEO_SRC = "/assets/hero/footscray-drone.mp4";
 
 /** Homepage hero uses only the opening clip (seconds). */
-export const HERO_VIDEO_CLIP_SECONDS = 10;
+export const HERO_VIDEO_CLIP_SECONDS = 7;
 
 /** Full-bleed muted loop for the homepage hero. Still image is the fallback. */
 export function HeroVideo({ alt, posterSrc }: { alt: string; posterSrc?: string }) {

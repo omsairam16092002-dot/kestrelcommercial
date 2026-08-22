@@ -11,7 +11,7 @@ const LINKS = [
   { href: "/services", label: "Services" },
   { href: "/investing", label: "Investing" },
   { href: "/contact", label: "Contact" },
-  { href: "/sell", label: "Sell my asset" },
+  { href: "/sell", label: "Sell my property / Request appraisal" },
   { href: "/privacy", label: "Privacy Policy" },
 ];
 

@@ -318,5 +318,10 @@
     "lat": -37.5371492,
     "lng": 144.9491439,
     "label": "34, Mitchell Street, Kalkallo, Melbourne, Victoria, 3064, Australia"
+  },
+  "295 Warragul-Lardner Road, Warragul VIC 3820, Australia": {
+    "lat": -38.1750836,
+    "lng": 145.9038599,
+    "label": "295, Warragul Lardner Road, Warragul, Victoria, 3820, Australia"
   }
 }

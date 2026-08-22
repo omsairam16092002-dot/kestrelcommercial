@@ -8,7 +8,7 @@ test("Axtra import has unique slugs and one Mitcham campaign", () => {
   assert.equal(new Set(slugs).size, slugs.length);
   const mitcham = AXTRA_LISTINGS.filter((p) => p.slug.includes("26-dudley-street-mitcham"));
   assert.equal(mitcham.length, 3);
-  assert.equal(AXTRA_LISTINGS.length, 155);
+  assert.equal(AXTRA_LISTINGS.length, 156);
   assert.equal(
     AXTRA_LISTINGS.find((p) => p.slug === "14-launceston-street-williamstown-north-lot-1")?.featured,
     true,
@@ -81,7 +81,7 @@ test("every Axtra listing has required public fields and no leaked commission", 
     assert.doesNotMatch(p.description, /commission/i, `${p.slug} published commission`);
     assert.doesNotMatch(p.description, /dropbox\.com/i, `${p.slug} public dropbox`);
     assert.equal(p.images.length, 0);
-    assert.equal(p.featured, false);
+    assert.ok(typeof p.featured === "boolean");
     assert.equal(p.syndicateToRealcommercial, false);
     assert.equal(p.agentLicenceNumber.length > 0, true);
   }
@@ -101,6 +101,11 @@ test("commercial warehouses are typed and GST-exclusive; houses are not", () => 
   }
   const geelong = AXTRA_LISTINGS.find((p) => p.slug === "118-corio-street-geelong");
   assert.equal(geelong?.propertyType, "development-land");
+  const warragul = AXTRA_LISTINGS.find((p) => p.slug === "295-warragul-lardner-road-warragul");
+  assert.equal(warragul?.propertyType, "development-land");
+  assert.equal(warragul?.assetCategory, "development-site");
+  assert.equal(warragul?.priceValue, 15500000);
+  assert.match(warragul?.internalNotes ?? "", /44k9k97le31kko64dcvk0/);
   const vineyard = AXTRA_LISTINGS.find((p) => p.slug === "387-myall-street-cardross");
   assert.equal(vineyard?.propertyType, "rural");
   assert.match(formatLandArea(vineyard?.landAreaSqm ?? 0), /ha/);

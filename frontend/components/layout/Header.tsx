@@ -139,9 +139,9 @@ export function Header() {
           </a>
           <PrefetchLink
             href="/sell"
-            className="hidden lg:inline-flex items-center bg-tan px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper active:scale-[0.985]"
+            className="hidden lg:inline-flex items-center bg-tan px-4 py-2.5 text-[11px] font-semibold normal-case tracking-[0.02em] text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper active:scale-[0.985]"
           >
-            Sell my asset
+            Sell my property / Request appraisal
           </PrefetchLink>
           <button
             ref={menuButtonRef}
@@ -217,7 +217,7 @@ export function Header() {
               className="mx-1 mt-2 btn-sharp bg-tan text-ink"
               onClick={() => setOpen(false)}
             >
-              Sell my asset
+              Sell my property / Request appraisal
             </PrefetchLink>
             <div className="mt-2 grid grid-cols-2 gap-2 px-1 pb-1">
               <a

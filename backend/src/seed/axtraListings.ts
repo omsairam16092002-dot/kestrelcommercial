@@ -25,6 +25,7 @@ const pack = {
   launceston: "https://www.dropbox.com/scl/fo/t48v8ei5uxam49izu60hf/AOtwfBntM93FzJcGtBt1-t4?rlkey=ilsg48gg6772um7a7umuoyf16&dl=0",
   leakes: "https://www.dropbox.com/scl/fo/fzegfiweh6b9q34je6fxb/APwRowDSGS9EyF8ISnRyjDc?rlkey=4abe9err7v7cyc26zjkc1jmnv&dl=0",
   cardross: "https://www.dropbox.com/scl/fo/qyobtvbssh1cb2fq7kwzv/AL6_zxGFGQ6AAHHa2rcgLl0?rlkey=g9x4ndh1jb7987uqetuc5518h&dl=0",
+  warragul: "https://www.dropbox.com/scl/fo/44k9k97le31kko64dcvk0/AE_z9EUKYpDn-xr627iq0Ao?rlkey=p5icd32unerjr1fhsmrmp1l5g&st=7k86s912&e=1&dl=0",
 } as const;
 
 function c(partial: AxtraCampaign): AxtraCampaign {
@@ -554,6 +555,36 @@ const PART2 = [
       { slug: "191-leakes-road-truganina-lot-40", address: "Lot 40, 191 Leakes Road", price: 808038, gstExclusive: true, floor: 212, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2576, extra: "Owners corporation fee advised at $2,576.10 per year for lots 39–40.", featured: true },
       { slug: "191-leakes-road-truganina-lot-50", address: "Lot 50, 191 Leakes Road", price: 776895, gstExclusive: true, floor: 196, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2382, extra: "Owners corporation fee advised at $2,381.68 per year for lots 50/55.", featured: true },
       { slug: "191-leakes-road-truganina-lot-55", address: "Lot 55, 191 Leakes Road", price: 776895, gstExclusive: true, floor: 196, cars: 1, carNote: "1–4", specNote: "Kitchenette and bathroom.", outgoingsPa: 2382, extra: "Owners corporation fee advised at $2,381.68 per year for lots 50/55.", featured: true },
+    ],
+  ),
+
+  ...campaignListings(
+    c({
+      suburb: "Warragul",
+      postcode: "3820",
+      type: "development-land",
+      zoning: "UGZ Schedule 1",
+      firb: "YES",
+      primary: "St Paul's Anglican Grammar School",
+      secondary: "Warragul Regional College",
+      commission: "2.2% inc GST, payment at settlement",
+      pack: pack.warragul,
+      extraCampaign:
+        "Permit-approved 132-lot residential subdivision on approximately 20.57 ha. Planning Permit PLA0201/21 issued 16 July 2024. Urban Growth Zone Schedule 1 and Warragul PSP.",
+    }),
+    [
+      {
+        slug: "295-warragul-lardner-road-warragul",
+        address: "295 Warragul-Lardner Road",
+        price: 15500000,
+        land: 205700,
+        featured: true,
+        specNote:
+          "Permit-approved residential development for 132 lots on approximately 20.57 hectares, offered as a single holding with vacant possession.",
+        evidenceLine: "20.57 ha · 132-lot permit",
+        extra:
+          "Lot A (~3.687 ha) may support approximately 40 additional residential lots, subject to further planning, environmental, servicing and authority approvals. Warragul Station ~7 min (4.3 km), Princes Freeway (M1) ~6 min (6 km), West Gippsland Hospital ~3 min (2.4 km).",
+      },
     ],
   ),
 
