@@ -15,7 +15,7 @@ const HEADER_LINK =
 const HEADER_ICON =
   "inline-flex h-9 w-9 items-center justify-center text-ink/75 transition-colors duration-150 ease-out hover:bg-oxblood/5 hover:text-oxblood";
 const STICKY =
-  "flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 px-2 py-2 text-[11px] font-semibold tracking-[0.03em] transition-colors duration-150 ease-out sm:min-h-[56px] sm:flex-row sm:gap-1.5 sm:text-[12px]";
+  "flex min-h-[52px] flex-1 items-center justify-center transition-colors duration-150 ease-out sm:min-h-[56px]";
 const FOOTER_ICON =
   "inline-flex h-10 w-10 items-center justify-center border border-paper/15 bg-paper/[0.03] text-tan transition-colors duration-150 ease-out hover:border-tan/40 hover:text-paper";
 const MENU_CALL =
@@ -69,7 +69,7 @@ export function CallButton({
     "menu-action": MENU_ACTION,
   } as const;
 
-  const iconOnly = variant === "header-icon" || variant === "footer-icon";
+  const iconOnly = variant === "header-icon" || variant === "footer-icon" || variant === "sticky";
 
   return (
     <a
@@ -84,11 +84,9 @@ export function CallButton({
     >
       {iconOnly ? (
         <>
-          <IconPhone className="h-4 w-4 shrink-0" />
+          <IconPhone className="h-5 w-5 shrink-0" />
           <span className="sr-only">Call</span>
         </>
-      ) : variant === "sticky" ? (
-        "Call"
       ) : (
         label
       )}
@@ -122,7 +120,7 @@ export function WhatsAppActionButton({
     "menu-call": MENU_CALL,
     "menu-action": MENU_ACTION,
   } as const;
-  const iconOnly = variant === "header-icon" || variant === "footer-icon";
+  const iconOnly = variant === "header-icon" || variant === "footer-icon" || variant === "sticky";
 
   return (
     <a
@@ -137,8 +135,8 @@ export function WhatsAppActionButton({
         onAction?.();
       }}
     >
-      <IconWhatsApp className="h-4 w-4 shrink-0" />
-      {iconOnly ? <span className="sr-only">WhatsApp</span> : variant === "sticky" ? "WA" : label}
+      <IconWhatsApp className={`${variant === "sticky" ? "h-5 w-5" : "h-4 w-4"} shrink-0`} />
+      {iconOnly ? <span className="sr-only">WhatsApp</span> : label}
     </a>
   );
 }
@@ -169,7 +167,7 @@ export function TextButton({
     "menu-call": MENU_CALL,
     "menu-action": MENU_ACTION,
   } as const;
-  const iconOnly = variant === "header-icon" || variant === "footer-icon";
+  const iconOnly = variant === "header-icon" || variant === "footer-icon" || variant === "sticky";
 
   return (
     <a
@@ -182,7 +180,7 @@ export function TextButton({
         onAction?.();
       }}
     >
-      <IconMessage className="h-4 w-4 shrink-0" />
+      <IconMessage className={`${variant === "sticky" ? "h-5 w-5" : "h-4 w-4"} shrink-0`} />
       {iconOnly ? <span className="sr-only">Text</span> : label}
     </a>
   );

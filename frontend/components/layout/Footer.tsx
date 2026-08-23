@@ -106,6 +106,8 @@ export function Footer() {
           </div>
         </div>
       </Container>
+
+      <div className="h-[4.75rem] md:hidden" aria-hidden />
     </footer>
   );
 }

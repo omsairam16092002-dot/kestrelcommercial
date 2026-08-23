@@ -2,7 +2,7 @@
 
 import { CallButton, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
 
-/** Mobile-only sticky bar: Call · WA · Text — always in thumb zone (AU pattern). */
+/** Mobile-only sticky bar: icon-only Call · WA · Text in thumb zone. */
 export function StickyCallBar({ page, listing }: { page: string; listing?: string }) {
   return (
     <nav
