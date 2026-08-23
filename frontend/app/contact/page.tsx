@@ -4,8 +4,8 @@ import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { ReasonCards, type Reason } from "@/components/brand/ReasonCards";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
-import { IconClock, IconMail, IconMessage, IconWhatsApp } from "@/components/icons";
-import { agencySmsHref } from "@/lib/contactLinks";
+import { IconClock, IconMail, IconPhone } from "@/components/icons";
+import { ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
 
 export const revalidate = 60;
 
@@ -19,7 +19,7 @@ const CONTACT_REASONS: Reason[] = [
     n: "01",
     t: "Call, WA or text",
     d: `${AGENCY.phone} — same Australian mobile for voice, WhatsApp and SMS.`,
-    Icon: IconWhatsApp,
+    Icon: IconPhone,
   },
   {
     n: "02",
@@ -50,33 +50,13 @@ export default function ContactPage() {
       <section className="bg-ink text-paper">
         <Container className="grid gap-10 py-14 md:grid-cols-12 md:py-20">
           <dl className="space-y-0 md:col-span-4">
+            <div className="border-t border-tan/25 py-5 first:border-t-0 first:pt-0">
+              <dt className="t-caption text-tan">Phone</dt>
+              <dd className="mt-2">
+                <ContactDeskSummary page="contact" tone="light" />
+              </dd>
+            </div>
             {[
-              {
-                k: "Call",
-                v: (
-                  <a href={AGENCY.phoneHref} className="t-mono hover:text-tan">
-                    {AGENCY.phone}
-                  </a>
-                ),
-              },
-              {
-                k: "WA",
-                icon: IconWhatsApp,
-                v: (
-                  <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="t-mono hover:text-tan">
-                    {AGENCY.phone}
-                  </a>
-                ),
-              },
-              {
-                k: "Text",
-                icon: IconMessage,
-                v: (
-                  <a href={agencySmsHref()} className="t-mono hover:text-tan">
-                    {AGENCY.phone}
-                  </a>
-                ),
-              },
               {
                 k: "Email",
                 icon: IconMail,
@@ -90,12 +70,12 @@ export default function ContactPage() {
             ].map((row) => {
               const Icon = row.icon;
               return (
-                <div key={row.k} className="border-t border-tan/25 py-5 first:border-t-0 first:pt-0">
+                <div key={row.k} className="border-t border-tan/25 py-5">
                   <dt className="flex items-center gap-2 t-caption text-tan">
-                    {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
+                    <Icon className="h-3.5 w-3.5" />
                     {row.k}
                   </dt>
-                  <dd className={`mt-2 ${row.k === "Email" || row.k === "Hours" ? "t-body" : "t-mono"}`}>{row.v}</dd>
+                  <dd className={`mt-2 ${row.k === "Hours" ? "t-body" : "t-body"}`}>{row.v}</dd>
                 </div>
               );
             })}

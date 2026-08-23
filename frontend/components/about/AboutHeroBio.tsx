@@ -12,7 +12,7 @@ import {
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { IconFacebook, IconInstagram, IconLinkedIn, IconMail } from "@/components/icons";
-import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
+import { ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
 import { agentPortraitSrc, agentPortraitSrcSet } from "@/lib/images";
 
 export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: string }) {
@@ -60,7 +60,7 @@ export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: stri
               </div>
               <p className="font-serif italic text-paper/90">{ABOUT_CLOSING_LINE}</p>
             </div>
-            <PhoneActionButtons page="about" variant="ghost" className="mt-8 flex flex-wrap gap-4 text-sm text-tan" />
+            <ContactDeskSummary page="about" tone="light" className="mt-8" />
             <div className="mt-4 flex flex-wrap gap-4 text-sm text-tan">
               <a
                 href={`mailto:${AGENCY.email}`}

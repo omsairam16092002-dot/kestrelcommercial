@@ -2,8 +2,8 @@ import { AGENCY, SOCIAL } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { Logo } from "@/components/brand/Logo";
 import { NewsletterSignup } from "@/components/forms/NewsletterSignup";
-import { IconFacebook, IconInstagram, IconLinkedIn, IconMail, IconMapPin, IconMessage, IconWhatsApp } from "@/components/icons";
-import { CallButton, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
+import { IconFacebook, IconInstagram, IconLinkedIn, IconMail, IconMapPin } from "@/components/icons";
+import { ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const LINKS = [
@@ -40,24 +40,7 @@ export function Footer() {
             </nav>
             <ul className="mt-8 space-y-3 text-sm text-paper/80">
               <li>
-                <CallButton page="footer" variant="footer-icon" className="inline-flex hover:text-tan" />
-              </li>
-              <li>
-                <a
-                  href={AGENCY.whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 hover:text-tan"
-                >
-                  <IconWhatsApp className="h-3.5 w-3.5 text-tan" />
-                  WA · {AGENCY.phone}
-                </a>
-              </li>
-              <li>
-                <a href={AGENCY.smsHref} className="inline-flex items-center gap-2 hover:text-tan">
-                  <IconMessage className="h-3.5 w-3.5 text-tan" />
-                  Text · {AGENCY.phone}
-                </a>
+                <ContactDeskSummary page="footer" tone="dark" />
               </li>
               <li>
                 <a href={`mailto:${AGENCY.email}`} className="inline-flex items-center gap-2 hover:text-tan">
@@ -75,8 +58,6 @@ export function Footer() {
               </li>
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-3 text-paper/80">
-              <WhatsAppActionButton page="footer" variant="footer-icon" />
-              <TextButton page="footer" variant="footer-icon" />
               <a
                 href={`mailto:${AGENCY.email}`}
                 aria-label={`Email ${AGENCY.email}`}

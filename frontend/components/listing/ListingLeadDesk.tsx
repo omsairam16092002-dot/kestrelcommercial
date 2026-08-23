@@ -7,7 +7,7 @@ import { Monogram } from "@/components/brand/Monogram";
 import { useUnlockedDocuments } from "@/lib/documents";
 import { apiUrl } from "@/lib/api";
 import { agentPortraitSrc } from "@/lib/images";
-import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
+import { ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
 
 const TABS: { id: EnquiryIntent; label: string; hash: string }[] = [
   { id: "inspection", label: "Inspect", hash: "inspect" },
@@ -65,12 +65,7 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
       <div className="premium-divider mt-5" />
 
       <div className="mt-5">
-        <PhoneActionButtons
-          page={`listing-${property.slug}`}
-          variant="sharp"
-          className="grid grid-cols-3 gap-2"
-          listing={property.slug}
-        />
+        <ContactDeskSummary page={`listing-${property.slug}`} tone="paper" listing={property.slug} />
       </div>
 
       <div

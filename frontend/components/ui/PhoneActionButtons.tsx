@@ -175,6 +175,85 @@ export function TextButton({
   );
 }
 
+/** One number, three actions — for footer, contact page, etc. */
+export function ContactDeskSummary({
+  page,
+  tone = "dark",
+  listing,
+  onAction,
+  className,
+}: {
+  page: string;
+  tone?: "dark" | "light" | "paper";
+  listing?: string;
+  onAction?: () => void;
+  className?: string;
+}) {
+  const wa = listingWhatsAppHref(listing);
+  const sms = agencySmsHref(listingMessage(listing));
+  const styles = {
+    dark: {
+      link: "font-semibold text-paper/85 transition-colors hover:text-tan",
+      number: "t-mono text-paper/90 transition-colors hover:text-tan",
+      sep: "text-paper/25",
+      sub: "text-paper/70",
+    },
+    light: {
+      link: "font-semibold text-paper/85 transition-colors hover:text-tan",
+      number: "t-mono text-paper transition-colors hover:text-tan",
+      sep: "text-tan/40",
+      sub: "text-paper/80",
+    },
+    paper: {
+      link: "font-semibold text-oxblood transition-colors hover:text-ink",
+      number: "t-mono text-ink transition-colors hover:text-oxblood",
+      sep: "text-mauve",
+      sub: "text-mauve",
+    },
+  } as const;
+  const s = styles[tone];
+
+  return (
+    <div className={className}>
+      <a
+        href={AGENCY.phoneHref}
+        id={`cta-call-${page}-summary`}
+        className={`${s.number} text-base`}
+        aria-label={`Call ${AGENCY.phone}`}
+        onClick={() => {
+          track({ event: "cta_click", id: `cta-call-${page}-summary`, page, listing, href: AGENCY.phoneHref });
+          onAction?.();
+        }}
+      >
+        {AGENCY.phone}
+      </a>
+      <p className={`mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm ${s.sub}`}>
+        <a href={AGENCY.phoneHref} className={s.link} onClick={() => { track({ event: "cta_click", id: `cta-call-${page}-link`, page, listing, href: AGENCY.phoneHref }); onAction?.(); }}>
+          Call
+        </a>
+        <span className={s.sep} aria-hidden>
+          ·
+        </span>
+        <a
+          href={wa}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={s.link}
+          onClick={() => { track({ event: "cta_click", id: `cta-wa-${page}-link`, page, listing, href: wa }); onAction?.(); }}
+        >
+          WA
+        </a>
+        <span className={s.sep} aria-hidden>
+          ·
+        </span>
+        <a href={sms} className={s.link} onClick={() => { track({ event: "cta_click", id: `cta-text-${page}-link`, page, listing, href: sms }); onAction?.(); }}>
+          Text
+        </a>
+      </p>
+    </div>
+  );
+}
+
 /** Desktop navbar: tap-to-call number + compact WA/Text icon group. */
 export function HeaderContactCluster({ page }: { page: string }) {
   return (
@@ -197,17 +276,8 @@ export function MobileContactPanel({ page, onNavigate }: { page: string; onNavig
   return (
     <div className="mx-1 mt-4 border-t border-oxblood/10 pt-5">
       <p className="px-3 t-caption text-mauve">Contact the desk</p>
-      <div className="mt-3 space-y-2 px-1">
-        <CallButton page={`${page}-mobile`} variant="menu-call" onAction={onNavigate} />
-        <div className="grid grid-cols-2 gap-2">
-          <WhatsAppActionButton
-            page={`${page}-mobile`}
-            variant="menu-action"
-            label="WhatsApp"
-            onAction={onNavigate}
-          />
-          <TextButton page={`${page}-mobile`} variant="menu-action" onAction={onNavigate} />
-        </div>
+      <div className="mt-3 px-3">
+        <ContactDeskSummary page={`${page}-mobile`} tone="paper" onAction={onNavigate} />
       </div>
     </div>
   );
@@ -226,7 +296,7 @@ export function PhoneActionButtons({
 }) {
   return (
     <div className={className}>
-      <CallButton page={page} variant={variant} listing={listing} />
+      <CallButton page={page} variant={variant} label="Call" listing={listing} />
       <WhatsAppActionButton page={page} variant={variant} listing={listing} />
       <TextButton page={page} variant={variant} listing={listing} />
     </div>
