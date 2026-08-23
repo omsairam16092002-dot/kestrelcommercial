@@ -57,6 +57,9 @@ export async function generateMetadata({
 
 export default async function ListingPage({ params }: { params: { slug: string } }) {
   const data = await getPropertyBySlug(params.slug);
+  if (data === "unavailable") {
+    throw new Error("Listing API unavailable");
+  }
   if (!data) notFound();
   const { property, agent } = data;
   const closed = isClosedListing(property.status);

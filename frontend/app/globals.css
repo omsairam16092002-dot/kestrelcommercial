@@ -254,6 +254,10 @@ textarea:focus:not(:focus-visible) {
   object-position: center;
 }
 
+.photo-contain {
+  object-fit: contain;
+}
+
 .photo-cut-enter {
   animation: photo-cut var(--motion-photo) var(--ease-out) both;
 }

@@ -37,7 +37,11 @@ function serializePublicProperty(doc: Record<string, unknown>): Property {
 
 async function serializePublicPropertyDetail(doc: Record<string, unknown>): Promise<Property> {
   const property = serializeProperty(doc);
-  return { ...property, images: await enrichGalleryImages(property.images) };
+  try {
+    return { ...property, images: await enrichGalleryImages(property.images) };
+  } catch {
+    return { ...property, images: galleryImages(property.images) };
+  }
 }
 
 export const propertiesRouter = Router();

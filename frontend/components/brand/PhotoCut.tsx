@@ -13,6 +13,7 @@ export function PhotoCut({
   srcSet,
   sizes = "100vw",
   priority = false,
+  fit = "cover",
 }: {
   src: string;
   alt: string;
@@ -20,6 +21,7 @@ export function PhotoCut({
   srcSet?: string;
   sizes?: string;
   priority?: boolean;
+  fit?: "cover" | "contain";
 }) {
   const [shown, setShown] = useState(src);
   const [shownSet, setShownSet] = useState(srcSet);
@@ -105,7 +107,7 @@ export function PhotoCut({
         data-listing-photo=""
         fetchPriority={priority ? "high" : "auto"}
         decoding="async"
-        className="photo-cut"
+        className={`photo-cut ${fit === "contain" ? "photo-contain" : ""}`}
       />
       {incoming ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -117,7 +119,7 @@ export function PhotoCut({
           alt=""
           aria-hidden
           decoding="async"
-          className={`photo-cut ${ready ? "photo-cut-enter" : "opacity-0"}`}
+          className={`photo-cut ${fit === "contain" ? "photo-contain" : ""} ${ready ? "photo-cut-enter" : "opacity-0"}`}
           onAnimationEnd={commitIncoming}
         />
       ) : null}

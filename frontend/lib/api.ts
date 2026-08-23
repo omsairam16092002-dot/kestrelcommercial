@@ -15,10 +15,14 @@ import {
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const REVALIDATE = 60;
 
-async function apiFetch<T>(
+export type ApiFetchResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; status: number | "network" };
+
+async function apiFetchResult<T>(
   path: string,
   init?: RequestInit & { revalidate?: number },
-): Promise<T | null> {
+): Promise<ApiFetchResult<T>> {
   try {
     const fresh = init?.cache === "no-store";
     const revalidate = init?.revalidate ?? REVALIDATE;
@@ -31,11 +35,19 @@ async function apiFetch<T>(
         ...(init?.headers ?? {}),
       },
     });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
+    if (!res.ok) return { ok: false, status: res.status };
+    return { ok: true, data: (await res.json()) as T };
   } catch {
-    return null;
+    return { ok: false, status: "network" };
   }
+}
+
+async function apiFetch<T>(
+  path: string,
+  init?: RequestInit & { revalidate?: number },
+): Promise<T | null> {
+  const result = await apiFetchResult<T>(path, init);
+  return result.ok ? result.data : null;
 }
 
 export function apiUrl(path: string): string {
@@ -75,12 +87,13 @@ export async function getFeaturedProperties(): Promise<Property[]> {
 
 export async function getPropertyBySlug(
   slug: string,
-): Promise<{ property: Property; agent: Agent } | null> {
-  const data = await apiFetch<{ property: Property; agent: Agent }>(
+): Promise<{ property: Property; agent: Agent } | null | "unavailable"> {
+  const result = await apiFetchResult<{ property: Property; agent: Agent }>(
     `/api/properties/${encodeURIComponent(slug)}`,
     { cache: "no-store" },
   );
-  if (data?.property) return data;
+  if (result.ok && result.data?.property) return result.data;
+  if (!result.ok && result.status !== 404) return "unavailable";
   const property = PROPERTIES.find((p) => p.slug === slug);
   if (!property) return null;
   const agent =

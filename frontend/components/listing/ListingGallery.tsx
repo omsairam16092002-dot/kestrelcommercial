@@ -79,11 +79,18 @@ export function ListingGallery({ property }: { property: Property }) {
 
   const src = gallerySrc(property, current?.publicId);
   const srcSet = gallerySrcSet(current?.publicId);
+  const frameW = current?.width ?? 1600;
+  const frameH = current?.height ?? 1067;
 
   return (
     <div ref={rootRef} tabIndex={0} role="region" aria-label={`Photos of ${address}`}>
       <div
-        className="relative h-[min(78svh,920px)] min-h-[22rem] overflow-hidden bg-oxblood touch-pan-y"
+        className="relative mx-auto w-full overflow-hidden bg-oxblood touch-pan-y"
+        style={{
+          aspectRatio: `${frameW} / ${frameH}`,
+          maxHeight: "min(78svh, 920px)",
+          minHeight: "14rem",
+        }}
         onTouchStart={(e) => {
           startX.current = e.touches[0]?.clientX ?? null;
         }}
@@ -101,6 +108,7 @@ export function ListingGallery({ property }: { property: Property }) {
           sizes="100vw"
           alt={current?.alt ?? address}
           priority={active === 0}
+          fit="contain"
         />
         <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.05] mix-blend-multiply" />
         {images.length > 1 ? (
