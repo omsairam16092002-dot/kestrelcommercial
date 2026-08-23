@@ -14,8 +14,7 @@ import { getProperties, getPropertyBySlug } from "@/lib/api";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
 import { listingTitle } from "@/lib/seo";
 
-export const revalidate = 60;
-export const dynamicParams = true;
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   const properties = await getProperties();

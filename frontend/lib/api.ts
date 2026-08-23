@@ -78,7 +78,7 @@ export async function getPropertyBySlug(
 ): Promise<{ property: Property; agent: Agent } | null> {
   const data = await apiFetch<{ property: Property; agent: Agent }>(
     `/api/properties/${encodeURIComponent(slug)}`,
-    { revalidate: 10 },
+    { cache: "no-store" },
   );
   if (data?.property) return data;
   const property = PROPERTIES.find((p) => p.slug === slug);
