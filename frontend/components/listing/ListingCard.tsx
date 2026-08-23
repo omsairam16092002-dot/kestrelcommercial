@@ -5,23 +5,26 @@ import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { CtaLink } from "@/components/ui/CtaLink";
 import { listingImageSrc, listingImageSrcSet, listingLqipSrc, listingPlaceholderSrc } from "@/lib/images";
-import { showcaseImage } from "@/lib/campaignPhoto";
+import { showcaseImageAsset } from "@/lib/campaignPhoto";
 import { IconArrowRight } from "@/components/icons";
 
 export function ListingCard({
   property,
   imageMode = "hero",
+  priority = false,
 }: {
   property: Property;
   imageMode?: "hero" | "varied";
+  priority?: boolean;
 }) {
-  const hero = property.images.find((i) => i.isHero) ?? property.images[0];
-  const visual = showcaseImage(property, imageMode);
+  const asset = showcaseImageAsset(property, imageMode);
   const href = `/listing/${property.slug}`;
-  const imageSrc = visual?.src ?? (hero ? listingImageSrc(hero.publicId, 1080, "card") : listingPlaceholderSrc(property, 1080));
-  const imageSrcSet = hero && !visual?.src ? listingImageSrcSet(hero.publicId, [640, 1080, 1920], "card") : undefined;
-  const lqipSrc = hero && !visual?.src ? listingLqipSrc(hero.publicId, "card") : undefined;
-  const imageAlt = visual?.alt ?? hero?.alt ?? fullAddress(property);
+  const imageSrc = asset
+    ? listingImageSrc(asset.publicId, 1080, "card")
+    : listingPlaceholderSrc(property, 1080);
+  const imageSrcSet = asset ? listingImageSrcSet(asset.publicId, [640, 1080, 1920], "card") : undefined;
+  const lqipSrc = asset ? listingLqipSrc(asset.publicId, "card") : undefined;
+  const imageAlt = asset?.alt ?? fullAddress(property);
 
   return (
     <article className="surface group flex h-full flex-col overflow-hidden border-t-2 border-t-oxblood transition-[transform,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:border-oxblood/25 hover:shadow-[0_20px_50px_rgba(42,20,24,0.08)]">
@@ -32,6 +35,7 @@ export function ListingCard({
           lqipSrc={lqipSrc}
           alt={imageAlt}
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          priority={priority}
           zoom
         />
         <span className="absolute left-3 top-3 z-10">

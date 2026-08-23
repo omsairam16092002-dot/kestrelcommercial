@@ -48,7 +48,7 @@ export function SearchResultRow({
           srcSet={imageSrcSet}
           sizes="160px"
           alt={hero?.alt ?? property.address}
-          loading="lazy"
+          loading="eager"
           decoding="async"
           className="h-full w-full object-cover"
         />

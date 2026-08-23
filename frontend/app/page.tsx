@@ -156,8 +156,8 @@ export default async function HomePage() {
           </div>
           {market.length ? (
             <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {market.map((p) => (
-                <ListingCard key={p.id} property={p} />
+              {market.map((p, i) => (
+                <ListingCard key={p.id} property={p} priority={i === 0} />
               ))}
             </div>
           ) : (

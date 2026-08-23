@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PLACEHOLDER_LISTING } from "@/lib/images";
 
 function imageIsReady(img: HTMLImageElement | null) {
@@ -40,9 +40,11 @@ export function DuotoneImage({
 
   useEffect(() => {
     setCurrent(src);
-    setLoaded(false);
-    if (imageIsReady(imgRef.current)) setLoaded(true);
   }, [src]);
+
+  useLayoutEffect(() => {
+    if (imageIsReady(imgRef.current)) setLoaded(true);
+  }, [current]);
 
   const grade =
     tone === "portrait"
@@ -54,7 +56,7 @@ export function DuotoneImage({
       {lqipSrc ? (
         <div
           aria-hidden
-          className={`absolute inset-0 scale-110 bg-cover bg-center blur-xl transition-opacity duration-500 ${
+          className={`absolute inset-0 z-0 scale-110 bg-cover bg-center blur-xl transition-opacity duration-500 ${
             loaded ? "opacity-0" : "opacity-100"
           }`}
           style={{ backgroundImage: `url("${lqipSrc}")` }}
@@ -70,9 +72,9 @@ export function DuotoneImage({
         width={1200}
         height={900}
         data-listing-photo=""
-        loading={priority ? "eager" : "lazy"}
+        loading="eager"
         fetchPriority={priority ? "high" : "auto"}
-        decoding={priority ? "sync" : "async"}
+        decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => {
           const next = fallbackSrc === undefined ? PLACEHOLDER_LISTING : fallbackSrc;
@@ -80,15 +82,15 @@ export function DuotoneImage({
             setLoaded(true);
             return;
           }
+          setLoaded(false);
           setCurrent(next);
-          setLoaded(imageIsReady(imgRef.current));
         }}
-        className={`absolute inset-0 h-full w-full object-cover ${grade} ${
+        className={`absolute inset-0 z-[1] h-full w-full object-cover ${grade} ${
           objectPosition === "top" ? "object-top" : objectPosition === "bottom" ? "object-bottom" : "object-center"
         } ${zoom ? "img-zoom" : ""}`}
       />
       {tone === "portrait" ? null : (
-        <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.06] mix-blend-multiply" />
+        <div className="pointer-events-none absolute inset-0 z-[2] bg-oxblood/[0.06] mix-blend-multiply" />
       )}
     </div>
   );

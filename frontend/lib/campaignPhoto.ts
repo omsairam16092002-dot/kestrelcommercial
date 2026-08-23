@@ -36,10 +36,10 @@ export function hasCompleteCommercialShowcaseSpecs(property: Property): boolean 
   );
 }
 
-export function showcaseImage(
+export function showcaseImageAsset(
   property: Property,
   mode: "hero" | "varied" = "hero",
-): { src: string; alt: string } | null {
+): { publicId: string; alt: string } | null {
   const realImages = galleryImages(property.images).filter((img) => !isStockImageId(img.publicId));
   if (!realImages.length) return null;
   const image =
@@ -48,8 +48,20 @@ export function showcaseImage(
       : heroImage(property) ?? realImages[0];
   if (!image) return null;
   return {
-    src: listingImageSrc(image.publicId, 2400, "flagship"),
+    publicId: image.publicId,
     alt: image.alt ?? fullAddress(property),
+  };
+}
+
+export function showcaseImage(
+  property: Property,
+  mode: "hero" | "varied" = "hero",
+): { src: string; alt: string } | null {
+  const asset = showcaseImageAsset(property, mode);
+  if (!asset) return null;
+  return {
+    src: listingImageSrc(asset.publicId, 2400, "flagship"),
+    alt: asset.alt,
   };
 }
 
