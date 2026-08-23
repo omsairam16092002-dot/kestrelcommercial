@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/listing/ListingCard";
 import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { CtaLink } from "@/components/ui/CtaLink";
-import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
+import { ContactDeskLine } from "@/components/ui/PhoneActionButtons";
 import { getFeaturedProperties, getProperties } from "@/lib/api";
 import { campaignPhotos, corridorProof, hasCompleteCommercialShowcaseSpecs, pickFlagship } from "@/lib/campaignPhoto";
 import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
@@ -78,7 +78,7 @@ export default async function HomePage() {
             >
               Request appraisal
             </CtaLink>
-            <PhoneActionButtons page="home-hero" variant="ghost" className="flex flex-wrap items-center gap-3" />
+            <ContactDeskLine page="home-hero" className="hero-enter-delay mt-5 t-body text-paper/75" />
           </div>
         </Container>
       </section>

@@ -8,21 +8,14 @@ import { StickyCallBar } from "@/components/listing/StickyCallBar";
 export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "/";
   const onListing = pathname.startsWith("/listing/");
-  const enquireHref = onListing
-    ? "#inspect"
-    : pathname === "/" || pathname === "/sell" || pathname === "/contact"
-      ? "#enquire"
-      : "/contact#enquire";
 
   return (
     <>
       <Header />
       <div className="page-shell">{children}</div>
       <StickyCallBar
-        page={pathname}
+        page={pathname.replace(/\//g, "-").replace(/^-|-$/g, "") || "home"}
         listing={onListing ? pathname.replace("/listing/", "") : undefined}
-        secondaryHref={enquireHref}
-        secondaryLabel={onListing ? "Inspect" : "Request info"}
       />
     </>
   );

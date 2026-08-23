@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { Logo } from "@/components/brand/Logo";
 import { IconChevronDown, IconClose, IconMenu } from "@/components/icons";
-import { CallButton, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
+import { HeaderContactCluster, MobileContactPanel } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const NAV = [
@@ -74,10 +74,12 @@ export function Header() {
     }
   }, [pathname]);
 
+  const closeMenu = () => setOpen(false);
+
   return (
     <header id="site-header" className="relative sticky top-0 z-50 border-b border-oxblood/10 bg-paper">
       <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
-        <Logo onClick={() => setOpen(false)} />
+        <Logo onClick={closeMenu} />
 
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           <div className="group relative">
@@ -128,9 +130,7 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <CallButton page="header" variant="header" />
-          <WhatsAppActionButton page="header" variant="header" />
-          <TextButton page="header" variant="header" />
+          <HeaderContactCluster page="header" />
           <PrefetchLink
             href="/sell"
             className="hidden lg:inline-flex items-center bg-tan px-4 py-2.5 text-[11px] font-semibold normal-case tracking-[0.02em] text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper active:scale-[0.985]"
@@ -152,10 +152,10 @@ export function Header() {
       </div>
 
       {open ? (
-      <div
-        id="mobile-nav"
-        className="absolute inset-x-0 top-full z-50 h-[calc(100svh-100%)] overflow-y-auto bg-paper px-4 pb-6 lg:hidden"
-      >
+        <div
+          id="mobile-nav"
+          className="absolute inset-x-0 top-full z-50 h-[calc(100svh-100%)] overflow-y-auto bg-paper px-4 pb-8 lg:hidden"
+        >
           <nav className="flex min-h-full flex-col gap-1 pt-3" aria-label="Mobile">
             {NAV.map((item) => {
               const active = item.match.some((m) => pathname === m || pathname.startsWith(`${m}/`));
@@ -164,7 +164,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={`min-h-11 px-4 py-3 text-base font-semibold ${active ? "bg-oxblood text-paper" : "text-ink hover:bg-white"}`}
-                  onClick={() => setOpen(false)}
+                  onClick={closeMenu}
                 >
                   {item.label}
                 </PrefetchLink>
@@ -199,37 +199,17 @@ export function Header() {
                     className={`min-h-11 px-4 py-3 text-base font-semibold ${
                       pathname === item.path ? "bg-oxblood text-paper" : "text-ink hover:bg-white"
                     }`}
-                    onClick={() => setOpen(false)}
+                    onClick={closeMenu}
                   >
                     {item.title}
                   </PrefetchLink>
                 ))}
               </div>
             </div>
-            <PrefetchLink
-              href="/sell"
-              className="mx-1 mt-2 btn-sharp bg-tan text-ink"
-              onClick={() => setOpen(false)}
-            >
+            <PrefetchLink href="/sell" className="mx-1 mt-2 btn-sharp bg-tan text-ink" onClick={closeMenu}>
               Sell my property / Request appraisal
             </PrefetchLink>
-            <div className="mt-2 grid grid-cols-2 gap-2 px-1 pb-1">
-              <CallButton
-                page="header-mobile"
-                className="btn-sharp inline-flex items-center justify-center t-mono tabular border border-oxblood text-oxblood"
-              />
-              <WhatsAppActionButton
-                page="header-mobile"
-                className="btn-sharp inline-flex items-center justify-center gap-2 bg-tan text-ink"
-              />
-              <TextButton
-                page="header-mobile"
-                className="btn-sharp inline-flex items-center justify-center gap-2 border border-oxblood text-oxblood"
-              />
-              <a href="/contact#enquire" className="btn-sharp bg-oxblood text-paper" onClick={() => setOpen(false)}>
-                Contact
-              </a>
-            </div>
+            <MobileContactPanel page="header" onNavigate={closeMenu} />
           </nav>
         </div>
       ) : null}

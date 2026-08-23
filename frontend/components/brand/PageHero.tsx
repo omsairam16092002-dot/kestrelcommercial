@@ -9,7 +9,7 @@ export function PageHero({
   description,
   page,
   cta,
-  showPhoneActions = true,
+  showPhoneActions = false,
   imageSrc,
   imageAlt = "",
 }: {

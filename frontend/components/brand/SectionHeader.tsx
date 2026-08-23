@@ -8,7 +8,7 @@ export function SectionHeader({
   description,
   page,
   cta,
-  showPhoneActions = true,
+  showPhoneActions = false,
 }: {
   kicker: string;
   title: ReactNode;
