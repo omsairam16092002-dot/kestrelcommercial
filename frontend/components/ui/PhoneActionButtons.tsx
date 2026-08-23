@@ -280,8 +280,17 @@ export function MobileContactPanel({ page, onNavigate }: { page: string; onNavig
   return (
     <div className="mx-1 mt-4 border-t border-oxblood/10 pt-5">
       <p className="px-3 t-caption text-mauve">Contact the desk</p>
-      <div className="mt-3 px-3">
-        <ContactDeskSummary page={`${page}-mobile`} tone="paper" onAction={onNavigate} />
+      <div className="mt-3 space-y-2 px-1">
+        <CallButton page={`${page}-mobile`} variant="menu-call" onAction={onNavigate} />
+        <div className="grid grid-cols-2 gap-2">
+          <WhatsAppActionButton
+            page={`${page}-mobile`}
+            variant="menu-action"
+            label="WhatsApp"
+            onAction={onNavigate}
+          />
+          <TextButton page={`${page}-mobile`} variant="menu-action" onAction={onNavigate} />
+        </div>
       </div>
     </div>
   );
