@@ -228,25 +228,29 @@ export function ContactDeskSummary({
         {AGENCY.phone}
       </a>
       <p className={`mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm ${s.sub}`}>
-        <a href={AGENCY.phoneHref} className={s.link} onClick={() => { track({ event: "cta_click", id: `cta-call-${page}-link`, page, listing, href: AGENCY.phoneHref }); onAction?.(); }}>
-          Call
-        </a>
-        <span className={s.sep} aria-hidden>
-          ·
-        </span>
         <a
           href={wa}
           target="_blank"
           rel="noopener noreferrer"
           className={s.link}
-          onClick={() => { track({ event: "cta_click", id: `cta-wa-${page}-link`, page, listing, href: wa }); onAction?.(); }}
+          onClick={() => {
+            track({ event: "cta_click", id: `cta-wa-${page}-link`, page, listing, href: wa });
+            onAction?.();
+          }}
         >
           WA
         </a>
         <span className={s.sep} aria-hidden>
           ·
         </span>
-        <a href={sms} className={s.link} onClick={() => { track({ event: "cta_click", id: `cta-text-${page}-link`, page, listing, href: sms }); onAction?.(); }}>
+        <a
+          href={sms}
+          className={s.link}
+          onClick={() => {
+            track({ event: "cta_click", id: `cta-text-${page}-link`, page, listing, href: sms });
+            onAction?.();
+          }}
+        >
           Text
         </a>
       </p>
