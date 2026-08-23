@@ -30,6 +30,7 @@ async function cloudinaryDimensions(publicId: string): Promise<{ width: number; 
 }
 
 export async function enrichGalleryImages(images: PropertyImage[]): Promise<PropertyImage[]> {
+  if (!images.length) return images;
   const enriched = await Promise.all(
     images.map(async (image) => {
       if (image.width != null && image.height != null) return image;

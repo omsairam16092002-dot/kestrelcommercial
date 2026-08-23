@@ -4,7 +4,7 @@ export const PUBLIC_PAGES = [
   { path: "/buy", markers: [/Sale|Search|Kestrel|Properties/i] },
   { path: "/lease", markers: [/Lease|Search|Kestrel/i] },
   { path: "/contact", markers: [/Contact|WhatsApp|Enquire/i] },
-  { path: "/about", markers: [/About|Kestrel|Director/i] },
+  { path: "/about", markers: [/About us|Jignesh Jhanjaria|700\+ transactions/i] },
   { path: "/services", markers: [/Sales|Leasing|Management|Advisory/i] },
   { path: "/sell", markers: [/appraisal|Sell|Kestrel/i] },
   { path: "/investing", markers: [/SMSF|AML|Compliance/i] },
