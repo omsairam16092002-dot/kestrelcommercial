@@ -1,26 +1,13 @@
-import { AGENCY, AGENTS, ABOUT_HOME_TEASER, ABOUT_WHY_CARDS, ABOUT_WHY_CLOSING, ABOUT_WHY_HEADING, ABOUT_WHY_INTRO, ABOUT_WHY_SUBHEADING, SOCIAL, isAvailableStatus } from "@kestrel/shared";
+import { AGENCY, isAvailableStatus } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
-import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { HeroVideo } from "@/components/brand/HeroVideo";
-import { ServicesGrid } from "@/components/brand/ServicesGrid";
 import { SpecSearchConsole } from "@/components/listing/SpecSearchConsole";
 import { ListingCard } from "@/components/listing/ListingCard";
-import { EnquiryForm } from "@/components/forms/EnquiryForm";
 import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { CtaLink } from "@/components/ui/CtaLink";
-import {
-  IconClipboard,
-  IconClock,
-  IconFacebook,
-  IconInstagram,
-  IconLinkedIn,
-  IconMail,
-  IconMapPin,
-  IconWhatsApp,
-} from "@/components/icons";
-import { getAgents, getFeaturedProperties, getProperties } from "@/lib/api";
-import { agentPortraitSrc, agentPortraitSrcSet } from "@/lib/images";
+import { IconWhatsApp } from "@/components/icons";
+import { getFeaturedProperties, getProperties } from "@/lib/api";
 import { campaignPhotos, corridorProof, hasCompleteCommercialShowcaseSpecs, pickFlagship } from "@/lib/campaignPhoto";
 import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 
@@ -36,15 +23,6 @@ export const metadata = {
 const STATS = [
   { n: 700, suffix: "+", l: "Property transactions", decimals: 0 },
   { n: 15, suffix: "+", l: "Years in Australian property", decimals: 0 },
-];
-
-const WHY_POINTS = ABOUT_WHY_CARDS.map((card) => `${card.title} — ${card.description}`);
-
-const TRANSFER_POINTS = [
-  "Contract to settlement — who does what, and when",
-  "Identity and beneficial ownership before we act (AML / Tranche 2)",
-  "How PEXA and trust money sit in a commercial sale",
-  "What stalls a deal — and how we keep it moving",
 ];
 
 export default async function HomePage() {
@@ -64,9 +42,6 @@ export default async function HomePage() {
   const flagship = pickFlagship(evidence);
   const proof = corridorProof(evidence);
   const heroBleed = campaignPhotos(marketPool.length ? marketPool : completeAvailable, 1)[0];
-  const agent = (await getAgents())[0] ?? AGENTS[0];
-  const portrait = agentPortraitSrc(agent.photoPublicId, 1400);
-  const portraitSet = agentPortraitSrcSet(agent.photoPublicId);
 
   return (
     <>
@@ -175,7 +150,7 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* 4 — Spec search */}
+      {/* 5 — Spec search */}
       <section className="border-y border-oxblood/10 bg-white/50">
         <Container className="section-pad">
           <p className="eyebrow-rule t-caption text-oxblood">Find stock</p>
@@ -185,215 +160,6 @@ export default async function HomePage() {
           </p>
           <div className="mt-8">
             <SpecSearchConsole assetCategory="commercial" />
-          </div>
-        </Container>
-      </section>
-
-      {/* 5 — Agent */}
-      <section className="bg-ink text-paper">
-        <Container className="section-pad">
-          <div className="grid items-stretch gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
-            <div className="relative isolate aspect-[4/5] overflow-hidden bg-oxblood sm:aspect-[5/6] lg:aspect-auto lg:min-h-[520px]">
-              <DuotoneImage
-                key={portrait}
-                src={portrait}
-                srcSet={portraitSet}
-                alt={`${agent.name}, Director of Kestrel Commercial`}
-                sizes="(min-width: 1024px) 40vw, 100vw"
-                objectPosition="top"
-                tone="portrait"
-              />
-            </div>
-            <div className="flex min-h-0 flex-col justify-center">
-              <p className="eyebrow-rule t-caption text-tan">Listing agent</p>
-              <h2 className="t-h1 mt-5 text-paper">{agent.name}</h2>
-              <p className="t-mono mt-3 text-tan">
-                {agent.title} · Licence {agent.licenceNumber}
-              </p>
-              <p className="t-body mt-6 max-w-xl text-pretty text-paper/80">{ABOUT_HOME_TEASER}</p>
-              <div className="mt-6 flex flex-wrap gap-4 text-sm">
-                <a
-                  href={AGENCY.whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
-                >
-                  <IconWhatsApp className="h-4 w-4" />
-                  WhatsApp
-                </a>
-                <a
-                  href={`mailto:${AGENCY.email}`}
-                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
-                >
-                  <IconMail className="h-4 w-4" />
-                  Email
-                </a>
-                <CtaLink href="/about" id="cta-home-about" page="home" className="font-semibold text-tan hover:text-paper">
-                  Full profile →
-                </CtaLink>
-                <a
-                  href={SOCIAL.facebook.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={SOCIAL.facebook.label}
-                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
-                >
-                  <IconFacebook className="h-4 w-4" />
-                  Facebook
-                </a>
-                <a
-                  href={SOCIAL.linkedin.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={SOCIAL.linkedin.label}
-                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
-                >
-                  <IconLinkedIn className="h-4 w-4" />
-                  LinkedIn
-                </a>
-                <a
-                  href={SOCIAL.instagram.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={SOCIAL.instagram.label}
-                  className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
-                >
-                  <IconInstagram className="h-4 w-4" />
-                  Instagram
-                </a>
-              </div>
-              <div className="mt-10 grid gap-5 sm:grid-cols-2">
-                <div className="border-t border-tan/30 pt-4">
-                  <h3 className="flex items-center gap-2 t-h3 text-paper">
-                    <IconClipboard className="h-4 w-4 shrink-0 text-tan" />
-                    Management
-                  </h3>
-                  <p className="mt-2 text-sm text-paper/70">
-                    Rent, outgoings, reviews and practical reporting an owner can read.
-                  </p>
-                </div>
-                <div className="border-t border-tan/30 pt-4">
-                  <h3 className="t-h3 text-paper">Direct advice</h3>
-                  <p className="mt-2 text-sm text-paper/70">
-                    One desk from appraisal through negotiation and completion, without category mixing on the public site.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      {/* 6 — What we do */}
-      <section className="bg-paper">
-        <Container className="section-pad">
-          <p className="eyebrow-rule t-caption text-oxblood">Services</p>
-          <h2 className="t-h2 mt-5 text-ink">What we do</h2>
-          <p className="t-body mt-5 max-w-2xl text-ink/80">Sales. Leasing. Management. Advisory.</p>
-          <div className="mt-10">
-            <ServicesGrid columns={4} />
-          </div>
-        </Container>
-      </section>
-
-      {/* 7 — Two things worth knowing */}
-      <section className="bg-paper pb-14 md:pb-20">
-        <Container>
-          <p className="eyebrow-rule t-caption text-oxblood">Straight talk</p>
-          <h2 className="t-h2 mt-5 text-ink">Two things worth knowing</h2>
-          <div className="mt-10 grid items-stretch gap-5 md:grid-cols-2">
-            <article className="premium-panel-dark flex h-full flex-col px-6 py-8 text-paper md:px-8 md:py-10">
-              <h3 className="t-h3 text-paper">{ABOUT_WHY_HEADING}</h3>
-              <p className="t-body mt-2 text-tan">{ABOUT_WHY_SUBHEADING}</p>
-              <p className="t-body mt-4 text-paper/85">{ABOUT_WHY_INTRO}</p>
-              <ul className="t-body mt-6 flex-1 space-y-3 text-paper/85">
-                {WHY_POINTS.map((item) => (
-                  <li key={item} className="border-l-2 border-tan pl-3">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="t-body mt-6 font-serif italic text-paper/85">{ABOUT_WHY_CLOSING}</p>
-              <CtaLink href="/about" id="cta-home-why" page="home" className="mt-8 text-sm font-semibold text-tan hover:text-paper">
-                About the desk →
-              </CtaLink>
-            </article>
-            <article className="premium-panel-dark flex h-full flex-col px-6 py-8 text-paper md:px-8 md:py-10">
-              <h3 className="t-h3 text-paper">What the transfer of land process means for your transaction</h3>
-              <p className="t-body mt-4 text-paper/85">
-                Commercial sales are not residential auctions. Identity, funds and settlement paperwork
-                need to be clear early — especially under AML Tranche 2.
-              </p>
-              <ul className="t-body mt-6 flex-1 space-y-3 text-paper/85">
-                {TRANSFER_POINTS.map((item) => (
-                  <li key={item} className="border-l-2 border-tan pl-3">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <CtaLink href="/investing" id="cta-home-transfer" page="home" className="mt-8 text-sm font-semibold text-tan hover:text-paper">
-                SMSF &amp; AML notes →
-              </CtaLink>
-            </article>
-          </div>
-        </Container>
-      </section>
-
-      {/* 8 — Talk to us */}
-      <section id="enquire" className="border-t border-oxblood/10 bg-paper">
-        <Container className="grid gap-10 py-14 md:grid-cols-12 md:py-20">
-          <div className="md:col-span-5">
-            <p className="t-caption text-oxblood">Contact</p>
-            <h2 className="t-h2 mt-5 text-ink">Talk to us</h2>
-            <dl className="mt-8 space-y-5">
-              <div className="border-t border-oxblood/15 pt-4">
-                <dt className="flex items-center gap-2 t-caption text-mauve">
-                  <IconWhatsApp className="h-3.5 w-3.5" />
-                  Phone / WhatsApp
-                </dt>
-                <dd className="t-mono mt-1 text-ink">
-                  <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-oxblood">
-                    {AGENCY.whatsapp}
-                  </a>
-                </dd>
-              </div>
-              <div className="border-t border-oxblood/15 pt-4">
-                <dt className="flex items-center gap-2 t-caption text-mauve">
-                  <IconMail className="h-3.5 w-3.5" />
-                  Email
-                </dt>
-                <dd className="mt-1 text-ink">
-                  <a href={`mailto:${AGENCY.email}`} className="hover:text-oxblood">
-                    {AGENCY.email}
-                  </a>
-                </dd>
-              </div>
-              <div className="border-t border-oxblood/15 pt-4">
-                <dt className="flex items-center gap-2 t-caption text-mauve">
-                  <IconMapPin className="h-3.5 w-3.5" />
-                  Office
-                </dt>
-                <dd className="mt-1 text-sm text-ink">
-                  {AGENCY.addressLine1}
-                  <br />
-                  {AGENCY.addressLine2}
-                </dd>
-              </div>
-              <div className="border-t border-oxblood/15 pt-4">
-                <dt className="flex items-center gap-2 t-caption text-mauve">
-                  <IconClock className="h-3.5 w-3.5" />
-                  Hours
-                </dt>
-                <dd className="mt-1 text-sm text-ink">{AGENCY.hours}</dd>
-              </div>
-            </dl>
-          </div>
-          <div className="premium-panel border-t-2 border-t-oxblood p-6 text-ink md:col-span-7 md:p-9">
-            <h3 className="t-h3 text-ink">Send a message</h3>
-            <p className="t-body mt-2 text-ink/70">One business day. Sooner if you WhatsApp.</p>
-            <div className="mt-6">
-              <EnquiryForm source="contact" defaultTopic="other" submitLabel="Send message" formId="form-home-contact" />
-            </div>
           </div>
         </Container>
       </section>

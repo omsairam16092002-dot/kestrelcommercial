@@ -43,7 +43,7 @@ export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: stri
             <p className="t-caption text-tan">About us</p>
             <h1 className="t-h1 mt-5 max-w-3xl">{agent.name}</h1>
             <p className="t-mono mt-3 text-tan">
-              {agent.title} · Licence {agent.licenceNumber}
+              {agent.title} · License {agent.licenceNumber}
             </p>
             <div className="t-body mt-8 max-w-3xl space-y-4 text-pretty text-paper/90">
               {ABOUT_BIO_PARAGRAPHS.map((para) => (

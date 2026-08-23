@@ -105,7 +105,6 @@ export default async function ListingPage({ params }: { params: { slug: string }
               {property.suburb} {property.postcode}
             </span>
           </p>
-          <p className="tabular text-mauve">Licence {property.agentLicenceNumber}</p>
         </div>
       </Container>
 

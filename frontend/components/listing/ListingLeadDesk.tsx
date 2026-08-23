@@ -59,7 +59,6 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
         <div className="min-w-0">
           <p className="t-caption text-oxblood">Listing agent</p>
           <h2 className="mt-1 text-base font-semibold text-ink">{agent.name}</h2>
-          <p className="mt-0.5 text-sm text-mauve">Licence {agent.licenceNumber}</p>
         </div>
       </div>
 

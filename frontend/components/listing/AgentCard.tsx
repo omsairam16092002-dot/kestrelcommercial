@@ -23,7 +23,6 @@ export function AgentCard({ agent }: { agent: Agent }) {
         <div>
           <h3 className="t-h3 text-ink">{agent.name}</h3>
           {agent.title ? <p className="t-body mt-1 text-mauve">{agent.title}</p> : null}
-          <p className="t-mono mt-2 text-[12px] text-ink">Licence {agent.licenceNumber}</p>
         </div>
       </div>
       <ul className="mt-5 space-y-2">

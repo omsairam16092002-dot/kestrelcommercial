@@ -120,18 +120,6 @@ export function Footer() {
         </div>
       </Container>
 
-      <div className="border-t border-paper/10">
-        <Container className="flex flex-col gap-2 py-5 text-xs leading-relaxed text-paper/75 md:flex-row md:items-center md:justify-between">
-          <p>
-            {AGENCY.legalName} · ACN {AGENCY.acn}
-          </p>
-          <p>
-            {AGENCY.licenceHolder} · Licence {AGENCY.licenceNumber}
-          </p>
-          <p>{AGENCY.hours}</p>
-        </Container>
-      </div>
-
       <div className="h-[4.75rem] md:hidden" aria-hidden />
     </footer>
   );

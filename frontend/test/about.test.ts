@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
 import {
   ABOUT_BIO_PARAGRAPHS,
@@ -32,4 +34,10 @@ test("About why section uses title plus description cards", () => {
 
 test("About closing line is the homepage teaser", () => {
   assert.match(ABOUT_CLOSING_LINE, /One experienced desk/);
+});
+
+test("license number appears only on About with American spelling", () => {
+  const aboutBio = readFileSync(join(__dirname, "../components/about/AboutHeroBio.tsx"), "utf8");
+  assert.match(aboutBio, /License \{agent\.licenceNumber\}/);
+  assert.doesNotMatch(aboutBio, /Licence \{agent\.licenceNumber\}/);
 });

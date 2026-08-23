@@ -45,9 +45,6 @@ export default function PrivacyPage() {
             </a>
             .
           </p>
-          <p className="t-mono text-mauve">
-            Estate Agent Licence {AGENCY.licenceNumber} · {AGENCY.licenceHolder}
-          </p>
         </div>
       </Container>
     </div>

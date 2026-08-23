@@ -4,7 +4,7 @@ import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { ReasonCards, type Reason } from "@/components/brand/ReasonCards";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
-import { IconBadge, IconClock, IconMail, IconWhatsApp } from "@/components/icons";
+import { IconClock, IconMail, IconWhatsApp } from "@/components/icons";
 
 export const revalidate = 60;
 
@@ -17,7 +17,7 @@ const CONTACT_REASONS: Reason[] = [
   {
     n: "01",
     t: "WhatsApp first",
-    d: "The public number is WhatsApp only. Licence on every reply.",
+    d: "The public number is WhatsApp only. Fastest way to reach the desk.",
     Icon: IconWhatsApp,
   },
   {
@@ -28,9 +28,9 @@ const CONTACT_REASONS: Reason[] = [
   },
   {
     n: "03",
-    t: "Licence",
-    d: `${AGENCY.licenceHolder} · ${AGENCY.licenceNumber}`,
-    Icon: IconBadge,
+    t: "Email",
+    d: AGENCY.email,
+    Icon: IconMail,
   },
 ];
 
@@ -44,7 +44,7 @@ export default function ContactPage() {
         page="contact"
       />
 
-      <ReasonCards kicker="The desk" title="Hours. Licence. WhatsApp." reasons={CONTACT_REASONS} />
+      <ReasonCards kicker="The desk" title="Hours. WhatsApp. Email." reasons={CONTACT_REASONS} />
 
       <section className="bg-ink text-paper">
         <Container className="grid gap-10 py-14 md:grid-cols-12 md:py-20">
@@ -71,18 +71,6 @@ export default function ContactPage() {
                 mono: false,
               },
               { k: "Hours", icon: IconClock, v: AGENCY.hours, mono: false },
-              {
-                k: "Licence",
-                icon: IconBadge,
-                v: (
-                  <>
-                    {AGENCY.licenceHolder}
-                    <br />
-                    {AGENCY.licenceNumber}
-                  </>
-                ),
-                mono: true,
-              },
             ].map((row) => {
               const Icon = row.icon;
               return (

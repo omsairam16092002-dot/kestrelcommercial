@@ -47,7 +47,6 @@ export function SpecTable({ property }: { property: Property }) {
   if (property.outgoingsPa != null) {
     rows.push({ k: "Outgoings", v: `${formatAud(property.outgoingsPa)} pa` });
   }
-  rows.push({ k: "Agent licence", v: property.agentLicenceNumber });
 
   return (
     <div className="surface overflow-hidden">

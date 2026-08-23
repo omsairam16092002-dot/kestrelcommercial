@@ -234,7 +234,6 @@ export function Header() {
                 Contact
               </a>
             </div>
-            <p className="px-4 pt-2 text-xs text-mauve">Licence {AGENCY.licenceNumber}</p>
           </nav>
         </div>
       ) : null}
