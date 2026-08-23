@@ -13,7 +13,7 @@
     "build": "npm run build -w @kestrel/shared && npm run build -w backend && npm run build -w frontend",
     "seed": "npm run seed -w backend",
     "lint": "npm run lint --workspaces --if-present",
-    "test": "npm run build -w @kestrel/shared && tsx --test packages/shared/test/images.test.ts packages/shared/test/filters.test.ts frontend/test/portrait.test.ts frontend/test/contactLinks.test.ts frontend/test/seo.test.ts backend/test/api.features.test.ts test/handover.integration.test.ts test/handover.pages.test.ts test/public-site.live.test.ts",
+    "test": "npm run build -w @kestrel/shared && tsx --test packages/shared/test/images.test.ts packages/shared/test/filters.test.ts frontend/test/portrait.test.ts frontend/test/contactLinks.test.ts frontend/test/seo.test.ts frontend/test/about.test.ts backend/test/api.features.test.ts test/handover.integration.test.ts test/handover.pages.test.ts test/public-site.live.test.ts test/production-media.test.ts",
     "test:lighthouse": "lhci autorun",
     "test:handover": "npm run build -w @kestrel/shared && tsx --test --test-concurrency=1 test/handover.integration.test.ts test/handover.pages.test.ts test/handover.admin-pages.test.ts test/route-errors.live.test.ts",
     "typecheck": "npm run typecheck -w @kestrel/shared && npm run typecheck -w backend && npm run typecheck -w frontend"

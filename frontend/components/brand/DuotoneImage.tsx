@@ -14,6 +14,7 @@ export function DuotoneImage({
   zoom = false,
   objectPosition = "center",
   fallbackSrc,
+  lqipSrc,
   tone = "photo",
 }: {
   src: string;
@@ -25,13 +26,16 @@ export function DuotoneImage({
   zoom?: boolean;
   objectPosition?: "center" | "top" | "bottom";
   fallbackSrc?: string;
+  lqipSrc?: string;
   /** `portrait` keeps facial detail; `photo` is a light oxblood grade only. */
   tone?: "photo" | "portrait";
 }) {
   const [current, setCurrent] = useState(src);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setCurrent(src);
+    setLoaded(false);
   }, [src]);
 
   const grade =
@@ -41,6 +45,15 @@ export function DuotoneImage({
 
   return (
     <div className={`absolute inset-0 overflow-hidden bg-oxblood ${className}`}>
+      {lqipSrc ? (
+        <div
+          aria-hidden
+          className={`absolute inset-0 scale-110 bg-cover bg-center blur-xl transition-opacity duration-500 ${
+            loaded ? "opacity-0" : "opacity-100"
+          }`}
+          style={{ backgroundImage: `url("${lqipSrc}")` }}
+        />
+      ) : null}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={current}
@@ -53,6 +66,7 @@ export function DuotoneImage({
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
         decoding={priority ? "sync" : "async"}
+        onLoad={() => setLoaded(true)}
         onError={() => {
           const next = fallbackSrc === undefined ? PLACEHOLDER_LISTING : fallbackSrc;
           if (!next || current === next) return;
@@ -60,7 +74,7 @@ export function DuotoneImage({
         }}
         className={`absolute inset-0 h-full w-full object-cover ${grade} ${
           objectPosition === "top" ? "object-top" : objectPosition === "bottom" ? "object-bottom" : "object-center"
-        } ${zoom ? "img-zoom" : ""}`}
+        } ${zoom ? "img-zoom" : ""} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}
       />
       {tone === "portrait" ? null : (
         <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.06] mix-blend-multiply" />

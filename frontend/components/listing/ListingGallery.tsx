@@ -171,6 +171,8 @@ export function ListingGallery({ property }: { property: Property }) {
               <img
                 src={listingImageSrc(img.publicId, THUMB_WIDTH, "thumb")}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </button>

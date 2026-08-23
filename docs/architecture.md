@@ -53,4 +53,4 @@ Copy root `.env.example` into `backend/.env` and `frontend/.env.local`. Never co
 
 ## ISR
 
-Listing pages use `export const revalidate = 60`. The frontend server fetches the API (or falls back to shared fixtures if the API is down). Images go through `next/image` + Cloudinary `f_auto,q_auto` (or Unsplash fixture URLs until Cloudinary is live).
+Listing pages use `export const revalidate = 60`. The frontend server fetches the API (or falls back to shared fixtures if the API is down). Listing and marketing photos use native `<img>` tags with Cloudinary delivery URLs (`f_auto,q_auto:good`, context crops) — not the Next.js image optimizer. Agent portraits and hero poster fall back to committed files under `frontend/public/assets/`.

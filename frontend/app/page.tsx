@@ -1,4 +1,4 @@
-import { AGENCY, AGENTS, SOCIAL, isAvailableStatus } from "@kestrel/shared";
+import { AGENCY, AGENTS, ABOUT_HOME_TEASER, ABOUT_WHY_CARDS, ABOUT_WHY_CLOSING, ABOUT_WHY_HEADING, ABOUT_WHY_INTRO, ABOUT_WHY_SUBHEADING, SOCIAL, isAvailableStatus } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { HeroVideo } from "@/components/brand/HeroVideo";
@@ -20,7 +20,7 @@ import {
   IconWhatsApp,
 } from "@/components/icons";
 import { getAgents, getFeaturedProperties, getProperties } from "@/lib/api";
-import { agentPortraitSrc } from "@/lib/images";
+import { agentPortraitSrc, agentPortraitSrcSet } from "@/lib/images";
 import { campaignPhotos, corridorProof, hasCompleteCommercialShowcaseSpecs, pickFlagship } from "@/lib/campaignPhoto";
 import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
 
@@ -38,11 +38,7 @@ const STATS = [
   { n: 15, suffix: "+", l: "Years in Australian property", decimals: 0 },
 ];
 
-const WHY_POINTS = [
-  "Spec-first advice — span, power, door and hardstand before suburb talk",
-  "Priced against real west-side paper, not a CBD index",
-  "One desk from first enquiry through settlement",
-];
+const WHY_POINTS = ABOUT_WHY_CARDS.map((card) => `${card.title} — ${card.description}`);
 
 const TRANSFER_POINTS = [
   "Contract to settlement — who does what, and when",
@@ -70,6 +66,7 @@ export default async function HomePage() {
   const heroBleed = campaignPhotos(marketPool.length ? marketPool : completeAvailable, 1)[0];
   const agent = (await getAgents())[0] ?? AGENTS[0];
   const portrait = agentPortraitSrc(agent.photoPublicId, 1400);
+  const portraitSet = agentPortraitSrcSet(agent.photoPublicId);
 
   return (
     <>
@@ -200,10 +197,10 @@ export default async function HomePage() {
               <DuotoneImage
                 key={portrait}
                 src={portrait}
+                srcSet={portraitSet}
                 alt={`${agent.name}, Director of Kestrel Commercial`}
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 objectPosition="top"
-                fallbackSrc=""
                 tone="portrait"
               />
             </div>
@@ -213,16 +210,7 @@ export default async function HomePage() {
               <p className="t-mono mt-3 text-tan">
                 {agent.title} · Licence {agent.licenceNumber}
               </p>
-              <div className="t-body mt-6 max-w-xl space-y-4 text-pretty text-paper/80">
-                {agent.bio
-                  ?.split(/\.\s+(?=[A-Z])/)
-                  .map((para) => para.replace(/\.$/, "") + ".")
-                  .slice(0, 3)
-                  .map((para) => (
-                    <p key={para.slice(0, 48)}>{para}</p>
-                  ))}
-                <p>{proof}</p>
-              </div>
+              <p className="t-body mt-6 max-w-xl text-pretty text-paper/80">{ABOUT_HOME_TEASER}</p>
               <div className="mt-6 flex flex-wrap gap-4 text-sm">
                 <a
                   href={AGENCY.whatsappHref}
@@ -315,11 +303,9 @@ export default async function HomePage() {
           <h2 className="t-h2 mt-5 text-ink">Two things worth knowing</h2>
           <div className="mt-10 grid items-stretch gap-5 md:grid-cols-2">
             <article className="premium-panel-dark flex h-full flex-col px-6 py-8 text-paper md:px-8 md:py-10">
-              <h3 className="t-h3 text-paper">Why we are the only choice for a straight deal in the west</h3>
-              <p className="t-body mt-4 text-paper/85">
-                Occupiers and investors come for corridor knowledge — not a marketing brochure. We price
-                the building against what actually trades here, then stay on the file through settlement.
-              </p>
+              <h3 className="t-h3 text-paper">{ABOUT_WHY_HEADING}</h3>
+              <p className="t-body mt-2 text-tan">{ABOUT_WHY_SUBHEADING}</p>
+              <p className="t-body mt-4 text-paper/85">{ABOUT_WHY_INTRO}</p>
               <ul className="t-body mt-6 flex-1 space-y-3 text-paper/85">
                 {WHY_POINTS.map((item) => (
                   <li key={item} className="border-l-2 border-tan pl-3">
@@ -327,6 +313,7 @@ export default async function HomePage() {
                   </li>
                 ))}
               </ul>
+              <p className="t-body mt-6 font-serif italic text-paper/85">{ABOUT_WHY_CLOSING}</p>
               <CtaLink href="/about" id="cta-home-why" page="home" className="mt-8 text-sm font-semibold text-tan hover:text-paper">
                 About the desk →
               </CtaLink>

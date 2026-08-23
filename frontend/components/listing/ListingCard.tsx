@@ -4,7 +4,7 @@ import { SpecMiniTable } from "@/components/brand/SpecMiniTable";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { CtaLink } from "@/components/ui/CtaLink";
-import { listingImageSrc, listingImageSrcSet, listingPlaceholderSrc } from "@/lib/images";
+import { listingImageSrc, listingImageSrcSet, listingLqipSrc, listingPlaceholderSrc } from "@/lib/images";
 import { showcaseImage } from "@/lib/campaignPhoto";
 import { IconArrowRight } from "@/components/icons";
 
@@ -20,6 +20,7 @@ export function ListingCard({
   const href = `/listing/${property.slug}`;
   const imageSrc = visual?.src ?? (hero ? listingImageSrc(hero.publicId, 1080, "card") : listingPlaceholderSrc(property, 1080));
   const imageSrcSet = hero && !visual?.src ? listingImageSrcSet(hero.publicId, [640, 1080, 1920], "card") : undefined;
+  const lqipSrc = hero && !visual?.src ? listingLqipSrc(hero.publicId, "card") : undefined;
   const imageAlt = visual?.alt ?? hero?.alt ?? fullAddress(property);
 
   return (
@@ -28,6 +29,7 @@ export function ListingCard({
         <DuotoneImage
           src={imageSrc}
           srcSet={imageSrcSet}
+          lqipSrc={lqipSrc}
           alt={imageAlt}
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           zoom

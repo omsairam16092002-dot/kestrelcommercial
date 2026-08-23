@@ -87,8 +87,21 @@ export function portraitSrc(publicId: string, width = 1400) {
 
 export const AGENT_PORTRAIT = "/assets/agent/jignesh.jpeg";
 
-/** Local portrait first, then Cloudinary, then stock Unsplash. */
-export function agentPortraitSrc(photoPublicId?: string | null, _width = 1400) {
-  if (!photoPublicId || isStockImageId(photoPublicId)) return AGENT_PORTRAIT;
-  return portraitSrc(photoPublicId as string, _width);
+/** Always serve the committed local JPEG — reliable on production without Cloudinary. */
+export function agentPortraitSrc(_photoPublicId?: string | null, _width = 1400) {
+  return AGENT_PORTRAIT;
+}
+
+/** Optional Cloudinary srcSet for high-DPI when a real upload id exists. */
+export function agentPortraitSrcSet(photoPublicId?: string | null, widths = [640, 1080, 1400]) {
+  if (!photoPublicId || isStockImageId(photoPublicId)) return undefined;
+  return widths.map((width) => `${portraitSrc(photoPublicId, width)} ${width}w`).join(", ");
+}
+
+/** Low-quality image placeholder for Cloudinary listing URLs. */
+export function listingLqipSrc(publicId: string, context: ListingImageContext = "card") {
+  if (isStockImageId(publicId) || publicId.startsWith("local:")) return undefined;
+  const base = resolveImageSrc(publicId, CLOUD, { width: 40, context });
+  if (!base.includes("res.cloudinary.com")) return undefined;
+  return base.replace("/upload/", "/upload/e_blur:1000,q_1,w_40/");
 }

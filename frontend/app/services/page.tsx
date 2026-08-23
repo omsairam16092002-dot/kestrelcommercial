@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { AGENCY, PROJECT_MARKETING } from "@kestrel/shared";
+import { AGENCY, PROJECT_MARKETING, SERVICES_FEATURE_COPY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
-import { ServicesGrid } from "@/components/brand/ServicesGrid";
+import { ServiceFeatureSection } from "@/components/services/ServiceFeatureSection";
 import { getProperties } from "@/lib/api";
 import { campaignPhotos } from "@/lib/campaignPhoto";
+import { listingLqipSrc } from "@/lib/images";
 
 export const revalidate = 60;
 
@@ -20,6 +21,10 @@ export default async function ServicesPage() {
   const stock = await getProperties();
   const projectPhoto = campaignPhotos(stock.filter((p) => p.assetCategory === "development-site"), 1)[0]
     ?? campaignPhotos(stock, 1)[0];
+  const projectLqip = projectPhoto?.property.images[0]?.publicId
+    ? listingLqipSrc(projectPhoto.property.images[0].publicId, "flagship")
+    : undefined;
+
   return (
     <div className="bg-paper">
       <SectionHeader
@@ -29,15 +34,9 @@ export default async function ServicesPage() {
         page="services"
       />
 
-      <section className="bg-paper">
-        <Container className="section-pad">
-          <p className="eyebrow-rule t-caption text-oxblood">Four lines</p>
-          <h2 className="t-h2 mt-5 text-ink">How the desk works.</h2>
-          <div className="mt-12">
-            <ServicesGrid columns={4} />
-          </div>
-        </Container>
-      </section>
+      {SERVICES_FEATURE_COPY.map((service, index) => (
+        <ServiceFeatureSection key={service.title} service={service} index={index} />
+      ))}
 
       <section className="bg-ink text-paper">
         <Container className="grid items-center gap-10 py-16 md:grid-cols-12 md:py-24 lg:min-h-[80vh] lg:gap-16">
@@ -56,6 +55,7 @@ export default async function ServicesPage() {
                 src={projectPhoto.src}
                 alt={projectPhoto.alt}
                 sizes="(min-width: 1024px) 55vw, 100vw"
+                lqipSrc={projectLqip}
                 tone="photo"
               />
             ) : (

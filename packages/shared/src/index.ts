@@ -1,4 +1,6 @@
 export * from "./constants";
+export * from "./aboutCopy";
+export * from "./servicesCopy";
 export * from "./types";
 export * from "./status";
 export * from "./filters";

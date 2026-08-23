@@ -3,7 +3,7 @@ import { StatusStamp } from "@/components/brand/StatusStamp";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { CtaLink } from "@/components/ui/CtaLink";
-import { listingImageSrc, PLACEHOLDER_LISTING } from "@/lib/images";
+import { listingImageSrc, listingImageSrcSet, listingLqipSrc, PLACEHOLDER_LISTING } from "@/lib/images";
 
 export function FeaturedLead({ property }: { property: Property }) {
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
@@ -20,6 +20,8 @@ export function FeaturedLead({ property }: { property: Property }) {
       <div className="relative aspect-[16/10] bg-oxblood sm:aspect-[16/9] lg:aspect-auto lg:min-h-[420px]">
         <DuotoneImage
           src={hero ? listingImageSrc(hero.publicId, 1600, "gallery") : PLACEHOLDER_LISTING}
+          srcSet={hero ? listingImageSrcSet(hero.publicId, [640, 1080, 1600], "gallery") : undefined}
+          lqipSrc={hero ? listingLqipSrc(hero.publicId, "gallery") : undefined}
           alt={hero?.alt ?? fullAddress(property)}
           sizes="(min-width: 1024px) 50vw, 100vw"
           priority

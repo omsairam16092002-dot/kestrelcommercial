@@ -48,8 +48,8 @@ test("live public site shows Cloudinary portrait when one is uploaded", async (t
 
   assert.match(homeHtml, /res\.cloudinary\.com/);
   assert.doesNotMatch(homeHtml, /photo-1560250097-0b93528c311a/);
-  assert.match(aboutHtml, /res\.cloudinary\.com/);
-  assert.doesNotMatch(aboutHtml, /photo-1560250097-0b93528c311a/);
+  assert.match(aboutHtml, /\/assets\/agent\/jignesh\.jpeg/);
+  assert.match(aboutHtml, /Selected Sales & Leasing Experience/);
 });
 
 test("live desk login page renders", async (t) => {

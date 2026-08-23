@@ -27,9 +27,6 @@ export const PROJECT_MARKETING = {
   ],
 } as const;
 
-/** One-line lead on /about — not the full bio. */
-export const ABOUT_LEAD_STATEMENT =
-  "One desk from first enquiry through settlement — corridor knowledge and spec-first advice, not suburb marketing.";
 
 export const AGENCY = {
   tradingName: "Kestrel Commercial",
