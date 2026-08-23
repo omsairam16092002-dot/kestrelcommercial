@@ -3,7 +3,9 @@
 import { AGENCY } from "@kestrel/shared";
 import { track } from "@/lib/analytics";
 import { agencySmsHref } from "@/lib/contactLinks";
-import { IconMessage, IconWhatsApp } from "@/components/icons";
+import { IconMessage, IconPhone, IconWhatsApp } from "@/components/icons";
+
+const PHONE_COMPACT = AGENCY.phone.replace(/\s/g, "");
 
 const SHARP =
   "btn-sharp inline-flex items-center justify-center gap-2 bg-tan t-mono text-[13px] tabular text-ink hover:bg-oxblood hover:text-paper";
@@ -67,6 +69,8 @@ export function CallButton({
     "menu-action": MENU_ACTION,
   } as const;
 
+  const iconOnly = variant === "header-icon" || variant === "footer-icon";
+
   return (
     <a
       href={AGENCY.phoneHref}
@@ -78,7 +82,16 @@ export function CallButton({
         onAction?.();
       }}
     >
-      {variant === "sticky" ? "Call" : label}
+      {iconOnly ? (
+        <>
+          <IconPhone className="h-4 w-4 shrink-0" />
+          <span className="sr-only">Call</span>
+        </>
+      ) : variant === "sticky" ? (
+        "Call"
+      ) : (
+        label
+      )}
     </a>
   );
 }
@@ -258,16 +271,27 @@ export function ContactDeskSummary({
   );
 }
 
-/** Desktop navbar: tap-to-call number + compact WA/Text icon group. */
+/** Navbar: compact number on top, Call · WA · Text icons below. */
 export function HeaderContactCluster({ page }: { page: string }) {
   return (
-    <div className="hidden items-center gap-2 lg:flex">
-      <CallButton page={page} variant="header-link" />
+    <div className="flex flex-col items-end gap-1">
+      <a
+        href={AGENCY.phoneHref}
+        id={`cta-call-${page}-header`}
+        className="t-mono text-[11px] font-semibold tabular leading-none text-ink/85 transition-colors duration-150 ease-out hover:text-oxblood sm:text-[13px]"
+        aria-label={`Call ${AGENCY.phone}`}
+        onClick={() =>
+          track({ event: "cta_click", id: `cta-call-${page}-header`, page, href: AGENCY.phoneHref })
+        }
+      >
+        {PHONE_COMPACT}
+      </a>
       <div
         className="flex items-center divide-x divide-oxblood/10 rounded-sm border border-oxblood/10 bg-white/80"
         role="group"
-        aria-label="Message the desk"
+        aria-label="Contact the desk"
       >
+        <CallButton page={page} variant="header-icon" />
         <WhatsAppActionButton page={page} variant="header-icon" />
         <TextButton page={page} variant="header-icon" />
       </div>

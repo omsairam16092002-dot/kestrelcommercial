@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { Logo } from "@/components/brand/Logo";
 import { IconChevronDown, IconClose, IconMenu } from "@/components/icons";
-import { HeaderContactCluster, MobileContactPanel } from "@/components/ui/PhoneActionButtons";
+import { HeaderContactCluster } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const NAV = [
@@ -78,7 +78,7 @@ export function Header() {
 
   return (
     <header id="site-header" className="relative sticky top-0 z-50 border-b border-oxblood/10 bg-paper">
-      <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8 lg:py-3.5">
         <Logo onClick={closeMenu} />
 
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
@@ -209,7 +209,6 @@ export function Header() {
             <PrefetchLink href="/sell" className="mx-1 mt-2 btn-sharp bg-tan text-ink" onClick={closeMenu}>
               Sell my property / Request appraisal
             </PrefetchLink>
-            <MobileContactPanel page="header" onNavigate={closeMenu} />
           </nav>
         </div>
       ) : null}
