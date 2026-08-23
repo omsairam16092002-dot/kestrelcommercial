@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PLACEHOLDER_LISTING } from "@/lib/images";
+
+function imageIsReady(img: HTMLImageElement | null) {
+  return Boolean(img?.complete && img.naturalWidth > 0);
+}
 
 /** Native img so listing photography never depends on the Next image optimizer. */
 export function DuotoneImage({
@@ -30,12 +34,14 @@ export function DuotoneImage({
   /** `portrait` keeps facial detail; `photo` is a light oxblood grade only. */
   tone?: "photo" | "portrait";
 }) {
+  const imgRef = useRef<HTMLImageElement>(null);
   const [current, setCurrent] = useState(src);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setCurrent(src);
     setLoaded(false);
+    if (imageIsReady(imgRef.current)) setLoaded(true);
   }, [src]);
 
   const grade =
@@ -56,6 +62,7 @@ export function DuotoneImage({
       ) : null}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={current}
         alt={alt}
         sizes={sizes}
@@ -69,12 +76,16 @@ export function DuotoneImage({
         onLoad={() => setLoaded(true)}
         onError={() => {
           const next = fallbackSrc === undefined ? PLACEHOLDER_LISTING : fallbackSrc;
-          if (!next || current === next) return;
+          if (!next || current === next) {
+            setLoaded(true);
+            return;
+          }
           setCurrent(next);
+          setLoaded(imageIsReady(imgRef.current));
         }}
         className={`absolute inset-0 h-full w-full object-cover ${grade} ${
           objectPosition === "top" ? "object-top" : objectPosition === "bottom" ? "object-bottom" : "object-center"
-        } ${zoom ? "img-zoom" : ""} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}
+        } ${zoom ? "img-zoom" : ""}`}
       />
       {tone === "portrait" ? null : (
         <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.06] mix-blend-multiply" />
