@@ -1,7 +1,7 @@
 "use client";
 
 import { fullAddress, type Property } from "@kestrel/shared";
-import { listingImageSrc } from "@/lib/images";
+import { listingImageOriginal } from "@/lib/images";
 import { useUnlockedDocuments } from "@/lib/documents";
 import { apiUrl } from "@/lib/api";
 
@@ -9,7 +9,7 @@ export function ListingDocuments({ property }: { property: Property }) {
   const leadId = useUnlockedDocuments(property.slug);
   const unlocked = Boolean(leadId);
   const floorplanSrc = property.floorplanPublicId
-    ? listingImageSrc(property.floorplanPublicId, unlocked ? 1800 : 900)
+    ? listingImageOriginal(property.floorplanPublicId, unlocked ? 1800 : 900)
     : null;
 
   return (

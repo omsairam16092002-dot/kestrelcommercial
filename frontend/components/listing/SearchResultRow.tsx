@@ -22,8 +22,8 @@ export function SearchResultRow({
 }) {
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
   const href = `/listing/${property.slug}`;
-  const imageSrc = hero ? listingImageSrc(hero.publicId, 640) : listingPlaceholderSrc(property, 640);
-  const imageSrcSet = hero ? listingImageSrcSet(hero.publicId, [320, 640, 800]) : undefined;
+  const imageSrc = hero ? listingImageSrc(hero.publicId, 640, "card") : listingPlaceholderSrc(property, 640);
+  const imageSrcSet = hero ? listingImageSrcSet(hero.publicId, [320, 640, 800], "card") : undefined;
 
   return (
     <article

@@ -19,7 +19,7 @@ export function FeaturedLead({ property }: { property: Property }) {
     <article className="overflow-hidden bg-ink text-paper lg:grid lg:grid-cols-2">
       <div className="relative aspect-[16/10] bg-oxblood sm:aspect-[16/9] lg:aspect-auto lg:min-h-[420px]">
         <DuotoneImage
-          src={hero ? listingImageSrc(hero.publicId, 1600) : PLACEHOLDER_LISTING}
+          src={hero ? listingImageSrc(hero.publicId, 1600, "gallery") : PLACEHOLDER_LISTING}
           alt={hero?.alt ?? fullAddress(property)}
           sizes="(min-width: 1024px) 50vw, 100vw"
           priority

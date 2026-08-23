@@ -18,8 +18,8 @@ export function ListingCard({
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
   const visual = showcaseImage(property, imageMode);
   const href = `/listing/${property.slug}`;
-  const imageSrc = visual?.src ?? (hero ? listingImageSrc(hero.publicId, 1080) : listingPlaceholderSrc(property, 1080));
-  const imageSrcSet = hero && !visual?.src ? listingImageSrcSet(hero.publicId, [640, 1080, 1920]) : undefined;
+  const imageSrc = visual?.src ?? (hero ? listingImageSrc(hero.publicId, 1080, "card") : listingPlaceholderSrc(property, 1080));
+  const imageSrcSet = hero && !visual?.src ? listingImageSrcSet(hero.publicId, [640, 1080, 1920], "card") : undefined;
   const imageAlt = visual?.alt ?? hero?.alt ?? fullAddress(property);
 
   return (

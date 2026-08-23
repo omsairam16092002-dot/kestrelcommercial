@@ -48,7 +48,7 @@ export function showcaseImage(
       : heroImage(property) ?? realImages[0];
   if (!image) return null;
   return {
-    src: listingImageSrc(image.publicId, 2400),
+    src: listingImageSrc(image.publicId, 2400, "flagship"),
     alt: image.alt ?? fullAddress(property),
   };
 }

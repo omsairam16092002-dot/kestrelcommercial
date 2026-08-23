@@ -4,22 +4,26 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fullAddress, galleryImages, type Property } from "@kestrel/shared";
 import { PhotoCut } from "@/components/brand/PhotoCut";
 import { IconArrowRight } from "@/components/icons";
+import { ListingLightbox } from "@/components/listing/ListingLightbox";
 import { listingImageSrc, listingImageSrcSet, listingPlaceholderSrc } from "@/lib/images";
 
 const GALLERY_WIDTH = 1600;
 const THUMB_WIDTH = 480;
 
 function gallerySrc(property: Property, publicId?: string) {
-  return publicId ? listingImageSrc(publicId, GALLERY_WIDTH) : listingPlaceholderSrc(property, GALLERY_WIDTH);
+  return publicId
+    ? listingImageSrc(publicId, GALLERY_WIDTH, "gallery")
+    : listingPlaceholderSrc(property, GALLERY_WIDTH);
 }
 
 function gallerySrcSet(publicId?: string) {
-  return publicId ? listingImageSrcSet(publicId) : undefined;
+  return publicId ? listingImageSrcSet(publicId, [640, 1080, 1920], "gallery") : undefined;
 }
 
 export function ListingGallery({ property }: { property: Property }) {
   const images = useMemo(() => galleryImages(property.images), [property.images]);
   const [active, setActive] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const current = images[active];
   const startX = useRef<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -60,14 +64,18 @@ export function ListingGallery({ property }: { property: Property }) {
   }, [images.length]);
 
   useEffect(() => {
+    setLightboxOpen(false);
+  }, [property.slug, active]);
+
+  useEffect(() => {
     if (images.length < 2) return;
     const neighbors = [images[(active + 1) % images.length], images[(active - 1 + images.length) % images.length]];
     const probes = neighbors.filter(Boolean).map((img) => {
       const probe = new Image();
       probe.decoding = "async";
-      probe.srcset = listingImageSrcSet(img.publicId);
+      probe.srcset = listingImageSrcSet(img.publicId, [640, 1080, 1920], "gallery");
       probe.sizes = "100vw";
-      probe.src = listingImageSrc(img.publicId, GALLERY_WIDTH);
+      probe.src = listingImageSrc(img.publicId, GALLERY_WIDTH, "gallery");
       return probe;
     });
     return () => {
@@ -79,18 +87,11 @@ export function ListingGallery({ property }: { property: Property }) {
 
   const src = gallerySrc(property, current?.publicId);
   const srcSet = gallerySrcSet(current?.publicId);
-  const frameW = current?.width ?? 1600;
-  const frameH = current?.height ?? 1067;
 
   return (
     <div ref={rootRef} tabIndex={0} role="region" aria-label={`Photos of ${address}`}>
       <div
-        className="relative mx-auto w-full overflow-hidden bg-oxblood touch-pan-y"
-        style={{
-          aspectRatio: `${frameW} / ${frameH}`,
-          maxHeight: "min(78svh, 920px)",
-          minHeight: "14rem",
-        }}
+        className="relative mx-auto aspect-video w-full max-h-[min(78svh,920px)] min-h-[14rem] overflow-hidden bg-oxblood touch-pan-y"
         onTouchStart={(e) => {
           startX.current = e.touches[0]?.clientX ?? null;
         }}
@@ -108,9 +109,17 @@ export function ListingGallery({ property }: { property: Property }) {
           sizes="100vw"
           alt={current?.alt ?? address}
           priority={active === 0}
-          fit="contain"
         />
         <div className="pointer-events-none absolute inset-0 bg-oxblood/[0.05] mix-blend-multiply" />
+        {current?.publicId ? (
+          <button
+            type="button"
+            className="absolute bottom-4 left-4 z-10 bg-paper/95 px-3 py-2 text-xs font-medium uppercase tracking-wide text-oxblood transition-colors hover:bg-paper md:bottom-6 md:left-6"
+            onClick={() => setLightboxOpen(true)}
+          >
+            View full image
+          </button>
+        ) : null}
         {images.length > 1 ? (
           <>
             <button
@@ -137,6 +146,14 @@ export function ListingGallery({ property }: { property: Property }) {
             : "Photos to follow"}
         </p>
       </div>
+      {current?.publicId ? (
+        <ListingLightbox
+          publicId={current.publicId}
+          alt={current.alt ?? address}
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      ) : null}
       {images.length > 1 ? (
         <div className="mx-auto mt-3 flex max-w-[1240px] snap-x gap-2 overflow-x-auto px-4 pb-1 sm:px-6 lg:px-8">
           {images.map((img, i) => (
@@ -146,12 +163,16 @@ export function ListingGallery({ property }: { property: Property }) {
               onClick={() => setActive(i)}
               aria-label={`${address}, photo ${i + 1} of ${images.length}`}
               aria-current={i === active}
-              className={`relative h-24 w-36 shrink-0 snap-start overflow-hidden sm:h-28 sm:w-44 ${
+              className={`relative aspect-[3/2] h-24 w-36 shrink-0 snap-start overflow-hidden sm:h-28 sm:w-44 ${
                 i === active ? "ring-2 ring-oxblood ring-offset-2 ring-offset-paper" : "opacity-70 hover:opacity-100"
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={listingImageSrc(img.publicId, THUMB_WIDTH)} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <img
+                src={listingImageSrc(img.publicId, THUMB_WIDTH, "thumb")}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>

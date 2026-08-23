@@ -10,19 +10,54 @@ export function isLocalImageId(publicId?: string | null): boolean {
   return Boolean(publicId?.startsWith("local:"));
 }
 
+export type ListingImageContext = "gallery" | "thumb" | "card" | "flagship" | "original";
+
+const CONTEXT_PRESETS: Record<
+  ListingImageContext,
+  { crop: string; gravity?: string; aspectRatio?: string }
+> = {
+  gallery: { crop: "fill", gravity: "auto", aspectRatio: "16:9" },
+  thumb: { crop: "fill", gravity: "auto", aspectRatio: "3:2" },
+  card: { crop: "fill", gravity: "auto", aspectRatio: "4:3" },
+  flagship: { crop: "fill", gravity: "auto", aspectRatio: "16:9" },
+  original: { crop: "limit" },
+};
+
 /**
  * Cloudinary URLs only. Backend never proxies image bytes.
- * Use f_auto,q_auto:good,c_limit,dpr_auto on every delivery URL.
+ * Default delivery uses c_limit; listing contexts use c_fill,g_auto with fixed aspect ratios.
  */
 export function cloudinaryUrl(
   cloudName: string,
   publicId: string,
-  options?: { width?: number; height?: number; crop?: string },
+  options?: {
+    width?: number;
+    height?: number;
+    crop?: string;
+    gravity?: string;
+    aspectRatio?: string;
+    context?: ListingImageContext;
+  },
 ): string {
-  const transforms = ["f_auto", "q_auto:good", "c_limit", "dpr_auto"];
-  if (options?.width) transforms.push(`w_${options.width}`);
-  if (options?.height) transforms.push(`h_${options.height}`);
-  if (options?.crop) transforms.push(`c_${options.crop}`);
+  const preset = options?.context ? CONTEXT_PRESETS[options.context] : null;
+  const crop = options?.crop ?? preset?.crop ?? "limit";
+  const gravity = options?.gravity ?? preset?.gravity;
+  const aspectRatio = options?.aspectRatio ?? preset?.aspectRatio;
+  const isFill = crop === "fill";
+
+  const transforms = ["f_auto", "q_auto:good"];
+  if (isFill) {
+    transforms.push("dpr_auto", `c_${crop}`);
+    if (gravity) transforms.push(`g_${gravity}`);
+    if (aspectRatio) transforms.push(`ar_${aspectRatio}`);
+    if (options?.width) transforms.push(`w_${options.width}`);
+    if (options?.height) transforms.push(`h_${options.height}`);
+  } else {
+    transforms.push(`c_${crop}`, "dpr_auto");
+    if (options?.width) transforms.push(`w_${options.width}`);
+    if (options?.height) transforms.push(`h_${options.height}`);
+  }
+
   return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms.join(",")}/${publicId}`;
 }
 
@@ -33,7 +68,7 @@ const STOCK_LISTING =
 export function resolveImageSrc(
   publicId: string,
   cloudName?: string,
-  options?: { width?: number; height?: number },
+  options?: { width?: number; height?: number; context?: ListingImageContext },
 ): string {
   if (publicId.startsWith("local:")) {
     const rel = publicId.slice("local:".length).replace(/^\/+/, "");
@@ -51,7 +86,11 @@ export function resolveImageSrc(
     return publicId;
   }
   if (cloudName) {
-    return cloudinaryUrl(cloudName, publicId, options);
+    return cloudinaryUrl(cloudName, publicId, {
+      width: options?.width,
+      height: options?.height,
+      context: options?.context,
+    });
   }
   return "";
 }

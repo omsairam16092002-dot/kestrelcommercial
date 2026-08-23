@@ -27,7 +27,7 @@ function statusText(property: Property) {
 }
 
 function imageUrl(publicId: string) {
-  return resolveImageSrc(publicId, env.cloudinary.cloudName, { width: 1600 });
+  return resolveImageSrc(publicId, env.cloudinary.cloudName, { width: 1600, context: "gallery" });
 }
 
 export function propertyToReaxml(property: Property, agent?: Agent | null) {

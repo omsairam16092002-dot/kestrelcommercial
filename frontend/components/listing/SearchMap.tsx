@@ -104,7 +104,7 @@ function SelectableMarker({
 }) {
   const markerRef = useRef<L.Marker | null>(null);
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
-  const src = hero ? listingImageSrc(hero.publicId, 640) : listingPlaceholderSrc(property, 640);
+  const src = hero ? listingImageSrc(hero.publicId, 640, "card") : listingPlaceholderSrc(property, 640);
   const pair = usableLatLng(property);
 
   useEffect(() => {

@@ -19,7 +19,7 @@ function accommodationType(propertyType: Property["propertyType"]) {
 
 export function ListingJsonLd({ property }: { property: Property }) {
   const hero = property.images.find((img) => img.isHero) ?? property.images[0];
-  const image = hero ? listingImageSrc(hero.publicId, 1200) : listingPlaceholderSrc(property, 1200);
+  const image = hero ? listingImageSrc(hero.publicId, 1200, "gallery") : listingPlaceholderSrc(property, 1200);
   const origin = siteOrigin();
   const url = `${origin}/listing/${property.slug}`;
   const forSale = property.transactionSide === "sale";

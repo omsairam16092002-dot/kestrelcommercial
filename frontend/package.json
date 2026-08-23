@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test test/portrait.test.ts test/seo.test.ts test/api.listing.test.ts test/about.test.ts"
+    "test": "tsx --test test/portrait.test.ts test/seo.test.ts test/api.listing.test.ts test/about.test.ts test/images.context.test.ts"
   },
   "dependencies": {
     "@kestrel/shared": "*",

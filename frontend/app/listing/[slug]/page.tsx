@@ -37,7 +37,7 @@ export async function generateMetadata({
   const title = listingTitle(property);
   const description = property.description.replace(/\s+/g, " ").slice(0, 160);
   const hero = property.images.find((img) => img.isHero) ?? property.images[0];
-  const ogImage = hero ? listingImageSrc(hero.publicId, 1200) : listingPlaceholderSrc(property, 1200);
+  const ogImage = hero ? listingImageSrc(hero.publicId, 1200, "gallery") : listingPlaceholderSrc(property, 1200);
   const imageAlt = hero?.alt ?? fullAddress(property);
   return {
     title,

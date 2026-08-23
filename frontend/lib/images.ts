@@ -1,4 +1,9 @@
-import { isStockImageId, resolveImageSrc, type Property } from "@kestrel/shared";
+import {
+  isStockImageId,
+  resolveImageSrc,
+  type ListingImageContext,
+  type Property,
+} from "@kestrel/shared";
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dne4fejan";
 
@@ -17,14 +22,27 @@ function optimizedLocalSrc(path: string, width: number) {
 }
 
 /** Request a bounded width so gallery/list photos are not original 8–20MB files. */
-export function listingImageSrc(publicId: string, width = 1200) {
-  const src = resolveImageSrc(publicId, CLOUD, { width });
+export function listingImageSrc(
+  publicId: string,
+  width = 1200,
+  context: ListingImageContext = "card",
+) {
+  const src = resolveImageSrc(publicId, CLOUD, { width, context });
   if (src.startsWith("/")) return optimizedLocalSrc(src, width);
   return src;
 }
 
-export function listingImageSrcSet(publicId: string, widths = [640, 1080, 1920]) {
-  return widths.map((width) => `${listingImageSrc(publicId, width)} ${width}w`).join(", ");
+export function listingImageSrcSet(
+  publicId: string,
+  widths = [640, 1080, 1920],
+  context: ListingImageContext = "card",
+) {
+  return widths.map((width) => `${listingImageSrc(publicId, width, context)} ${width}w`).join(", ");
+}
+
+/** Uncropped delivery for lightbox and floorplans. */
+export function listingImageOriginal(publicId: string, width = 2400) {
+  return listingImageSrc(publicId, width, "original");
 }
 
 const HERO_ID = "photo-1586528116311-ad8dd3c8310d";
@@ -64,7 +82,7 @@ export function portraitSrc(publicId: string, width = 1400) {
     const id = publicId.startsWith("unsplash:") ? publicId.slice("unsplash:".length) : "photo-1560250097-0b93528c311a";
     return `https://images.unsplash.com/${id}?auto=format&fit=crop&crop=faces,top&w=${width}&q=80`;
   }
-  return listingImageSrc(publicId, width);
+  return listingImageSrc(publicId, width, "original");
 }
 
 export const AGENT_PORTRAIT = "/assets/agent/jignesh.jpeg";

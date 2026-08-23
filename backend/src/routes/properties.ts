@@ -276,7 +276,10 @@ propertiesRouter.get("/:slug/floorplan", async (req, res, next) => {
     if (!property.floorplanPublicId) {
       throw new HttpError(404, "No floorplan on file. Request one via inspection.");
     }
-    const url = resolveImageSrc(property.floorplanPublicId, env.cloudinary.cloudName, { width: 2400 });
+    const url = resolveImageSrc(property.floorplanPublicId, env.cloudinary.cloudName, {
+      width: 2400,
+      context: "original",
+    });
     res.redirect(url);
   } catch (err) {
     next(err);

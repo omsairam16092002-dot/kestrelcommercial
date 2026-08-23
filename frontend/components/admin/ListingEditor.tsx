@@ -390,7 +390,7 @@ export function ListingEditor({
           {images.map((img, i) => (
             <li key={`${img.publicId}-${i}`} className="border border-oxblood/10 bg-paper p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={listingImageSrc(img.publicId, 600)} alt={img.alt ?? ""} className="aspect-[4/3] w-full object-cover" />
+              <img src={listingImageSrc(img.publicId, 600, "original")} alt={img.alt ?? ""} className="aspect-[4/3] w-full object-cover" />
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"

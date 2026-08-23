@@ -29,7 +29,7 @@ export function FlagshipCaseStudy({
       }`}
     >
       <DuotoneImage
-        src={visual?.src ?? (property.images[0] ? listingImageSrc(property.images[0].publicId, 2400) : listingPlaceholderSrc(property, 2400))}
+        src={visual?.src ?? (property.images[0] ? listingImageSrc(property.images[0].publicId, 2400, "flagship") : listingPlaceholderSrc(property, 2400))}
         alt={visual?.alt ?? fullAddress(property)}
         sizes="100vw"
         priority={priority}
