@@ -11,14 +11,14 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Call, text or WhatsApp the Kestrel Commercial desk. Melbourne west.",
+  description: "Call, WA or text the Kestrel Commercial desk. Melbourne west.",
 };
 
 const CONTACT_REASONS: Reason[] = [
   {
     n: "01",
-    t: "Call, text or WhatsApp",
-    d: `${AGENCY.phone} — same number for voice, SMS and WhatsApp.`,
+    t: "Call, WA or text",
+    d: `${AGENCY.phone} — same Australian mobile for voice, WhatsApp and SMS.`,
     Icon: IconWhatsApp,
   },
   {
@@ -40,8 +40,8 @@ export default function ContactPage() {
     <div className="bg-paper">
       <SectionHeader
         kicker="Contact"
-        title="Call, text or WhatsApp the desk."
-        description="Selling, leasing, buying, SMSF, management. Same number for all three."
+        title="Call, WA or text the desk."
+        description="Selling, leasing, buying, SMSF, management. One Australian number — three ways to reach us."
         page="contact"
       />
 
@@ -60,19 +60,19 @@ export default function ContactPage() {
                 ),
               },
               {
-                k: "Text",
-                icon: IconMessage,
+                k: "WA",
+                icon: IconWhatsApp,
                 v: (
-                  <a href={agencySmsHref()} className="t-mono hover:text-tan">
+                  <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="t-mono hover:text-tan">
                     {AGENCY.phone}
                   </a>
                 ),
               },
               {
-                k: "WhatsApp",
-                icon: IconWhatsApp,
+                k: "Text",
+                icon: IconMessage,
                 v: (
-                  <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="t-mono hover:text-tan">
+                  <a href={agencySmsHref()} className="t-mono hover:text-tan">
                     {AGENCY.phone}
                   </a>
                 ),
@@ -103,7 +103,7 @@ export default function ContactPage() {
 
           <div id="enquire" className="premium-panel bg-paper p-6 text-ink md:col-span-8 md:p-9">
             <h2 className="t-h2 text-ink">If you would rather write</h2>
-            <p className="t-body mt-2 text-mauve">One business day. Sooner if you call, text or WhatsApp.</p>
+            <p className="t-body mt-2 text-mauve">One business day. Sooner if you call, WA or text.</p>
             <div className="mt-6">
               <EnquiryForm source="contact" defaultTopic="other" submitLabel="Enquire" formId="form-contact" />
             </div>

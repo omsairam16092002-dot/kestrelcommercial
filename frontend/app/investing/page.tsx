@@ -97,7 +97,7 @@ export default function InvestingPage() {
             Questions on SMSF or AML? <em className="font-serif font-normal italic text-oxblood">Ask early.</em>
           </>
         }
-        lede="Call, text or WhatsApp the desk. Or write an enquiry."
+        lede="Call, WA or text the desk. Or write an enquiry."
         phoneActions
       />
 

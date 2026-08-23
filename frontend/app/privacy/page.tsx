@@ -45,6 +45,14 @@ export default function PrivacyPage() {
             </a>
             .
           </p>
+          <div className="border-t border-oxblood/10 pt-6">
+            <h2 className="t-h3 text-ink">Acceptance of Use</h2>
+            <p className="mt-3">
+              By accessing this website, you indicate your acceptance of this Privacy Policy. We reserve
+              the right, at our discretion, to amend, modify, add or remove portions from this Privacy
+              Policy from time to time.
+            </p>
+          </div>
         </div>
       </Container>
     </div>

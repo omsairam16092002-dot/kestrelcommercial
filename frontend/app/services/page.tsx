@@ -72,7 +72,7 @@ export default async function ServicesPage() {
             Selling? Start with an <em className="font-serif font-normal italic text-oxblood">appraisal</em>.
           </>
         }
-        lede="Call, text or WhatsApp the desk. Or request a priced note."
+        lede="Call, WA or text the desk. Or request a priced note."
         phoneActions
       />
     </div>

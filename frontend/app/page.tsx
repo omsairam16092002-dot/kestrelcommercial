@@ -49,7 +49,9 @@ export default async function HomePage() {
       <section className="relative overflow-hidden bg-oxblood text-paper">
         <HeroVideo alt="Drone footage over Footscray, Melbourne west" posterSrc={heroBleed?.src} />
         <Container className="relative z-10 flex min-h-[100svh] flex-col justify-end pb-20 pt-28 sm:pb-24 md:pb-28">
-          <p className="hero-enter t-caption text-tan">Kestrel Commercial · Melbourne west</p>
+          <p className="hero-enter text-base font-medium uppercase tracking-[0.14em] text-tan sm:text-lg md:text-xl">
+            Kestrel Commercial · Melbourne west
+          </p>
           <h1 className="hero-enter t-display mt-4 max-w-4xl uppercase tracking-[-0.02em] text-paper sm:mt-5">
             Buildings that{" "}
             <em className="font-serif font-normal italic normal-case tracking-normal text-tan">work</em>{" "}
@@ -131,7 +133,7 @@ export default async function HomePage() {
             <div className="border-t-2 border-oxblood bg-white/50 px-6 py-12 md:px-10">
               <p className="t-h3 text-ink">No live listings on the public grid</p>
               <p className="t-body mt-3 max-w-xl text-ink/75">
-                Off-market and quietly marketed stock still moves through this desk. Call or text{" "}
+                Off-market and quietly marketed stock still moves through this desk. Call, WA or text{" "}
                 <a href={AGENCY.phoneHref} className="font-semibold text-oxblood hover:underline">
                   {AGENCY.phone}
                 </a>{" "}

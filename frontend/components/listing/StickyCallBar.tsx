@@ -7,7 +7,7 @@ export function StickyCallBar({
   page,
   listing,
   secondaryHref = "/contact#enquire",
-  secondaryLabel = "Request info",
+  secondaryLabel = "Enquire",
 }: {
   page: string;
   listing?: string;
@@ -22,19 +22,19 @@ export function StickyCallBar({
     >
       <div className="border-t-2 border-tan bg-paper pb-[env(safe-area-inset-bottom)]">
         <div className="grid grid-cols-4">
+          <CallButton page={page} variant="sticky" listing={listing} className="text-[10px] sm:text-[11px]" />
+          <WhatsAppActionButton page={page} variant="sticky" listing={listing} />
+          <TextButton page={page} variant="sticky" listing={listing} />
           <a
             href={secondaryHref}
             id={`cta-enquire-${page}`}
-            className="flex min-h-[56px] items-center justify-center border-r border-oxblood/15 px-1.5 text-[11px] font-semibold tracking-[0.03em] text-oxblood transition-colors duration-150 ease-out hover:bg-white active:bg-oxblood/5 sm:px-2 sm:text-[12px]"
+            className="flex min-h-[56px] items-center justify-center px-1.5 text-[11px] font-semibold tracking-[0.03em] text-oxblood transition-colors duration-150 ease-out hover:bg-white active:bg-oxblood/5 sm:px-2 sm:text-[12px]"
             onClick={() =>
               track({ event: "cta_click", id: `cta-enquire-${page}`, page, listing, href: secondaryHref })
             }
           >
             {secondaryLabel}
           </a>
-          <CallButton page={page} variant="sticky" listing={listing} />
-          <TextButton page={page} variant="sticky" listing={listing} />
-          <WhatsAppActionButton page={page} variant="sticky" listing={listing} label="WA" />
         </div>
       </div>
     </nav>

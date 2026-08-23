@@ -96,7 +96,7 @@ export async function SearchPage({
       <DualCtaBand
         page={page}
         kicker="Quiet grid?"
-        title="Call, text or WhatsApp the desk. Half the west never hits a portal."
+        title="Call, WA or text the desk. Half the west never hits a portal."
         lede="Or look at recent evidence first."
         phoneActions
       />

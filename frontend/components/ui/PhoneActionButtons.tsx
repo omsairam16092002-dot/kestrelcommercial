@@ -11,7 +11,7 @@ const GHOST = "inline-flex items-center gap-1.5 text-sm font-semibold transition
 const HEADER =
   "hidden items-center gap-1.5 rounded-sm border border-oxblood/15 px-3 py-2 text-[12px] font-semibold tracking-[0.04em] transition-colors duration-150 ease-out lg:inline-flex";
 const STICKY =
-  "flex min-h-[56px] items-center justify-center gap-2 px-2 text-[12px] font-semibold tracking-[0.04em] transition-colors duration-150 ease-out sm:px-3 sm:text-[13px]";
+  "flex min-h-[56px] items-center justify-center gap-1.5 px-2 text-[12px] font-semibold tracking-[0.03em] transition-colors duration-150 ease-out sm:px-3 sm:text-[13px]";
 const FOOTER_ICON =
   "inline-flex h-10 w-10 items-center justify-center border border-paper/15 bg-paper/[0.03] text-tan transition-colors duration-150 ease-out hover:border-tan/40 hover:text-paper";
 
@@ -27,6 +27,7 @@ function listingWhatsAppHref(listing?: string) {
   return text ? `${AGENCY.whatsappHref}?text=${encodeURIComponent(text)}` : AGENCY.whatsappHref;
 }
 
+/** AU desk contact: Call (number) · WA · Text — same 0431 number. */
 export function CallButton({
   page,
   variant = "sharp",
@@ -61,47 +62,11 @@ export function CallButton({
   );
 }
 
-export function TextButton({
-  page,
-  variant = "sharp",
-  className,
-  label = "Text",
-  listing,
-}: {
-  page: string;
-  variant?: Variant;
-  className?: string;
-  label?: string;
-  listing?: string;
-}) {
-  const href = agencySmsHref(listingMessage(listing));
-  const styles = {
-    sharp: SHARP,
-    ghost: `${GHOST} text-paper/85 hover:text-tan`,
-    header: `${HEADER} border-tan/40 text-ink/80 hover:border-tan hover:text-oxblood`,
-    sticky: `${STICKY} border-r border-oxblood/15 bg-tan text-ink hover:bg-oxblood hover:text-paper active:bg-ink active:text-paper`,
-    "footer-icon": FOOTER_ICON,
-  } as const;
-
-  return (
-    <a
-      href={href}
-      id={`cta-text-${page}`}
-      className={className ? `${styles[variant]} ${className}` : styles[variant]}
-      aria-label={`Text ${AGENCY.phone}`}
-      onClick={() => track({ event: "cta_click", id: `cta-text-${page}`, page, listing, href })}
-    >
-      <IconMessage className="h-4 w-4 shrink-0" />
-      {variant === "footer-icon" ? <span className="sr-only">Text</span> : label}
-    </a>
-  );
-}
-
 export function WhatsAppActionButton({
   page,
   variant = "sharp",
   className,
-  label = "WhatsApp",
+  label = "WA",
   listing,
 }: {
   page: string;
@@ -115,7 +80,7 @@ export function WhatsAppActionButton({
     sharp: SHARP,
     ghost: `${GHOST} text-paper/85 hover:text-tan`,
     header: `${HEADER} border-oxblood/20 text-ink/80 hover:border-oxblood/40 hover:text-oxblood`,
-    sticky: `${STICKY} bg-oxblood text-paper hover:bg-ink active:bg-ink/90`,
+    sticky: `${STICKY} border-r border-oxblood/15 bg-tan text-ink hover:bg-oxblood hover:text-paper active:bg-ink active:text-paper`,
     "footer-icon": FOOTER_ICON,
   } as const;
 
@@ -135,24 +100,58 @@ export function WhatsAppActionButton({
   );
 }
 
+export function TextButton({
+  page,
+  variant = "sharp",
+  className,
+  label = "Text",
+  listing,
+}: {
+  page: string;
+  variant?: Variant;
+  className?: string;
+  label?: string;
+  listing?: string;
+}) {
+  const href = agencySmsHref(listingMessage(listing));
+  const styles = {
+    sharp: SHARP,
+    ghost: `${GHOST} text-paper/85 hover:text-tan`,
+    header: `${HEADER} border-tan/40 text-ink/80 hover:border-tan hover:text-oxblood`,
+    sticky: `${STICKY} bg-oxblood text-paper hover:bg-ink active:bg-ink/90`,
+    "footer-icon": FOOTER_ICON,
+  } as const;
+
+  return (
+    <a
+      href={href}
+      id={`cta-text-${page}`}
+      className={className ? `${styles[variant]} ${className}` : styles[variant]}
+      aria-label={`Text ${AGENCY.phone}`}
+      onClick={() => track({ event: "cta_click", id: `cta-text-${page}`, page, listing, href })}
+    >
+      <IconMessage className="h-4 w-4 shrink-0" />
+      {variant === "footer-icon" ? <span className="sr-only">Text</span> : label}
+    </a>
+  );
+}
+
 export function PhoneActionButtons({
   page,
   variant = "sharp",
   className = "flex flex-wrap items-center gap-2 sm:gap-3",
   listing,
-  showWhatsApp = true,
 }: {
   page: string;
   variant?: Variant;
   className?: string;
   listing?: string;
-  showWhatsApp?: boolean;
 }) {
   return (
     <div className={className}>
       <CallButton page={page} variant={variant} listing={listing} />
+      <WhatsAppActionButton page={page} variant={variant} listing={listing} />
       <TextButton page={page} variant={variant} listing={listing} />
-      {showWhatsApp ? <WhatsAppActionButton page={page} variant={variant} listing={listing} /> : null}
     </div>
   );
 }

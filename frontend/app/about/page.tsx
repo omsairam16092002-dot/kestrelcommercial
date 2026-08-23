@@ -31,7 +31,7 @@ export default async function AboutPage() {
             Talk to the desk. <em className="font-serif font-normal italic text-oxblood">Direct.</em>
           </>
         }
-        lede="Call, text or WhatsApp. Or write an enquiry."
+        lede="Call, WA or text. Or write an enquiry."
         phoneActions
       />
     </div>

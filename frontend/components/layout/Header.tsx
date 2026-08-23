@@ -129,8 +129,8 @@ export function Header() {
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <CallButton page="header" variant="header" />
-          <TextButton page="header" variant="header" />
           <WhatsAppActionButton page="header" variant="header" />
+          <TextButton page="header" variant="header" />
           <PrefetchLink
             href="/sell"
             className="hidden lg:inline-flex items-center bg-tan px-4 py-2.5 text-[11px] font-semibold normal-case tracking-[0.02em] text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper active:scale-[0.985]"
@@ -218,11 +218,11 @@ export function Header() {
                 page="header-mobile"
                 className="btn-sharp inline-flex items-center justify-center t-mono tabular border border-oxblood text-oxblood"
               />
-              <TextButton
+              <WhatsAppActionButton
                 page="header-mobile"
                 className="btn-sharp inline-flex items-center justify-center gap-2 bg-tan text-ink"
               />
-              <WhatsAppActionButton
+              <TextButton
                 page="header-mobile"
                 className="btn-sharp inline-flex items-center justify-center gap-2 border border-oxblood text-oxblood"
               />
