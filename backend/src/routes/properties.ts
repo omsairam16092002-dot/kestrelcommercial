@@ -20,6 +20,7 @@ import { EnquiryModel } from "../models/Enquiry";
 import { HttpError } from "../middleware/errorHandler";
 import { serializeProperty, serializeAgent } from "../utils/serialize";
 import { enrichGalleryImages } from "../services/galleryImageCache";
+import { galleryImages } from "@kestrel/shared";
 import { optionalAuth, requireAuth } from "../middleware/requireAuth";
 import { publicCache } from "../middleware/publicCache";
 import { getPropertyListCache, setPropertyListCache, invalidatePropertyListCache } from "../services/propertyCache";
@@ -29,7 +30,12 @@ import { env } from "../config/env";
 import { logActivity } from "../services/activity";
 import { propertiesToReaxml, propertyToReaxml } from "../services/reaxml";
 
-async function serializePublicProperty(doc: Record<string, unknown>): Promise<Property> {
+function serializePublicProperty(doc: Record<string, unknown>): Property {
+  const property = serializeProperty(doc);
+  return { ...property, images: galleryImages(property.images) };
+}
+
+async function serializePublicPropertyDetail(doc: Record<string, unknown>): Promise<Property> {
   const property = serializeProperty(doc);
   return { ...property, images: await enrichGalleryImages(property.images) };
 }
@@ -159,7 +165,7 @@ propertiesRouter.get("/", optionalAuth, publicCache(), async (req, res, next) =>
     const docs = await listQuery.lean();
     let serialized = req.user
       ? docs.map((d) => serializeProperty(d as Record<string, unknown>))
-      : await Promise.all(docs.map((d) => serializePublicProperty(d as Record<string, unknown>)));
+      : docs.map((d) => serializePublicProperty(d as Record<string, unknown>));
     serialized = filterProperties(serialized, filters);
     if (req.user && (req.query.withLeadCounts === "1" || req.query.withLeadCounts === "true")) {
       const slugs = serialized.map((p) => p.slug);
@@ -302,7 +308,9 @@ propertiesRouter.get("/:slug", publicCache(), async (req, res, next) => {
 
     const doc = await PropertyModel.findOne({ slug: req.params.slug, archived: { $ne: true } }).lean();
     if (!doc) throw new HttpError(404, "Listing not found");
-    const property = await serializePublicProperty(doc as Record<string, unknown>);
+    const property = req.user
+      ? serializeProperty(doc as Record<string, unknown>)
+      : await serializePublicPropertyDetail(doc as Record<string, unknown>);
     const agentDoc = await AgentModel.findOne({
       licenceNumber: property.agentLicenceNumber,
     }).lean();

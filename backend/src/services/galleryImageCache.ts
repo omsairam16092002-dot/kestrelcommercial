@@ -3,21 +3,30 @@ import { galleryImages, isMarketingGalleryImage, type PropertyImage } from "@kes
 
 const CLOUD = env.cloudinary.cloudName || "dne4fejan";
 const dimCache = new Map<string, { width: number; height: number }>();
+const FETCH_MS = 4000;
 
 async function cloudinaryDimensions(publicId: string): Promise<{ width: number; height: number } | null> {
   if (publicId.startsWith("local:") || publicId.startsWith("unsplash:")) return null;
   const cached = dimCache.get(publicId);
   if (cached) return cached;
   const url = `https://res.cloudinary.com/${CLOUD}/image/upload/fl_getinfo/${publicId}`;
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  const body = (await res.json()) as { input?: { width?: number; height?: number } };
-  const width = body.input?.width;
-  const height = body.input?.height;
-  if (!width || !height) return null;
-  const dims = { width, height };
-  dimCache.set(publicId, dims);
-  return dims;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_MS);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { input?: { width?: number; height?: number } };
+    const width = body.input?.width;
+    const height = body.input?.height;
+    if (!width || !height) return null;
+    const dims = { width, height };
+    dimCache.set(publicId, dims);
+    return dims;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function enrichGalleryImages(images: PropertyImage[]): Promise<PropertyImage[]> {
