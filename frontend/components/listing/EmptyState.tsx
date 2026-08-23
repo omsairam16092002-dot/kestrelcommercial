@@ -1,12 +1,12 @@
-import { AGENCY } from "@kestrel/shared";
 import { CtaLink } from "@/components/ui/CtaLink";
-import { IconSearch, IconWhatsApp } from "@/components/icons";
+import { IconSearch } from "@/components/icons";
+import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
 
 export function EmptyState({
   side,
   page = side === "lease" ? "lease" : "buy",
   resetHref = side === "lease" ? "/lease" : "/buy",
-  title = "Widen the span. Or WhatsApp the desk.",
+  title = "Widen the span. Or call the desk.",
   body = "Nothing on the grid clears that combination of floor, span, zone and price. Most occupiers over-specify height — drop the span first.",
 }: {
   side: "sale" | "lease";
@@ -23,15 +23,11 @@ export function EmptyState({
       <p className="t-caption mt-5 text-oxblood">No match on that spec</p>
       <h2 className="t-h2 mt-3 text-ink">{title}</h2>
       <p className="t-body mx-auto mt-4 max-w-lg text-ink/75">{body}</p>
-      <CtaLink
-        href={AGENCY.whatsappHref}
-        id={`cta-empty-${side}-wa`}
+      <PhoneActionButtons
         page={page}
-        className="btn-sharp mt-8 inline-flex items-center justify-center gap-2 bg-oxblood text-paper hover:bg-ink"
-      >
-        <IconWhatsApp className="h-4 w-4" />
-        WhatsApp {AGENCY.whatsapp}
-      </CtaLink>
+        variant="sharp"
+        className="mt-8 inline-flex flex-wrap items-center justify-center gap-2"
+      />
       <p className="mt-4">
         <CtaLink
           href={resetHref}

@@ -3,6 +3,7 @@ import { Container } from "@/components/brand/Container";
 import { Logo } from "@/components/brand/Logo";
 import { NewsletterSignup } from "@/components/forms/NewsletterSignup";
 import { IconFacebook, IconInstagram, IconLinkedIn, IconMail, IconMapPin, IconWhatsApp } from "@/components/icons";
+import { CallButton, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const LINKS = [
@@ -39,6 +40,9 @@ export function Footer() {
             </nav>
             <ul className="mt-8 space-y-3 text-sm text-paper/80">
               <li>
+                <CallButton page="footer" variant="footer-icon" className="inline-flex hover:text-tan" />
+              </li>
+              <li>
                 <a
                   href={AGENCY.whatsappHref}
                   target="_blank"
@@ -46,7 +50,7 @@ export function Footer() {
                   className="inline-flex items-center gap-2 hover:text-tan"
                 >
                   <IconWhatsApp className="h-3.5 w-3.5 text-tan" />
-                  {AGENCY.whatsapp}
+                  WhatsApp
                 </a>
               </li>
               <li>
@@ -65,15 +69,8 @@ export function Footer() {
               </li>
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-3 text-paper/80">
-              <a
-                href={AGENCY.whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`WhatsApp ${AGENCY.whatsapp}`}
-                className="inline-flex h-10 w-10 items-center justify-center border border-paper/15 bg-paper/[0.03] text-tan transition-colors duration-150 ease-out hover:border-tan/40 hover:text-paper"
-              >
-                <IconWhatsApp className="h-4 w-4" />
-              </a>
+              <TextButton page="footer" variant="footer-icon" />
+              <WhatsAppActionButton page="footer" variant="footer-icon" />
               <a
                 href={`mailto:${AGENCY.email}`}
                 aria-label={`Email ${AGENCY.email}`}

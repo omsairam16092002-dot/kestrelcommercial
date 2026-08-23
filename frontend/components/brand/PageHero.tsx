@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
-import { AGENCY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { HeroBleed } from "@/components/brand/HeroBleed";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
 
 export function PageHero({
   kicker,
@@ -10,7 +9,7 @@ export function PageHero({
   description,
   page,
   cta,
-  showWhatsApp = true,
+  showPhoneActions = true,
   imageSrc,
   imageAlt = "",
 }: {
@@ -19,7 +18,7 @@ export function PageHero({
   description?: ReactNode;
   page: string;
   cta?: ReactNode;
-  showWhatsApp?: boolean;
+  showPhoneActions?: boolean;
   imageSrc?: string;
   imageAlt?: string;
 }) {
@@ -31,12 +30,8 @@ export function PageHero({
         <h1 className="t-h1 mt-5 max-w-3xl">{title}</h1>
         {description ? <div className="t-body-lg mt-6 max-w-xl text-pretty text-paper/90">{description}</div> : null}
         <div className="mt-10 flex flex-wrap items-center gap-3">
-          {showWhatsApp ? (
-            <WhatsAppButton
-              page={page}
-              className="btn-sharp inline-flex items-center justify-center gap-2 bg-tan text-ink hover:bg-paper"
-              label={`WhatsApp ${AGENCY.whatsapp}`}
-            />
+          {showPhoneActions ? (
+            <PhoneActionButtons page={page} variant="sharp" />
           ) : null}
           {cta}
         </div>

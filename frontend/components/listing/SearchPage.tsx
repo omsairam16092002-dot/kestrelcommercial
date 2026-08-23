@@ -1,5 +1,5 @@
 import type { AssetCategory, SpecFilters, TransactionSide } from "@kestrel/shared";
-import { AGENCY, ASSET_CATEGORY_LABELS, filterProperties } from "@kestrel/shared";
+import { ASSET_CATEGORY_LABELS, filterProperties } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { HeroBleed } from "@/components/brand/HeroBleed";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
@@ -96,14 +96,9 @@ export async function SearchPage({
       <DualCtaBand
         page={page}
         kicker="Quiet grid?"
-        title="WhatsApp the desk. Half the west never hits a portal."
+        title="Call, text or WhatsApp the desk. Half the west never hits a portal."
         lede="Or look at recent evidence first."
-        primaryHref={AGENCY.whatsappHref}
-        primaryLabel={`WhatsApp ${AGENCY.whatsapp}`}
-        primaryId={`cta-${page}-band-wa`}
-        secondaryHref={evidence.length ? "#evidence" : "/sell"}
-        secondaryLabel={evidence.length ? "See evidence" : "Request an appraisal"}
-        secondaryId={`cta-${page}-band-secondary`}
+        phoneActions
       />
     </div>
   );

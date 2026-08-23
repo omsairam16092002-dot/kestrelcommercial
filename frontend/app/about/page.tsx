@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AGENCY, AGENTS } from "@kestrel/shared";
+import { AGENTS } from "@kestrel/shared";
 import { AboutHeroBio } from "@/components/about/AboutHeroBio";
 import { AboutWhyChoose } from "@/components/about/AboutWhyChoose";
 import { ReasonCards } from "@/components/brand/ReasonCards";
@@ -31,13 +31,8 @@ export default async function AboutPage() {
             Talk to the desk. <em className="font-serif font-normal italic text-oxblood">Direct.</em>
           </>
         }
-        lede="WhatsApp first. Or write an enquiry."
-        primaryHref={AGENCY.whatsappHref}
-        primaryLabel={`WhatsApp ${AGENCY.whatsapp}`}
-        primaryId="cta-about-band-wa"
-        secondaryHref="/contact#enquire"
-        secondaryLabel="Send an enquiry"
-        secondaryId="cta-about-band-enquire"
+        lede="Call, text or WhatsApp. Or write an enquiry."
+        phoneActions
       />
     </div>
   );

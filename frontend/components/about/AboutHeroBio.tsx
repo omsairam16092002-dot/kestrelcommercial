@@ -12,7 +12,7 @@ import {
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { IconFacebook, IconInstagram, IconLinkedIn, IconMail } from "@/components/icons";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
 import { agentPortraitSrc, agentPortraitSrcSet } from "@/lib/images";
 
 export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: string }) {
@@ -60,12 +60,8 @@ export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: stri
               </div>
               <p className="font-serif italic text-paper/90">{ABOUT_CLOSING_LINE}</p>
             </div>
-            <div className="mt-8 flex flex-wrap gap-4 text-sm text-tan">
-              <WhatsAppButton
-                page="about"
-                className="inline-flex items-center gap-1.5 font-semibold text-tan hover:text-paper"
-                label={`WhatsApp ${agent.phone}`}
-              />
+            <PhoneActionButtons page="about" variant="ghost" className="mt-8 flex flex-wrap gap-4 text-sm text-tan" />
+            <div className="mt-4 flex flex-wrap gap-4 text-sm text-tan">
               <a
                 href={`mailto:${AGENCY.email}`}
                 className="inline-flex items-center gap-1.5 font-semibold hover:text-paper"

@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/listing/ListingCard";
 import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { CtaLink } from "@/components/ui/CtaLink";
-import { IconWhatsApp } from "@/components/icons";
+import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
 import { getFeaturedProperties, getProperties } from "@/lib/api";
 import { campaignPhotos, corridorProof, hasCompleteCommercialShowcaseSpecs, pickFlagship } from "@/lib/campaignPhoto";
 import { FlagshipCaseStudy } from "@/components/listing/FlagshipCaseStudy";
@@ -76,15 +76,7 @@ export default async function HomePage() {
             >
               Request appraisal
             </CtaLink>
-            <a
-              href={AGENCY.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2 text-sm font-semibold text-paper/85 hover:text-tan"
-            >
-              <IconWhatsApp className="h-4 w-4" />
-              WhatsApp
-            </a>
+            <PhoneActionButtons page="home-hero" variant="ghost" className="flex flex-wrap items-center gap-3" />
           </div>
         </Container>
       </section>
@@ -139,9 +131,9 @@ export default async function HomePage() {
             <div className="border-t-2 border-oxblood bg-white/50 px-6 py-12 md:px-10">
               <p className="t-h3 text-ink">No live listings on the public grid</p>
               <p className="t-body mt-3 max-w-xl text-ink/75">
-                Off-market and quietly marketed stock still moves through this desk. WhatsApp{" "}
-                <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="font-semibold text-oxblood hover:underline">
-                  {AGENCY.whatsapp}
+                Off-market and quietly marketed stock still moves through this desk. Call or text{" "}
+                <a href={AGENCY.phoneHref} className="font-semibold text-oxblood hover:underline">
+                  {AGENCY.phone}
                 </a>{" "}
                 and we will tell you what is real.
               </p>

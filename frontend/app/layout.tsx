@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "Kestrel Commercial",
     images: [
       {
-        url: "/assets/logo-flat.png",
+        url: "/assets/logo.png",
         alt: "Kestrel Commercial logo",
       },
     ],

@@ -4,20 +4,21 @@ import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { ReasonCards, type Reason } from "@/components/brand/ReasonCards";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
-import { IconClock, IconMail, IconWhatsApp } from "@/components/icons";
+import { IconClock, IconMail, IconMessage, IconWhatsApp } from "@/components/icons";
+import { agencySmsHref } from "@/lib/contactLinks";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "WhatsApp the Kestrel Commercial desk. Melbourne west.",
+  description: "Call, text or WhatsApp the Kestrel Commercial desk. Melbourne west.",
 };
 
 const CONTACT_REASONS: Reason[] = [
   {
     n: "01",
-    t: "WhatsApp first",
-    d: "The public number is WhatsApp only. Fastest way to reach the desk.",
+    t: "Call, text or WhatsApp",
+    d: `${AGENCY.phone} — same number for voice, SMS and WhatsApp.`,
     Icon: IconWhatsApp,
   },
   {
@@ -39,26 +40,42 @@ export default function ContactPage() {
     <div className="bg-paper">
       <SectionHeader
         kicker="Contact"
-        title="Start with WhatsApp."
-        description="Selling, leasing, buying, SMSF, management. Message the desk."
+        title="Call, text or WhatsApp the desk."
+        description="Selling, leasing, buying, SMSF, management. Same number for all three."
         page="contact"
       />
 
-      <ReasonCards kicker="The desk" title="Hours. WhatsApp. Email." reasons={CONTACT_REASONS} />
+      <ReasonCards kicker="The desk" title="Hours. Phone. Email." reasons={CONTACT_REASONS} />
 
       <section className="bg-ink text-paper">
         <Container className="grid gap-10 py-14 md:grid-cols-12 md:py-20">
           <dl className="space-y-0 md:col-span-4">
             {[
               {
+                k: "Call",
+                v: (
+                  <a href={AGENCY.phoneHref} className="t-mono hover:text-tan">
+                    {AGENCY.phone}
+                  </a>
+                ),
+              },
+              {
+                k: "Text",
+                icon: IconMessage,
+                v: (
+                  <a href={agencySmsHref()} className="t-mono hover:text-tan">
+                    {AGENCY.phone}
+                  </a>
+                ),
+              },
+              {
                 k: "WhatsApp",
                 icon: IconWhatsApp,
                 v: (
-                  <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-tan">
-                    {AGENCY.whatsapp}
+                  <a href={AGENCY.whatsappHref} target="_blank" rel="noopener noreferrer" className="t-mono hover:text-tan">
+                    {AGENCY.phone}
                   </a>
                 ),
-                mono: true,
               },
               {
                 k: "Email",
@@ -68,18 +85,17 @@ export default function ContactPage() {
                     {AGENCY.email}
                   </a>
                 ),
-                mono: false,
               },
-              { k: "Hours", icon: IconClock, v: AGENCY.hours, mono: false },
+              { k: "Hours", icon: IconClock, v: AGENCY.hours },
             ].map((row) => {
               const Icon = row.icon;
               return (
                 <div key={row.k} className="border-t border-tan/25 py-5 first:border-t-0 first:pt-0">
                   <dt className="flex items-center gap-2 t-caption text-tan">
-                    <Icon className="h-3.5 w-3.5" />
+                    {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
                     {row.k}
                   </dt>
-                  <dd className={`mt-2 ${row.mono ? "t-mono" : "t-body"}`}>{row.v}</dd>
+                  <dd className={`mt-2 ${row.k === "Email" || row.k === "Hours" ? "t-body" : "t-mono"}`}>{row.v}</dd>
                 </div>
               );
             })}
@@ -87,7 +103,7 @@ export default function ContactPage() {
 
           <div id="enquire" className="premium-panel bg-paper p-6 text-ink md:col-span-8 md:p-9">
             <h2 className="t-h2 text-ink">If you would rather write</h2>
-            <p className="t-body mt-2 text-mauve">One business day. Sooner if you WhatsApp.</p>
+            <p className="t-body mt-2 text-mauve">One business day. Sooner if you call, text or WhatsApp.</p>
             <div className="mt-6">
               <EnquiryForm source="contact" defaultTopic="other" submitLabel="Enquire" formId="form-contact" />
             </div>

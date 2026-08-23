@@ -1,3 +1,5 @@
+import { AGENCY } from "@kestrel/shared";
+
 export type ListingCaptionInput = {
   address?: string;
   suburb?: string;
@@ -20,6 +22,27 @@ export function telHref(phone: string): string | null {
   if (!trimmed) return null;
   const href = trimmed.replace(/[^\d+]/g, "");
   return href ? `tel:${href}` : null;
+}
+
+function smsNumber(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return null;
+  if (digits.startsWith("61") && digits.length >= 10) return `+${digits}`;
+  if (digits.startsWith("0") && digits.length >= 8) return `+61${digits.slice(1)}`;
+  if (digits.length >= 8 && digits.length <= 10) return `+61${digits}`;
+  if (digits.startsWith("+")) return digits;
+  return digits ? `+${digits}` : null;
+}
+
+export function smsHref(phone: string, body?: string): string | null {
+  const number = smsNumber(phone);
+  if (!number) return null;
+  const href = `sms:${number}`;
+  return body ? `${href}?body=${encodeURIComponent(body)}` : href;
+}
+
+export function agencySmsHref(body?: string): string {
+  return smsHref(AGENCY.phone, body) ?? AGENCY.smsHref;
 }
 
 export function mailtoHref(email: string, subject?: string, body?: string): string | null {

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AGENCY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
@@ -98,13 +97,8 @@ export default function InvestingPage() {
             Questions on SMSF or AML? <em className="font-serif font-normal italic text-oxblood">Ask early.</em>
           </>
         }
-        lede="WhatsApp the desk. Or write an enquiry."
-        primaryHref={AGENCY.whatsappHref}
-        primaryLabel={`WhatsApp ${AGENCY.whatsapp}`}
-        primaryId="cta-investing-band-wa"
-        secondaryHref="/contact#enquire"
-        secondaryLabel="Send an enquiry"
-        secondaryId="cta-investing-band-enquire"
+        lede="Call, text or WhatsApp the desk. Or write an enquiry."
+        phoneActions
       />
 
       <p className="mx-auto max-w-[1240px] px-4 py-10 t-caption normal-case tracking-normal text-mauve sm:px-6 lg:px-8">

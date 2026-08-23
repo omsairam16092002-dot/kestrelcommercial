@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { AGENCY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
 
 export function SectionHeader({
   kicker,
@@ -9,14 +8,14 @@ export function SectionHeader({
   description,
   page,
   cta,
-  showWhatsApp = true,
+  showPhoneActions = true,
 }: {
   kicker: string;
   title: ReactNode;
   description?: ReactNode;
   page: string;
   cta?: ReactNode;
-  showWhatsApp?: boolean;
+  showPhoneActions?: boolean;
 }) {
   return (
     <section className="relative overflow-hidden bg-oxblood text-paper">
@@ -32,12 +31,8 @@ export function SectionHeader({
           <div className="t-body-lg mt-6 max-w-xl text-pretty text-paper/90">{description}</div>
         ) : null}
         <div className="mt-10 flex flex-wrap items-center gap-3">
-          {showWhatsApp ? (
-            <WhatsAppButton
-              page={page}
-              className="btn-sharp inline-flex items-center justify-center gap-2 bg-tan text-ink hover:bg-paper"
-              label={`WhatsApp ${AGENCY.whatsapp}`}
-            />
+          {showPhoneActions ? (
+            <PhoneActionButtons page={page} variant="sharp" />
           ) : null}
           {cta}
         </div>

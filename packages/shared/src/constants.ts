@@ -36,6 +36,7 @@ export const AGENCY = {
   licenceHolder: "Jignesh Jhanjaria",
   phone: "0431 000 038",
   phoneHref: "tel:+61431000038",
+  smsHref: "sms:+61431000038",
   whatsapp: "0431 000 038",
   whatsappHref: "https://wa.me/61431000038",
   email: "jignesh@kestrelcommercial.com",

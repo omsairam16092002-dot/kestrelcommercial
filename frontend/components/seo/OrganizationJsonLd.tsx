@@ -12,7 +12,7 @@ export function OrganizationJsonLd() {
     url: origin,
     telephone: AGENCY.phone,
     email: AGENCY.email,
-    image: `${origin}/assets/logo-flat.png`,
+    image: `${origin}/assets/logo.png`,
     address: {
       "@type": "PostalAddress",
       streetAddress: AGENCY.addressLine1,

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AGENCY, PROJECT_MARKETING, SERVICES_FEATURE_COPY } from "@kestrel/shared";
+import { PROJECT_MARKETING, SERVICES_FEATURE_COPY } from "@kestrel/shared";
 import { Container } from "@/components/brand/Container";
 import { DuotoneImage } from "@/components/brand/DuotoneImage";
 import { SectionHeader } from "@/components/brand/SectionHeader";
@@ -72,13 +72,8 @@ export default async function ServicesPage() {
             Selling? Start with an <em className="font-serif font-normal italic text-oxblood">appraisal</em>.
           </>
         }
-        lede="WhatsApp the desk. Or request a priced note."
-        primaryHref={AGENCY.whatsappHref}
-        primaryLabel={`WhatsApp ${AGENCY.whatsapp}`}
-        primaryId="cta-services-band-wa"
-        secondaryHref="/sell"
-        secondaryLabel="Request an appraisal"
-        secondaryId="cta-services-band-sell"
+        lede="Call, text or WhatsApp the desk. Or request a priced note."
+        phoneActions
       />
     </div>
   );

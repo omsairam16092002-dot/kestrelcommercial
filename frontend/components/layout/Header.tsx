@@ -2,9 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AGENCY, ASSET_CATEGORY_LABELS } from "@kestrel/shared";
+import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { Logo } from "@/components/brand/Logo";
-import { IconChevronDown, IconClose, IconMenu, IconWhatsApp } from "@/components/icons";
+import { IconChevronDown, IconClose, IconMenu } from "@/components/icons";
+import { CallButton, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const NAV = [
@@ -127,16 +128,9 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <a
-            href={AGENCY.whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden items-center gap-1.5 text-[12px] font-semibold tracking-[0.04em] text-ink/80 transition-colors duration-150 ease-out hover:text-oxblood lg:inline-flex"
-            aria-label={`WhatsApp ${AGENCY.whatsapp}`}
-          >
-            <IconWhatsApp className="h-3.5 w-3.5 text-oxblood" />
-            {AGENCY.whatsapp}
-          </a>
+          <CallButton page="header" variant="header" />
+          <TextButton page="header" variant="header" />
+          <WhatsAppActionButton page="header" variant="header" />
           <PrefetchLink
             href="/sell"
             className="hidden lg:inline-flex items-center bg-tan px-4 py-2.5 text-[11px] font-semibold normal-case tracking-[0.02em] text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper active:scale-[0.985]"
@@ -220,16 +214,18 @@ export function Header() {
               Sell my property / Request appraisal
             </PrefetchLink>
             <div className="mt-2 grid grid-cols-2 gap-2 px-1 pb-1">
-              <a
-                href={AGENCY.whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
+              <CallButton
+                page="header-mobile"
+                className="btn-sharp inline-flex items-center justify-center t-mono tabular border border-oxblood text-oxblood"
+              />
+              <TextButton
+                page="header-mobile"
+                className="btn-sharp inline-flex items-center justify-center gap-2 bg-tan text-ink"
+              />
+              <WhatsAppActionButton
+                page="header-mobile"
                 className="btn-sharp inline-flex items-center justify-center gap-2 border border-oxblood text-oxblood"
-                onClick={() => setOpen(false)}
-              >
-                <IconWhatsApp className="h-4 w-4" />
-                WhatsApp
-              </a>
+              />
               <a href="/contact#enquire" className="btn-sharp bg-oxblood text-paper" onClick={() => setOpen(false)}>
                 Contact
               </a>
