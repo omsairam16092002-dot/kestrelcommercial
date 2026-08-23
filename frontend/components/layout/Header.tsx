@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
 import { Logo } from "@/components/brand/Logo";
 import { IconChevronDown, IconClose, IconMenu } from "@/components/icons";
-import { HeaderContactCluster } from "@/components/ui/PhoneActionButtons";
+import { HeaderContactCluster, MobileContactPanel } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const NAV = [
@@ -209,6 +209,7 @@ export function Header() {
             <PrefetchLink href="/sell" className="mx-1 mt-2 btn-sharp bg-tan text-ink" onClick={closeMenu}>
               Sell my property / Request appraisal
             </PrefetchLink>
+            <MobileContactPanel page="header" onNavigate={closeMenu} />
           </nav>
         </div>
       ) : null}

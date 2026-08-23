@@ -271,49 +271,78 @@ export function ContactDeskSummary({
   );
 }
 
-/** Navbar: compact number on top, Call · WA · Text icons below. */
+/** Navbar: compact number on top, Call · WA · Text icons below (desktop only). */
 export function HeaderContactCluster({ page }: { page: string }) {
   return (
-    <div className="flex flex-col items-end gap-1">
+    <>
       <a
         href={AGENCY.phoneHref}
-        id={`cta-call-${page}-header`}
-        className="t-mono text-[11px] font-semibold tabular leading-none text-ink/85 transition-colors duration-150 ease-out hover:text-oxblood sm:text-[13px]"
+        id={`cta-call-${page}-header-mobile`}
+        className="t-mono text-[11px] font-semibold tabular leading-none text-ink/85 transition-colors duration-150 ease-out hover:text-oxblood sm:text-[12px] lg:hidden"
         aria-label={`Call ${AGENCY.phone}`}
         onClick={() =>
-          track({ event: "cta_click", id: `cta-call-${page}-header`, page, href: AGENCY.phoneHref })
+          track({ event: "cta_click", id: `cta-call-${page}-header-mobile`, page, href: AGENCY.phoneHref })
         }
       >
         {PHONE_COMPACT}
       </a>
-      <div
-        className="flex items-center divide-x divide-oxblood/10 rounded-sm border border-oxblood/10 bg-white/80"
-        role="group"
-        aria-label="Contact the desk"
-      >
-        <CallButton page={page} variant="header-icon" />
-        <WhatsAppActionButton page={page} variant="header-icon" />
-        <TextButton page={page} variant="header-icon" />
+      <div className="hidden flex-col items-end gap-1 lg:flex">
+        <a
+          href={AGENCY.phoneHref}
+          id={`cta-call-${page}-header`}
+          className="t-mono text-[13px] font-semibold tabular leading-none text-ink/85 transition-colors duration-150 ease-out hover:text-oxblood"
+          aria-label={`Call ${AGENCY.phone}`}
+          onClick={() =>
+            track({ event: "cta_click", id: `cta-call-${page}-header`, page, href: AGENCY.phoneHref })
+          }
+        >
+          {PHONE_COMPACT}
+        </a>
+        <div
+          className="flex items-center divide-x divide-oxblood/10 rounded-sm border border-oxblood/10 bg-white/80"
+          role="group"
+          aria-label="Contact the desk"
+        >
+          <CallButton page={page} variant="header-icon" />
+          <WhatsAppActionButton page={page} variant="header-icon" />
+          <TextButton page={page} variant="header-icon" />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-/** Mobile nav drawer: labelled contact block — not mixed with page links. */
+/** Mobile nav drawer: number + icon-only Call · WA · Text. */
 export function MobileContactPanel({ page, onNavigate }: { page: string; onNavigate?: () => void }) {
   return (
     <div className="mx-1 mt-4 border-t border-oxblood/10 pt-5">
       <p className="px-3 t-caption text-mauve">Contact the desk</p>
-      <div className="mt-3 space-y-2 px-1">
-        <CallButton page={`${page}-mobile`} variant="menu-call" onAction={onNavigate} />
-        <div className="grid grid-cols-2 gap-2">
-          <WhatsAppActionButton
-            page={`${page}-mobile`}
-            variant="menu-action"
-            label="WhatsApp"
-            onAction={onNavigate}
-          />
-          <TextButton page={`${page}-mobile`} variant="menu-action" onAction={onNavigate} />
+      <div className="mt-3 px-3">
+        <a
+          href={AGENCY.phoneHref}
+          id={`cta-call-${page}-mobile-number`}
+          className="t-mono text-base font-semibold tabular text-ink transition-colors hover:text-oxblood"
+          aria-label={`Call ${AGENCY.phone}`}
+          onClick={() => {
+            track({
+              event: "cta_click",
+              id: `cta-call-${page}-mobile-number`,
+              page,
+              href: AGENCY.phoneHref,
+            });
+            onNavigate?.();
+          }}
+        >
+          {PHONE_COMPACT}
+        </a>
+        <div
+          className="mt-3 flex w-fit items-center divide-x divide-oxblood/10 rounded-sm border border-oxblood/10 bg-white"
+          role="group"
+          aria-label="Contact the desk"
+        >
+          <CallButton page={`${page}-mobile`} variant="header-icon" onAction={onNavigate} />
+          <WhatsAppActionButton page={`${page}-mobile`} variant="header-icon" onAction={onNavigate} />
+          <TextButton page={`${page}-mobile`} variant="header-icon" onAction={onNavigate} />
         </div>
       </div>
     </div>
