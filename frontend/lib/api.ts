@@ -85,9 +85,21 @@ export async function getFeaturedProperties(): Promise<Property[]> {
   return getProperties({ featured: true });
 }
 
-export async function getPropertyBySlug(
-  slug: string,
-): Promise<{ property: Property; agent: Agent } | null | "unavailable"> {
+export type PropertyBySlugResult = { property: Property; agent: Agent } | null | "unavailable";
+
+export function isPropertySlugUnavailable(
+  data: PropertyBySlugResult,
+): data is "unavailable" {
+  return data === "unavailable";
+}
+
+export function isPropertySlugFound(
+  data: PropertyBySlugResult,
+): data is { property: Property; agent: Agent } {
+  return data != null && data !== "unavailable";
+}
+
+export async function getPropertyBySlug(slug: string): Promise<PropertyBySlugResult> {
   const result = await apiFetchResult<{ property: Property; agent: Agent }>(
     `/api/properties/${encodeURIComponent(slug)}`,
     { cache: "no-store" },

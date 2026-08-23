@@ -10,7 +10,7 @@ import { ListingLeadDesk } from "@/components/listing/ListingLeadDesk";
 import { ListingDocuments } from "@/components/listing/ListingDocuments";
 import { ListingJsonLd } from "@/components/listing/ListingJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
-import { getProperties, getPropertyBySlug } from "@/lib/api";
+import { getProperties, getPropertyBySlug, isPropertySlugFound, isPropertySlugUnavailable } from "@/lib/api";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
 import { listingTitle } from "@/lib/seo";
 
@@ -27,7 +27,12 @@ export async function generateMetadata({
   params: { slug: string };
 }): Promise<Metadata> {
   const data = await getPropertyBySlug(params.slug);
-  if (!data) return { title: "Listing" };
+  if (isPropertySlugUnavailable(data)) {
+    return { title: "Listing temporarily unavailable" };
+  }
+  if (!isPropertySlugFound(data)) {
+    return { title: "Listing not found" };
+  }
   const { property } = data;
   const title = listingTitle(property);
   const description = property.description.replace(/\s+/g, " ").slice(0, 160);
@@ -57,10 +62,10 @@ export async function generateMetadata({
 
 export default async function ListingPage({ params }: { params: { slug: string } }) {
   const data = await getPropertyBySlug(params.slug);
-  if (data === "unavailable") {
+  if (isPropertySlugUnavailable(data)) {
     throw new Error("Listing API unavailable");
   }
-  if (!data) notFound();
+  if (!isPropertySlugFound(data)) notFound();
   const { property, agent } = data;
   const closed = isClosedListing(property.status);
   const browseHref =
