@@ -26,17 +26,6 @@ body {
   color: var(--ink);
 }
 
-@media (max-width: 767px) {
-  html {
-    scroll-padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
-  }
-}
-
-body[data-mobile-menu-open="true"] #sticky-call-bar {
-  opacity: 0;
-  pointer-events: none;
-}
-
 ::selection {
   background: var(--oxblood);
   color: var(--paper);

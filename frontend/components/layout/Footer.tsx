@@ -3,7 +3,7 @@ import { Container } from "@/components/brand/Container";
 import { Logo } from "@/components/brand/Logo";
 import { NewsletterSignup } from "@/components/forms/NewsletterSignup";
 import { IconFacebook, IconInstagram, IconLinkedIn, IconMail, IconMapPin, IconPhone } from "@/components/icons";
-import { ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
+import { CallButton, ContactDeskSummary, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const LINKS = [
@@ -95,6 +95,9 @@ export function Footer() {
               >
                 <IconInstagram className="h-4 w-4" />
               </a>
+              <CallButton page="footer" variant="footer-icon" />
+              <WhatsAppActionButton page="footer" variant="footer-icon" />
+              <TextButton page="footer" variant="footer-icon" />
             </div>
           </div>
           <div className="premium-panel-dark w-full p-6 md:p-8">
@@ -106,8 +109,6 @@ export function Footer() {
           </div>
         </div>
       </Container>
-
-      <div className="h-[4.75rem] md:hidden" aria-hidden />
     </footer>
   );
 }

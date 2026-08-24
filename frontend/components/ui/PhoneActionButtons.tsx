@@ -64,7 +64,7 @@ export function CallButton({
     "header-link": HEADER_LINK,
     "header-icon": HEADER_ICON,
     sticky: `${STICKY} border-r border-oxblood/10 bg-oxblood text-paper hover:bg-ink active:bg-ink/90`,
-    "footer-icon": `${GHOST} t-mono tabular text-paper/80 hover:text-tan`,
+    "footer-icon": FOOTER_ICON,
     "menu-call": MENU_CALL,
     "menu-action": MENU_ACTION,
   } as const;
@@ -84,7 +84,7 @@ export function CallButton({
     >
       {iconOnly ? (
         <>
-          <IconPhone className="h-5 w-5 shrink-0" />
+          <IconPhone className={`${variant === "sticky" ? "h-5 w-5" : "h-4 w-4"} shrink-0`} />
           <span className="sr-only">Call</span>
         </>
       ) : (
