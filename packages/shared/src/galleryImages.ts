@@ -11,7 +11,15 @@ export function isMarketingGalleryDimensions(width: number, height: number): boo
   if (width >= 2500 && portrait > 1.35) return true;
   if (ratio >= 1.3 && ratio <= 1.36 && width >= 3000) return true;
   if (ratio >= 1.55 && ratio <= 1.62 && width >= 3500) return true;
+  /** Wide Axtra renders — e.g. 4000×2400, 4000×2160 interior/facade posters. */
+  if (width >= 3500 && ratio >= 1.65) return true;
   return false;
+}
+
+function isAxtraFloorPlanDocument(publicId: string, width: number, height: number): boolean {
+  if (!publicId.includes("/axtra/")) return false;
+  const portrait = height / width;
+  return width >= 1500 && width <= 2100 && height >= 2200 && portrait >= 1.25 && portrait <= 1.5;
 }
 
 export function isMarketingGalleryImage(image: PropertyImage): boolean {
@@ -20,15 +28,16 @@ export function isMarketingGalleryImage(image: PropertyImage): boolean {
   if (MARKETING_NAME.test(id)) return true;
   const w = image.width;
   const h = image.height;
-  if (w != null && h != null && isMarketingGalleryDimensions(w, h)) return true;
+  if (w != null && h != null) {
+    if (isMarketingGalleryDimensions(w, h)) return true;
+    if (isAxtraFloorPlanDocument(id, w, h)) return true;
+  }
   return false;
 }
 
 /** Real property photos only — drops developer campaign banners and incentive sheets. */
 export function galleryImages(images: PropertyImage[]): PropertyImage[] {
-  const filtered = images.filter((img) => !isMarketingGalleryImage(img));
-  if (filtered.length) return filtered;
-  return images.length ? [images[0]] : [];
+  return images.filter((img) => !isMarketingGalleryImage(img));
 }
 
 export function isClosedListing(status: PropertyStatus): boolean {

@@ -11,35 +11,48 @@ test("isMarketingGalleryDimensions flags developer posters and banners", () => {
   assert.equal(isMarketingGalleryDimensions(4000, 3000), true);
   assert.equal(isMarketingGalleryDimensions(4130, 7207), true);
   assert.equal(isMarketingGalleryDimensions(4000, 2504), true);
-  assert.equal(isMarketingGalleryDimensions(4000, 2400), false);
+  assert.equal(isMarketingGalleryDimensions(4000, 2400), true);
+  assert.equal(isMarketingGalleryDimensions(4000, 2160), true);
   assert.equal(isMarketingGalleryDimensions(1587, 2245), false);
 });
 
-test("isMarketingGalleryImage matches marketing filenames", () => {
+test("isMarketingGalleryImage matches marketing filenames and axtra floor plans", () => {
   assert.equal(
     isMarketingGalleryImage({ publicId: "kestrel/listings/axtra/foo/completion-banner" }),
     true,
   );
   assert.equal(isMarketingGalleryImage({ publicId: "kestrel/listings/axtra/foo/01" }), false);
+  assert.equal(
+    isMarketingGalleryImage({
+      publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/05",
+      width: 1587,
+      height: 2245,
+    }),
+    true,
+  );
 });
 
 test("galleryImages removes marketing slides but keeps real photos", () => {
   const images = [
-    { publicId: "kestrel/listings/axtra/pack/01", isHero: true },
-    { publicId: "kestrel/listings/axtra/pack/02" },
+    { publicId: "kestrel/listings/axtra/pack/01", width: 4000, height: 2400, isHero: true },
+    { publicId: "kestrel/listings/axtra/pack/02", width: 4000, height: 2160 },
     { publicId: "kestrel/listings/axtra/pack/03", width: 4000, height: 3000 },
     { publicId: "kestrel/listings/axtra/pack/04", width: 4000, height: 2504 },
     { publicId: "kestrel/listings/axtra/pack/05", width: 1587, height: 2245 },
+    { publicId: "kestrel/listings/warehouse/derrimut/01", width: 1200, height: 900 },
   ];
   const out = galleryImages(images);
-  assert.deepEqual(
-    out.map((i) => i.publicId),
-    [
-      "kestrel/listings/axtra/pack/01",
-      "kestrel/listings/axtra/pack/02",
-      "kestrel/listings/axtra/pack/05",
-    ],
-  );
+  assert.deepEqual(out.map((i) => i.publicId), ["kestrel/listings/warehouse/derrimut/01"]);
+});
+
+test("galleryImages removes all heidelberg campaign art when only marketing exists", () => {
+  const images = [
+    { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/01", width: 4000, height: 2400 },
+    { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/02", width: 4000, height: 2160 },
+    { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/05", width: 1587, height: 2245 },
+    { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/08", width: 1831, height: 2552 },
+  ];
+  assert.equal(galleryImages(images).length, 0);
 });
 
 test("publicListingParagraphs removes campaign marketing and sold lines", () => {

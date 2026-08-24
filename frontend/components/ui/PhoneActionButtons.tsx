@@ -5,8 +5,6 @@ import { track } from "@/lib/analytics";
 import { agencySmsHref } from "@/lib/contactLinks";
 import { IconMessage, IconPhone, IconWhatsApp } from "@/components/icons";
 
-const PHONE_COMPACT = AGENCY.phone.replace(/\s/g, "");
-
 const SHARP =
   "btn-sharp inline-flex items-center justify-center gap-2 bg-tan t-mono text-[13px] tabular text-ink hover:bg-oxblood hover:text-paper";
 const GHOST = "inline-flex items-center gap-1.5 text-sm font-semibold transition-colors duration-150 ease-out";
@@ -18,6 +16,10 @@ const STICKY =
   "flex min-h-[52px] flex-1 items-center justify-center transition-colors duration-150 ease-out sm:min-h-[56px]";
 const FOOTER_ICON =
   "inline-flex h-10 w-10 items-center justify-center border border-paper/15 bg-paper/[0.03] text-tan transition-colors duration-150 ease-out hover:border-tan/40 hover:text-paper";
+const CLUSTER_WA =
+  "inline-flex h-10 w-10 shrink-0 items-center justify-center bg-tan text-ink transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper";
+const CLUSTER_SECONDARY =
+  "inline-flex h-10 w-10 shrink-0 items-center justify-center bg-paper text-oxblood transition-colors duration-150 ease-out hover:bg-oxblood/5";
 const MENU_CALL =
   "btn-sharp inline-flex w-full items-center justify-center t-mono tabular border border-oxblood bg-white text-oxblood hover:bg-oxblood hover:text-paper";
 const MENU_ACTION =
@@ -30,6 +32,8 @@ export type ContactVariant =
   | "header-icon"
   | "sticky"
   | "footer-icon"
+  | "cluster-wa"
+  | "cluster-secondary"
   | "menu-call"
   | "menu-action";
 
@@ -65,11 +69,18 @@ export function CallButton({
     "header-icon": HEADER_ICON,
     sticky: `${STICKY} border-r border-oxblood/10 bg-oxblood text-paper hover:bg-ink active:bg-ink/90`,
     "footer-icon": FOOTER_ICON,
+    "cluster-wa": CLUSTER_WA,
+    "cluster-secondary": CLUSTER_SECONDARY,
     "menu-call": MENU_CALL,
     "menu-action": MENU_ACTION,
   } as const;
 
-  const iconOnly = variant === "header-icon" || variant === "footer-icon" || variant === "sticky";
+  const iconOnly =
+    variant === "header-icon" ||
+    variant === "footer-icon" ||
+    variant === "sticky" ||
+    variant === "cluster-wa" ||
+    variant === "cluster-secondary";
 
   return (
     <a
@@ -117,10 +128,17 @@ export function WhatsAppActionButton({
     "header-icon": HEADER_ICON,
     sticky: `${STICKY} border-r border-oxblood/10 bg-tan text-ink hover:bg-oxblood hover:text-paper active:bg-ink active:text-paper`,
     "footer-icon": FOOTER_ICON,
+    "cluster-wa": CLUSTER_WA,
+    "cluster-secondary": CLUSTER_SECONDARY,
     "menu-call": MENU_CALL,
     "menu-action": MENU_ACTION,
   } as const;
-  const iconOnly = variant === "header-icon" || variant === "footer-icon" || variant === "sticky";
+  const iconOnly =
+    variant === "header-icon" ||
+    variant === "footer-icon" ||
+    variant === "sticky" ||
+    variant === "cluster-wa" ||
+    variant === "cluster-secondary";
 
   return (
     <a
@@ -164,10 +182,17 @@ export function TextButton({
     "header-icon": HEADER_ICON,
     sticky: `${STICKY} bg-paper text-oxblood hover:bg-white active:bg-oxblood/5`,
     "footer-icon": FOOTER_ICON,
+    "cluster-wa": CLUSTER_WA,
+    "cluster-secondary": CLUSTER_SECONDARY,
     "menu-call": MENU_CALL,
     "menu-action": MENU_ACTION,
   } as const;
-  const iconOnly = variant === "header-icon" || variant === "footer-icon" || variant === "sticky";
+  const iconOnly =
+    variant === "header-icon" ||
+    variant === "footer-icon" ||
+    variant === "sticky" ||
+    variant === "cluster-wa" ||
+    variant === "cluster-secondary";
 
   return (
     <a
@@ -269,7 +294,47 @@ export function ContactDeskSummary({
   );
 }
 
-/** Navbar: compact number on top, Call · WA · Text icons below (desktop only). */
+/** One sharp unit: spaced mono phone (tel link) + WhatsApp + Text. */
+export function ContactClusterBar({
+  page,
+  listing,
+  onAction,
+  className = "",
+  fullWidth = false,
+}: {
+  page: string;
+  listing?: string;
+  onAction?: () => void;
+  className?: string;
+  fullWidth?: boolean;
+}) {
+  return (
+    <div
+      className={`inline-flex items-stretch border border-oxblood divide-x divide-oxblood ${className}`.trim()}
+      role="group"
+      aria-label="Contact the desk"
+    >
+      <a
+        href={AGENCY.phoneHref}
+        id={`cta-call-${page}-cluster`}
+        className={`t-mono flex items-center px-3 py-2 text-[13px] font-semibold tabular text-oxblood transition-colors duration-150 ease-out hover:bg-oxblood/5 ${
+          fullWidth ? "min-w-0 flex-1" : ""
+        }`}
+        aria-label={`Call ${AGENCY.phone}`}
+        onClick={() => {
+          track({ event: "cta_click", id: `cta-call-${page}-cluster`, page, listing, href: AGENCY.phoneHref });
+          onAction?.();
+        }}
+      >
+        {AGENCY.phone}
+      </a>
+      <WhatsAppActionButton page={page} variant="cluster-wa" listing={listing} onAction={onAction} />
+      <TextButton page={page} variant="cluster-secondary" listing={listing} onAction={onAction} />
+    </div>
+  );
+}
+
+/** Navbar contact: compact mono number on mobile top bar; full cluster on desktop. */
 export function HeaderContactCluster({ page }: { page: string }) {
   return (
     <>
@@ -282,66 +347,22 @@ export function HeaderContactCluster({ page }: { page: string }) {
           track({ event: "cta_click", id: `cta-call-${page}-header-mobile`, page, href: AGENCY.phoneHref })
         }
       >
-        {PHONE_COMPACT}
+        {AGENCY.phone}
       </a>
-      <div className="hidden flex-col items-end gap-1 lg:flex">
-        <a
-          href={AGENCY.phoneHref}
-          id={`cta-call-${page}-header`}
-          className="t-mono text-[13px] font-semibold tabular leading-none text-ink/85 transition-colors duration-150 ease-out hover:text-oxblood"
-          aria-label={`Call ${AGENCY.phone}`}
-          onClick={() =>
-            track({ event: "cta_click", id: `cta-call-${page}-header`, page, href: AGENCY.phoneHref })
-          }
-        >
-          {PHONE_COMPACT}
-        </a>
-        <div
-          className="flex items-center divide-x divide-oxblood/10 rounded-sm border border-oxblood/10 bg-white/80"
-          role="group"
-          aria-label="Contact the desk"
-        >
-          <CallButton page={page} variant="header-icon" />
-          <WhatsAppActionButton page={page} variant="header-icon" />
-          <TextButton page={page} variant="header-icon" />
-        </div>
+      <div className="hidden lg:block">
+        <ContactClusterBar page={page} />
       </div>
     </>
   );
 }
 
-/** Mobile nav drawer: number + icon-only Call · WA · Text. */
+/** Mobile nav drawer: same ContactClusterBar as desktop. */
 export function MobileContactPanel({ page, onNavigate }: { page: string; onNavigate?: () => void }) {
   return (
     <div className="mx-1 mt-4 border-t border-oxblood/10 pt-5">
       <p className="px-3 t-caption text-mauve">Contact the desk</p>
       <div className="mt-3 px-3">
-        <a
-          href={AGENCY.phoneHref}
-          id={`cta-call-${page}-mobile-number`}
-          className="t-mono text-base font-semibold tabular text-ink transition-colors hover:text-oxblood"
-          aria-label={`Call ${AGENCY.phone}`}
-          onClick={() => {
-            track({
-              event: "cta_click",
-              id: `cta-call-${page}-mobile-number`,
-              page,
-              href: AGENCY.phoneHref,
-            });
-            onNavigate?.();
-          }}
-        >
-          {PHONE_COMPACT}
-        </a>
-        <div
-          className="mt-3 flex w-fit items-center divide-x divide-oxblood/10 rounded-sm border border-oxblood/10 bg-white"
-          role="group"
-          aria-label="Contact the desk"
-        >
-          <CallButton page={`${page}-mobile`} variant="header-icon" onAction={onNavigate} />
-          <WhatsAppActionButton page={`${page}-mobile`} variant="header-icon" onAction={onNavigate} />
-          <TextButton page={`${page}-mobile`} variant="header-icon" onAction={onNavigate} />
-        </div>
+        <ContactClusterBar page={`${page}-mobile`} onAction={onNavigate} fullWidth />
       </div>
     </div>
   );
