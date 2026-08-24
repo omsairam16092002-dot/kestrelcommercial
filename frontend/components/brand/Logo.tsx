@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
-/** Circular mark — 2000×2000 source. */
+/** Horizontal mark — 3000×1056 transparent source. */
 const SIZES = {
-  header: { width: 48, height: 48 },
-  footer: { width: 56, height: 56 },
+  header: { width: 136, height: 48 },
+  footer: { width: 159, height: 56 },
 } as const;
 
 export function Logo({
@@ -27,7 +27,7 @@ export function Logo({
         alt="Kestrel Commercial"
         width={width}
         height={height}
-        className={variant === "footer" ? "h-14 w-14" : "h-11 w-11 sm:h-12 sm:w-12"}
+        className={variant === "footer" ? "h-14 w-auto" : "h-10 w-auto sm:h-11"}
         priority
       />
     </PrefetchLink>

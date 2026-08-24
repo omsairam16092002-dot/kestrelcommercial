@@ -3,7 +3,7 @@ import { Container } from "@/components/brand/Container";
 import { Logo } from "@/components/brand/Logo";
 import { NewsletterSignup } from "@/components/forms/NewsletterSignup";
 import { IconFacebook, IconInstagram, IconLinkedIn, IconMail, IconMapPin, IconPhone } from "@/components/icons";
-import { CallButton, ContactDeskSummary, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
+import { CallButton, TextButton, WhatsAppActionButton } from "@/components/ui/PhoneActionButtons";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
 
 const LINKS = [
@@ -43,7 +43,12 @@ export function Footer() {
                 <IconPhone className="mt-1 h-3.5 w-3.5 shrink-0 text-tan" aria-hidden />
                 <div>
                   <p className="t-caption text-tan">Phone</p>
-                  <ContactDeskSummary page="footer" tone="dark" className="mt-1" />
+                  <a
+                    href={AGENCY.phoneHref}
+                    className="mt-1 inline-block t-mono text-base text-paper/90 transition-colors hover:text-tan"
+                  >
+                    {AGENCY.phone}
+                  </a>
                 </div>
               </li>
               <li className="flex items-start gap-2">
@@ -109,6 +114,8 @@ export function Footer() {
           </div>
         </div>
       </Container>
+
+      <div className="h-[4.75rem] md:hidden" aria-hidden />
     </footer>
   );
 }
