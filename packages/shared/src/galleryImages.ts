@@ -11,8 +11,6 @@ export function isMarketingGalleryDimensions(width: number, height: number): boo
   if (width >= 2500 && portrait > 1.35) return true;
   if (ratio >= 1.3 && ratio <= 1.36 && width >= 3000) return true;
   if (ratio >= 1.55 && ratio <= 1.62 && width >= 3500) return true;
-  /** Wide Axtra renders — e.g. 4000×2400, 4000×2160 interior/facade posters. */
-  if (width >= 3500 && ratio >= 1.65) return true;
   return false;
 }
 

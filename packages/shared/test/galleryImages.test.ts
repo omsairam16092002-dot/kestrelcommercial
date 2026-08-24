@@ -11,8 +11,8 @@ test("isMarketingGalleryDimensions flags developer posters and banners", () => {
   assert.equal(isMarketingGalleryDimensions(4000, 3000), true);
   assert.equal(isMarketingGalleryDimensions(4130, 7207), true);
   assert.equal(isMarketingGalleryDimensions(4000, 2504), true);
-  assert.equal(isMarketingGalleryDimensions(4000, 2400), true);
-  assert.equal(isMarketingGalleryDimensions(4000, 2160), true);
+  assert.equal(isMarketingGalleryDimensions(4000, 2400), false);
+  assert.equal(isMarketingGalleryDimensions(4000, 2160), false);
   assert.equal(isMarketingGalleryDimensions(1587, 2245), false);
 });
 
@@ -32,7 +32,7 @@ test("isMarketingGalleryImage matches marketing filenames and axtra floor plans"
   );
 });
 
-test("galleryImages removes marketing slides but keeps real photos", () => {
+test("galleryImages removes marketing slides but keeps interior renders", () => {
   const images = [
     { publicId: "kestrel/listings/axtra/pack/01", width: 4000, height: 2400, isHero: true },
     { publicId: "kestrel/listings/axtra/pack/02", width: 4000, height: 2160 },
@@ -42,17 +42,24 @@ test("galleryImages removes marketing slides but keeps real photos", () => {
     { publicId: "kestrel/listings/warehouse/derrimut/01", width: 1200, height: 900 },
   ];
   const out = galleryImages(images);
-  assert.deepEqual(out.map((i) => i.publicId), ["kestrel/listings/warehouse/derrimut/01"]);
+  assert.deepEqual(out.map((i) => i.publicId), [
+    "kestrel/listings/axtra/pack/01",
+    "kestrel/listings/axtra/pack/02",
+    "kestrel/listings/warehouse/derrimut/01",
+  ]);
 });
 
-test("galleryImages removes all heidelberg campaign art when only marketing exists", () => {
+test("galleryImages keeps heidelberg renders but drops floor-plan documents", () => {
   const images = [
     { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/01", width: 4000, height: 2400 },
     { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/02", width: 4000, height: 2160 },
     { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/05", width: 1587, height: 2245 },
     { publicId: "kestrel/listings/axtra/171-northern-road-heidelberg-heights/08", width: 1831, height: 2552 },
   ];
-  assert.equal(galleryImages(images).length, 0);
+  assert.deepEqual(galleryImages(images).map((i) => i.publicId), [
+    "kestrel/listings/axtra/171-northern-road-heidelberg-heights/01",
+    "kestrel/listings/axtra/171-northern-road-heidelberg-heights/02",
+  ]);
 });
 
 test("publicListingParagraphs removes campaign marketing and sold lines", () => {
