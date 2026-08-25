@@ -1,4 +1,5 @@
 import {
+  cloudinaryUrl,
   isStockImageId,
   resolveImageSrc,
   type ListingImageContext,
@@ -21,6 +22,11 @@ function optimizedLocalSrc(path: string, width: number) {
   return `/_next/image?url=${encodeURIComponent(path)}&w=${w}&q=70`;
 }
 
+/** Committed listing JPEGs under frontend/public/listings — serve directly, no optimizer hop. */
+function isLocalListingId(publicId: string) {
+  return publicId.startsWith("local:");
+}
+
 /** Request a bounded width so gallery/list photos are not original 8–20MB files. */
 export function listingImageSrc(
   publicId: string,
@@ -28,6 +34,7 @@ export function listingImageSrc(
   context: ListingImageContext = "card",
 ) {
   const src = resolveImageSrc(publicId, CLOUD, { width, context });
+  if (isLocalListingId(publicId)) return src;
   if (src.startsWith("/")) return optimizedLocalSrc(src, width);
   return src;
 }
@@ -37,6 +44,7 @@ export function listingImageSrcSet(
   widths = [640, 1080, 1920],
   context: ListingImageContext = "card",
 ) {
+  if (isLocalListingId(publicId)) return undefined;
   return widths.map((width) => `${listingImageSrc(publicId, width, context)} ${width}w`).join(", ");
 }
 
@@ -82,13 +90,22 @@ export function portraitSrc(publicId: string, width = 1400) {
     const id = publicId.startsWith("unsplash:") ? publicId.slice("unsplash:".length) : "photo-1560250097-0b93528c311a";
     return `https://images.unsplash.com/${id}?auto=format&fit=crop&crop=faces,top&w=${width}&q=80`;
   }
-  return listingImageSrc(publicId, width, "original");
+  return cloudinaryUrl(CLOUD, publicId, {
+    width,
+    context: "portrait",
+  });
 }
 
 export const AGENT_PORTRAIT = "/assets/agent/jignesh.jpeg";
 
-/** Always serve the committed local JPEG — reliable on production without Cloudinary. */
-export function agentPortraitSrc(_photoPublicId?: string | null, _width = 1400) {
+/**
+ * Prefer Cloudinary face-aware crop when a real upload id exists.
+ * Fall back to the committed local JPEG so the site never blanks without Cloudinary.
+ */
+export function agentPortraitSrc(photoPublicId?: string | null, width = 1400) {
+  if (photoPublicId && !isStockImageId(photoPublicId) && !photoPublicId.startsWith("local:")) {
+    return portraitSrc(photoPublicId, width);
+  }
   return AGENT_PORTRAIT;
 }
 

@@ -36,8 +36,16 @@ test("About closing line is the homepage teaser", () => {
   assert.match(ABOUT_CLOSING_LINE, /One experienced desk/);
 });
 
-test("license number appears only on About with American spelling", () => {
+test("About name/role line does not include the licence number", () => {
   const aboutBio = readFileSync(join(__dirname, "../components/about/AboutHeroBio.tsx"), "utf8");
-  assert.match(aboutBio, /License \{agent\.licenceNumber\}/);
+  assert.doesNotMatch(aboutBio, /License \{agent\.licenceNumber\}/);
   assert.doesNotMatch(aboutBio, /Licence \{agent\.licenceNumber\}/);
+  assert.match(aboutBio, /\{agent\.title\}/);
+});
+
+test("licence number remains on Privacy with American spelling", () => {
+  const privacy = readFileSync(join(__dirname, "../app/privacy/page.tsx"), "utf8");
+  assert.match(privacy, /License/);
+  assert.match(privacy, /AGENCY\.licenceNumber/);
+  assert.doesNotMatch(privacy, /Licence \{/);
 });

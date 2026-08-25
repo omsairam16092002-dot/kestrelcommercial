@@ -46,7 +46,7 @@ export function DualCtaBand({
           {lede ? <p className={`t-body-lg mt-4 ${ink ? "text-paper/80" : "text-ink/80"}`}>{lede}</p> : null}
         </div>
         {phoneActions ? (
-          <ContactDeskSummary page={page} tone="paper" />
+          <ContactDeskSummary page={page} tone={ink ? "dark" : "paper"} />
         ) : primaryHref && primaryLabel && primaryId && secondaryHref && secondaryLabel && secondaryId ? (
           <div className="flex flex-col gap-3 sm:flex-row">
             <CtaLink

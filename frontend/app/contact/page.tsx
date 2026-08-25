@@ -4,8 +4,8 @@ import { Container } from "@/components/brand/Container";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { ReasonCards, type Reason } from "@/components/brand/ReasonCards";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
-import { IconClock, IconMail, IconPhone } from "@/components/icons";
-import { ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
+import { IconClock, IconMail } from "@/components/icons";
+import { ContactClusterBar, ContactDeskSummary } from "@/components/ui/PhoneActionButtons";
 
 export const revalidate = 60;
 
@@ -19,7 +19,7 @@ const CONTACT_REASONS: Reason[] = [
     n: "01",
     t: "Call, WA or text",
     d: `${AGENCY.phone} — same Australian mobile for voice, WhatsApp and SMS.`,
-    Icon: IconPhone,
+    media: <ContactClusterBar page="contact-reasons" />,
   },
   {
     n: "02",

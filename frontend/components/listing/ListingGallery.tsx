@@ -73,7 +73,7 @@ export function ListingGallery({ property }: { property: Property }) {
     const probes = neighbors.filter(Boolean).map((img) => {
       const probe = new Image();
       probe.decoding = "async";
-      probe.srcset = listingImageSrcSet(img.publicId, [640, 1080, 1920], "gallery");
+      probe.srcset = listingImageSrcSet(img.publicId, [640, 1080, 1920], "gallery") ?? "";
       probe.sizes = "100vw";
       probe.src = listingImageSrc(img.publicId, GALLERY_WIDTH, "gallery");
       return probe;

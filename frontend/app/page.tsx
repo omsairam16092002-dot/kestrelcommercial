@@ -78,7 +78,7 @@ export default async function HomePage() {
             >
               Request appraisal
             </CtaLink>
-            <ContactDeskLine page="home-hero" className="hero-enter-delay mt-5 t-body text-paper/75" />
+            <ContactDeskLine page="home-hero" />
           </div>
         </Container>
       </section>

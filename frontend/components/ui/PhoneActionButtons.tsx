@@ -211,10 +211,10 @@ export function TextButton({
   );
 }
 
-/** One number, three actions — for footer, contact page, etc. */
+/** Same ContactClusterBar as the header — used on About, Investing, Contact, listing desk. */
 export function ContactDeskSummary({
   page,
-  tone = "dark",
+  tone = "paper",
   listing,
   onAction,
   className,
@@ -225,72 +225,14 @@ export function ContactDeskSummary({
   onAction?: () => void;
   className?: string;
 }) {
-  const wa = listingWhatsAppHref(listing);
-  const sms = agencySmsHref(listingMessage(listing));
-  const styles = {
-    dark: {
-      link: "font-semibold text-paper/85 transition-colors hover:text-tan",
-      number: "t-mono text-paper/90 transition-colors hover:text-tan",
-      sep: "text-paper/25",
-      sub: "text-paper/70",
-    },
-    light: {
-      link: "font-semibold text-paper/85 transition-colors hover:text-tan",
-      number: "t-mono text-paper transition-colors hover:text-tan",
-      sep: "text-tan/40",
-      sub: "text-paper/80",
-    },
-    paper: {
-      link: "font-semibold text-oxblood transition-colors hover:text-ink",
-      number: "t-mono text-ink transition-colors hover:text-oxblood",
-      sep: "text-mauve",
-      sub: "text-mauve",
-    },
-  } as const;
-  const s = styles[tone];
-
   return (
-    <div className={className}>
-      <a
-        href={AGENCY.phoneHref}
-        id={`cta-call-${page}-summary`}
-        className={`${s.number} text-base`}
-        aria-label={`Call ${AGENCY.phone}`}
-        onClick={() => {
-          track({ event: "cta_click", id: `cta-call-${page}-summary`, page, listing, href: AGENCY.phoneHref });
-          onAction?.();
-        }}
-      >
-        {AGENCY.phone}
-      </a>
-      <p className={`mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm ${s.sub}`}>
-        <a
-          href={wa}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={s.link}
-          onClick={() => {
-            track({ event: "cta_click", id: `cta-wa-${page}-link`, page, listing, href: wa });
-            onAction?.();
-          }}
-        >
-          WA
-        </a>
-        <span className={s.sep} aria-hidden>
-          ·
-        </span>
-        <a
-          href={sms}
-          className={s.link}
-          onClick={() => {
-            track({ event: "cta_click", id: `cta-text-${page}-link`, page, listing, href: sms });
-            onAction?.();
-          }}
-        >
-          Text
-        </a>
-      </p>
-    </div>
+    <ContactClusterBar
+      page={page}
+      listing={listing}
+      onAction={onAction}
+      className={className}
+      surface={tone === "paper" ? "paper" : "dark"}
+    />
   );
 }
 
@@ -301,25 +243,33 @@ export function ContactClusterBar({
   onAction,
   className = "",
   fullWidth = false,
+  surface = "paper",
 }: {
   page: string;
   listing?: string;
   onAction?: () => void;
   className?: string;
   fullWidth?: boolean;
+  /** `paper` = oxblood on paper (header). `dark` = tan/paper on ink or oxblood bands. */
+  surface?: "paper" | "dark";
 }) {
+  const dark = surface === "dark";
   return (
     <div
-      className={`inline-flex items-stretch border border-oxblood divide-x divide-oxblood ${className}`.trim()}
+      className={`inline-flex items-stretch border divide-x ${
+        dark ? "border-tan/50 divide-tan/50" : "border-oxblood divide-oxblood"
+      } ${fullWidth ? "w-full" : "w-fit max-w-full shrink-0 self-start"} ${className}`.trim()}
       role="group"
       aria-label="Contact the desk"
     >
       <a
         href={AGENCY.phoneHref}
         id={`cta-call-${page}-cluster`}
-        className={`t-mono flex items-center px-3 py-2 text-[13px] font-semibold tabular text-oxblood transition-colors duration-150 ease-out hover:bg-oxblood/5 ${
-          fullWidth ? "min-w-0 flex-1" : ""
-        }`}
+        className={`t-mono flex items-center px-3 py-2 text-[13px] font-semibold tabular transition-colors duration-150 ease-out ${
+          dark
+            ? "text-tan hover:bg-paper/10 hover:text-paper"
+            : "text-oxblood hover:bg-oxblood/5"
+        } ${fullWidth ? "min-w-0 flex-1" : ""}`}
         aria-label={`Call ${AGENCY.phone}`}
         onClick={() => {
           track({ event: "cta_click", id: `cta-call-${page}-cluster`, page, listing, href: AGENCY.phoneHref });
@@ -334,21 +284,18 @@ export function ContactClusterBar({
   );
 }
 
-/** Navbar contact: compact mono number on mobile top bar; full cluster on desktop. */
+/** Navbar contact: mobile = Call + WhatsApp icons; desktop = full cluster. Text stays in the drawer. */
 export function HeaderContactCluster({ page }: { page: string }) {
   return (
     <>
-      <a
-        href={AGENCY.phoneHref}
-        id={`cta-call-${page}-header-mobile`}
-        className="t-mono text-[11px] font-semibold tabular leading-none text-ink/85 transition-colors duration-150 ease-out hover:text-oxblood sm:text-[12px] lg:hidden"
-        aria-label={`Call ${AGENCY.phone}`}
-        onClick={() =>
-          track({ event: "cta_click", id: `cta-call-${page}-header-mobile`, page, href: AGENCY.phoneHref })
-        }
+      <div
+        className="inline-flex items-stretch border border-oxblood divide-x divide-oxblood lg:hidden"
+        role="group"
+        aria-label="Contact the desk"
       >
-        {AGENCY.phone}
-      </a>
+        <CallButton page={`${page}-nav`} variant="cluster-secondary" />
+        <WhatsAppActionButton page={`${page}-nav`} variant="cluster-wa" />
+      </div>
       <div className="hidden lg:block">
         <ContactClusterBar page={page} />
       </div>
@@ -388,21 +335,20 @@ export function PhoneActionButtons({
   );
 }
 
-/** Subtle inline line for heroes — secondary to primary page CTAs. */
-export function ContactDeskLine({ page, className = "t-body text-paper/75" }: { page: string; className?: string }) {
+/** Hero / secondary WhatsApp CTA — tan button with number, never louder than primary. */
+export function ContactDeskLine({
+  page,
+  className = "",
+}: {
+  page: string;
+  className?: string;
+}) {
   return (
-    <p className={className}>
-      Call, WA or text{" "}
-      <a
-        href={AGENCY.phoneHref}
-        id={`cta-call-inline-${page}`}
-        className="t-mono tabular font-semibold text-tan hover:text-paper"
-        onClick={() =>
-          track({ event: "cta_click", id: `cta-call-inline-${page}`, page, href: AGENCY.phoneHref })
-        }
-      >
-        {AGENCY.phone}
-      </a>
-    </p>
+    <WhatsAppActionButton
+      page={page}
+      variant="sharp"
+      label={`WhatsApp ${AGENCY.phone}`}
+      className={`px-5 py-3.5 ${className}`.trim()}
+    />
   );
 }

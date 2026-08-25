@@ -59,7 +59,9 @@ const PACK_PAGES: Record<string, { dir: string; files: string[] }> = {
     files: ["03.jpg", "06.jpg", "05.jpg", "02.jpg"],
   },
   "34-mitchell-street-kalkallo": {
-    dir: join(TMP_JPEG, "kalkallo-cp01a"),
+    // CP01A PDF extracts were false-positive FFD8 slices (invalid JPEG markers).
+    // TPP pages decode cleanly as Adobe APP14 JPEGs.
+    dir: join(TMP_JPEG, "kalkallo-tpp"),
     files: ["01.jpg", "02.jpg", "03.jpg"],
   },
 };
@@ -74,10 +76,20 @@ function looksLikeImage(file: string) {
   if (!existsSync(file)) return false;
   const buf = readFileSync(file);
   if (buf.length < 20_000) return false;
-  const jpeg = buf[0] === 0xff && buf[1] === 0xd8;
+  const jpeg = buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff;
+  // Reject PDF binary false-positives (e.g. FFD8 FF0F) — real JPEGs use APP0–APP15, DQT, SOF, DHT, etc.
+  const jpegMarker = jpeg ? buf[3] : 0;
+  const jpegOk =
+    jpeg &&
+    ((jpegMarker >= 0xe0 && jpegMarker <= 0xef) ||
+      jpegMarker === 0xdb ||
+      jpegMarker === 0xc0 ||
+      jpegMarker === 0xc2 ||
+      jpegMarker === 0xc4 ||
+      jpegMarker === 0xdd);
   const png = buf[0] === 0x89 && buf[1] === 0x50;
   const webp = buf.length > 12 && buf.subarray(8, 12).toString("ascii") === "WEBP";
-  return jpeg || png || webp;
+  return jpegOk || png || webp;
 }
 
 function downloadDrive(id: string, dest: string, thumbnail = false) {

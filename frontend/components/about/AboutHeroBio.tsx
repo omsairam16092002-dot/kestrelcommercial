@@ -26,15 +26,15 @@ export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: stri
         aria-hidden
       />
       <Container className="relative z-10 py-16 md:py-20 lg:py-24">
-        <div className="grid items-stretch gap-8 lg:grid-cols-[minmax(0,0.34fr)_minmax(0,0.66fr)] lg:gap-14">
-          <div className="relative isolate aspect-[4/5] overflow-hidden bg-oxblood sm:aspect-[5/6] lg:aspect-auto lg:min-h-[520px]">
+        <div className="grid items-stretch gap-8 lg:grid-cols-[minmax(0,0.46fr)_minmax(0,0.54fr)] lg:gap-12">
+          <div className="relative isolate aspect-[4/3] overflow-hidden bg-oxblood sm:aspect-[5/4] lg:aspect-auto lg:min-h-[440px]">
             <DuotoneImage
               key={portrait}
               src={portrait}
               srcSet={portraitSet}
               alt={`${agent.name}, Director of Kestrel Commercial`}
-              sizes="(min-width: 1024px) 34vw, 100vw"
-              objectPosition="top"
+              sizes="(min-width: 1024px) 46vw, 100vw"
+              objectPosition="center"
               priority
               tone="portrait"
             />
@@ -42,9 +42,7 @@ export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: stri
           <div className="flex min-h-0 flex-col justify-center">
             <p className="t-caption text-tan">About us</p>
             <h1 className="t-h1 mt-5 max-w-3xl">{agent.name}</h1>
-            <p className="t-mono mt-3 text-tan">
-              {agent.title} · License {agent.licenceNumber}
-            </p>
+            <p className="t-mono mt-3 text-tan">{agent.title}</p>
             <div className="t-body mt-8 max-w-3xl space-y-4 text-pretty text-paper/90">
               {ABOUT_BIO_PARAGRAPHS.map((para) => (
                 <p key={para.slice(0, 48)}>{para}</p>

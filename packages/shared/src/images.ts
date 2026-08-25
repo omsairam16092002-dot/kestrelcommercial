@@ -10,7 +10,7 @@ export function isLocalImageId(publicId?: string | null): boolean {
   return Boolean(publicId?.startsWith("local:"));
 }
 
-export type ListingImageContext = "gallery" | "thumb" | "card" | "flagship" | "original";
+export type ListingImageContext = "gallery" | "thumb" | "card" | "flagship" | "original" | "portrait";
 
 const CONTEXT_PRESETS: Record<
   ListingImageContext,
@@ -21,6 +21,8 @@ const CONTEXT_PRESETS: Record<
   card: { crop: "fill", gravity: "auto", aspectRatio: "4:3" },
   flagship: { crop: "fill", gravity: "auto", aspectRatio: "16:9" },
   original: { crop: "limit" },
+  /** Agent headshot — face gravity in a wider frame so the portrait reads horizontal, not a tall strip. */
+  portrait: { crop: "fill", gravity: "face", aspectRatio: "4:3" },
 };
 
 /**

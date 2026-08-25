@@ -9,6 +9,8 @@ export type Reason = {
   t: string;
   d: string;
   Icon?: ReasonIcon;
+  /** Replaces the decorative icon square — e.g. tappable Call / WA / Text cluster. */
+  media?: ReactNode;
 };
 
 export const KESTREL_REASONS: Reason[] = [
@@ -57,7 +59,9 @@ export function ReasonCards({
                 key={item.n}
                 className={`border-t-2 pt-5 ${ink ? "border-tan bg-ink" : "border-oxblood bg-paper"}`}
               >
-                {Icon ? (
+                {item.media ? (
+                  <div className="min-h-9">{item.media}</div>
+                ) : Icon ? (
                   <span className="inline-flex h-9 w-9 items-center justify-center bg-oxblood text-tan">
                     <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
                   </span>

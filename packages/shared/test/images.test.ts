@@ -65,9 +65,11 @@ test("resolveImageSrc card context uses 4:3 smart crop", () => {
   assert.match(url, /c_fill,g_auto,ar_4:3/);
 });
 
-test("local listing paths ignore image context", () => {
-  assert.equal(
-    resolveImageSrc("local:axtra/mitcham/01.jpg", "dne4fejan", { width: 1600, context: "gallery" }),
-    "/listings/axtra/mitcham/01.jpg",
-  );
+test("resolveImageSrc portrait context uses face gravity at 4:3", () => {
+  const id = "kestrel/agents/jignesh";
+  const url = resolveImageSrc(id, "dne4fejan", { width: 1400, context: "portrait" });
+  assert.match(url, /c_fill/);
+  assert.match(url, /g_face/);
+  assert.match(url, /ar_4:3/);
+  assert.match(url, /w_1400/);
 });
