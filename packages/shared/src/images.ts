@@ -21,8 +21,8 @@ const CONTEXT_PRESETS: Record<
   card: { crop: "fill", gravity: "auto", aspectRatio: "4:3" },
   flagship: { crop: "fill", gravity: "auto", aspectRatio: "16:9" },
   original: { crop: "limit" },
-  /** Agent headshot — face gravity in a wider frame so the portrait reads horizontal, not a tall strip. */
-  portrait: { crop: "fill", gravity: "face", aspectRatio: "4:3" },
+  /** Agent headshot — face gravity in a classic portrait frame. */
+  portrait: { crop: "fill", gravity: "face", aspectRatio: "4:5" },
 };
 
 /**

@@ -17,26 +17,25 @@ export function auWhatsAppDigits(phone: string): string | null {
   return null;
 }
 
+/** AU number → E.164 with +61 for tel:/sms: (e.g. +61431000038). */
+export function auE164(phone: string): string | null {
+  const digits = auWhatsAppDigits(phone);
+  return digits ? `+${digits}` : null;
+}
+
 export function telHref(phone: string): string | null {
+  const e164 = auE164(phone);
+  if (e164) return `tel:${e164}`;
   const trimmed = phone.trim();
   if (!trimmed) return null;
   const href = trimmed.replace(/[^\d+]/g, "");
   return href ? `tel:${href}` : null;
 }
 
-function auLocalDigits(phone: string): string | null {
-  const digits = phone.replace(/\D/g, "");
-  if (!digits) return null;
-  if (digits.startsWith("0") && digits.length >= 9) return digits;
-  if (digits.startsWith("61") && digits.length >= 10) return `0${digits.slice(2)}`;
-  if (digits.length >= 9 && digits.length <= 10) return `0${digits}`;
-  return digits;
-}
-
 export function smsHref(phone: string, body?: string): string | null {
-  const local = auLocalDigits(phone);
-  if (!local) return null;
-  const href = `sms:${local}`;
+  const e164 = auE164(phone);
+  if (!e164) return null;
+  const href = `sms:${e164}`;
   return body ? `${href}?body=${encodeURIComponent(body)}` : href;
 }
 

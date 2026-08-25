@@ -14,7 +14,7 @@ test("agent portrait uses Cloudinary face gravity when a real upload id exists",
   assert.match(url, /res\.cloudinary\.com\//);
   assert.match(url, /g_face/);
   assert.match(url, /c_fill/);
-  assert.match(url, /ar_4:3/);
+  assert.match(url, /ar_4:5/);
 });
 
 test("agent portrait srcSet uses Cloudinary when a real upload id exists", () => {

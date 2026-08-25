@@ -26,14 +26,14 @@ export function AboutHeroBio({ agent, portrait }: { agent: Agent; portrait: stri
         aria-hidden
       />
       <Container className="relative z-10 py-16 md:py-20 lg:py-24">
-        <div className="grid items-stretch gap-8 lg:grid-cols-[minmax(0,0.46fr)_minmax(0,0.54fr)] lg:gap-12">
-          <div className="relative isolate aspect-[4/3] overflow-hidden bg-oxblood sm:aspect-[5/4] lg:aspect-auto lg:min-h-[440px]">
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:items-center lg:gap-12">
+          <div className="relative isolate mx-auto aspect-[4/5] w-full max-w-[320px] overflow-hidden bg-oxblood sm:max-w-[360px] lg:mx-0 lg:max-w-[420px]">
             <DuotoneImage
               key={portrait}
               src={portrait}
               srcSet={portraitSet}
               alt={`${agent.name}, Director of Kestrel Commercial`}
-              sizes="(min-width: 1024px) 46vw, 100vw"
+              sizes="(min-width: 1024px) 420px, 360px"
               objectPosition="center"
               priority
               tone="portrait"

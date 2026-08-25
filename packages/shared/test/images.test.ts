@@ -65,11 +65,11 @@ test("resolveImageSrc card context uses 4:3 smart crop", () => {
   assert.match(url, /c_fill,g_auto,ar_4:3/);
 });
 
-test("resolveImageSrc portrait context uses face gravity at 4:3", () => {
+test("resolveImageSrc portrait context uses face gravity at 4:5", () => {
   const id = "kestrel/agents/jignesh";
   const url = resolveImageSrc(id, "dne4fejan", { width: 1400, context: "portrait" });
   assert.match(url, /c_fill/);
   assert.match(url, /g_face/);
-  assert.match(url, /ar_4:3/);
+  assert.match(url, /ar_4:5/);
   assert.match(url, /w_1400/);
 });
