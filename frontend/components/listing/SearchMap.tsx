@@ -6,7 +6,14 @@ import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { fullAddress, type Property } from "@kestrel/shared";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
 import { MapTileLayer } from "@/components/listing/MapTileLayer";
-import { mapIsLaidOut, safeFitBounds, safeFlyTo, safeSetView, usableLatLng } from "@/lib/leafletMap";
+import {
+  leafletMapOptions,
+  mapIsLaidOut,
+  safeFitBounds,
+  safeFlyTo,
+  safeSetView,
+  usableLatLng,
+} from "@/lib/leafletMap";
 import "leaflet/dist/leaflet.css";
 
 const MELBOURNE_WEST: [number, number] = [-37.82, 144.76];
@@ -168,6 +175,7 @@ export function SearchMap({
     <MapContainer
       center={MELBOURNE_WEST}
       zoom={11}
+      minZoom={leafletMapOptions.minZoom}
       className="kc-search-map h-full min-h-[420px] w-full"
       scrollWheelZoom
     >

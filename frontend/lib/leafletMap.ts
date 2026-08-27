@@ -1,7 +1,7 @@
-import type { Map as LeafletMap } from "leaflet";
+import type { Map as LeafletMap, MapOptions } from "leaflet";
 import { latLngPair, type Property } from "@kestrel/shared";
 
-/** Light basemap — matches Kestrel paper/oxblood palette. Requires NEXT_PUBLIC_CARTO_API_KEY in production. */
+/** Light raster style — matches Kestrel paper/oxblood palette (Positron equivalent). */
 export const CARTO_LIGHT_STYLE = "light_all";
 
 export const MAP_TILE_ATTR =
@@ -15,23 +15,34 @@ export type MapTileLayerConfig = {
   attribution: string;
   subdomains: string;
   maxZoom: number;
-  /** True when using the committed Carto key — false means OSM dev fallback. */
   usesCarto: boolean;
 };
 
-/** Carto raster tiles require a free API key — see https://carto.com/basemaps/apikey */
-export function mapTileLayerConfig(): MapTileLayerConfig {
+export const leafletMapOptions: Pick<MapOptions, "minZoom"> = {
+  minZoom: 1,
+};
+
+export function cartoApiKey(): string | undefined {
   const key = process.env.NEXT_PUBLIC_CARTO_API_KEY?.trim();
+  return key || undefined;
+}
+
+export function cartoRasterTileUrl(key: string): string {
+  return `https://{s}.basemaps.cartocdn.com/${CARTO_LIGHT_STYLE}/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(key)}`;
+}
+
+/** Carto light raster when keyed, OpenStreetMap fallback otherwise. */
+export function mapTileLayerConfig(): MapTileLayerConfig {
+  const key = cartoApiKey();
   if (key) {
     return {
-      url: `https://{s}.basemaps.cartocdn.com/${CARTO_LIGHT_STYLE}/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(key)}`,
+      url: cartoRasterTileUrl(key),
       attribution: MAP_TILE_ATTR,
       subdomains: "abcd",
       maxZoom: 20,
       usesCarto: true,
     };
   }
-  /** No key: OpenStreetMap fallback so maps work in dev; add NEXT_PUBLIC_CARTO_API_KEY on Vercel for production. */
   return {
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution: OSM_TILE_ATTR,
@@ -40,9 +51,6 @@ export function mapTileLayerConfig(): MapTileLayerConfig {
     usesCarto: false,
   };
 }
-
-/** @deprecated Use mapTileLayerConfig().url */
-export const MAP_TILE_URL = mapTileLayerConfig().url;
 
 /** Leaflet throws `Invalid LatLng (NaN, NaN)` if the pane is still 0×0 (display:none / first paint). */
 export function mapIsLaidOut(map: LeafletMap): boolean {

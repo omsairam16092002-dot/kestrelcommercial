@@ -1,15 +1,21 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mapTileLayerConfig } from "../lib/leafletMap";
+import { cartoRasterTileUrl, mapTileLayerConfig } from "../lib/leafletMap";
 
-test("mapTileLayerConfig uses Carto light tiles when NEXT_PUBLIC_CARTO_API_KEY is set", () => {
+test("cartoRasterTileUrl builds light_all raster URL with encoded key", () => {
+  const url = cartoRasterTileUrl("test key");
+  assert.match(url, /basemaps\.cartocdn\.com\/light_all/);
+  assert.match(url, /key=test%20key/);
+  assert.match(url, /\{r\}/);
+});
+
+test("mapTileLayerConfig uses Carto light raster tiles when NEXT_PUBLIC_CARTO_API_KEY is set", () => {
   const prev = process.env.NEXT_PUBLIC_CARTO_API_KEY;
   process.env.NEXT_PUBLIC_CARTO_API_KEY = "test-carto-key";
   try {
     const cfg = mapTileLayerConfig();
     assert.match(cfg.url, /basemaps\.cartocdn\.com\/light_all/);
     assert.match(cfg.url, /key=test-carto-key/);
-    assert.match(cfg.url, /\{r\}/);
     assert.equal(cfg.subdomains, "abcd");
     assert.equal(cfg.maxZoom, 20);
     assert.equal(cfg.usesCarto, true);

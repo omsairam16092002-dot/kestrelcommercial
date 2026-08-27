@@ -4,7 +4,7 @@ import L from "leaflet";
 import { MapContainer, Marker, useMap } from "react-leaflet";
 import { type Property } from "@kestrel/shared";
 import { MapTileLayer } from "@/components/listing/MapTileLayer";
-import { mapIsLaidOut, usableLatLng } from "@/lib/leafletMap";
+import { leafletMapOptions, mapIsLaidOut, usableLatLng } from "@/lib/leafletMap";
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 
@@ -60,6 +60,7 @@ export function ListingMapCanvas({ property }: { property: Property }) {
     <MapContainer
       center={pair}
       zoom={15}
+      minZoom={leafletMapOptions.minZoom}
       className="kc-search-map h-full min-h-[18rem] w-full"
       scrollWheelZoom
     >
