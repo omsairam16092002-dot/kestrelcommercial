@@ -44,7 +44,7 @@ Do not reimplement filter or badge logic in either app.
 
 | App | Platform | Required env |
 |---|---|---|
-| frontend | Vercel | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` |
+| frontend | Vercel | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `NEXT_PUBLIC_CARTO_API_KEY` |
 | backend | Railway / Render | `MONGODB_URI`, `FRONTEND_ORIGIN`, `CLOUDINARY_*`, `REDIS_URL`, `XERO_*`, `PEXA_*` |
 | db | Atlas | — |
 | redis | Upstash | `REDIS_URL` |

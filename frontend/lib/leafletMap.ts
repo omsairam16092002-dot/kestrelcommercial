@@ -1,8 +1,48 @@
 import type { Map as LeafletMap } from "leaflet";
 import { latLngPair, type Property } from "@kestrel/shared";
 
-export const MAP_TILE_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
-export const MAP_TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+/** Light basemap — matches Kestrel paper/oxblood palette. Requires NEXT_PUBLIC_CARTO_API_KEY in production. */
+export const CARTO_LIGHT_STYLE = "light_all";
+
+export const MAP_TILE_ATTR =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+export const OSM_TILE_ATTR =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+export type MapTileLayerConfig = {
+  url: string;
+  attribution: string;
+  subdomains: string;
+  maxZoom: number;
+  /** True when using the committed Carto key — false means OSM dev fallback. */
+  usesCarto: boolean;
+};
+
+/** Carto raster tiles require a free API key — see https://carto.com/basemaps/apikey */
+export function mapTileLayerConfig(): MapTileLayerConfig {
+  const key = process.env.NEXT_PUBLIC_CARTO_API_KEY?.trim();
+  if (key) {
+    return {
+      url: `https://{s}.basemaps.cartocdn.com/${CARTO_LIGHT_STYLE}/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(key)}`,
+      attribution: MAP_TILE_ATTR,
+      subdomains: "abcd",
+      maxZoom: 20,
+      usesCarto: true,
+    };
+  }
+  /** No key: OpenStreetMap fallback so maps work in dev; add NEXT_PUBLIC_CARTO_API_KEY on Vercel for production. */
+  return {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: OSM_TILE_ATTR,
+    subdomains: "abc",
+    maxZoom: 19,
+    usesCarto: false,
+  };
+}
+
+/** @deprecated Use mapTileLayerConfig().url */
+export const MAP_TILE_URL = mapTileLayerConfig().url;
 
 /** Leaflet throws `Invalid LatLng (NaN, NaN)` if the pane is still 0×0 (display:none / first paint). */
 export function mapIsLaidOut(map: LeafletMap): boolean {

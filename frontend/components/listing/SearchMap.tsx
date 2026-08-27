@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { fullAddress, type Property } from "@kestrel/shared";
 import { listingImageSrc, listingPlaceholderSrc } from "@/lib/images";
-import { mapIsLaidOut, MAP_TILE_ATTR, MAP_TILE_URL, safeFitBounds, safeFlyTo, safeSetView, usableLatLng } from "@/lib/leafletMap";
+import { MapTileLayer } from "@/components/listing/MapTileLayer";
+import { mapIsLaidOut, safeFitBounds, safeFlyTo, safeSetView, usableLatLng } from "@/lib/leafletMap";
 import "leaflet/dist/leaflet.css";
 
 const MELBOURNE_WEST: [number, number] = [-37.82, 144.76];
@@ -170,7 +171,7 @@ export function SearchMap({
       className="kc-search-map h-full min-h-[420px] w-full"
       scrollWheelZoom
     >
-      <TileLayer attribution={MAP_TILE_ATTR} url={MAP_TILE_URL} />
+      <MapTileLayer />
       <FitToResults properties={mapped} />
       <FlyToSelected property={selected} />
       {mapped.map((property, i) => (
