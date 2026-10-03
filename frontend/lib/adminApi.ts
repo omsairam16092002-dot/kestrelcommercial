@@ -352,15 +352,43 @@ export type IntegrationLog = {
   createdAt?: string | null;
 };
 
+export type ZohoStatus = {
+  configured: boolean;
+  connected: boolean;
+  orgName: string | null;
+  connectedBy: string | null;
+  connectedAt: string | null;
+  dataCentre: string;
+};
+
 export type IntegrationsStatus = {
   xero: { configured: boolean; note: string };
   pexa: { configured: boolean; note: string };
+  zoho: ZohoStatus;
   redis: boolean;
   recentLogs: IntegrationLog[];
 };
 
 export function getIntegrationsStatus() {
   return adminFetch<IntegrationsStatus>("/api/integrations/status");
+}
+
+export function disconnectZoho() {
+  return adminFetch<ZohoStatus>("/api/integrations/zoho/disconnect", { method: "POST" });
+}
+
+export function syncPendingZoho() {
+  return adminFetch<{ attempted: number; success: number; failed: number; skipped: number; remaining: number }>(
+    "/api/integrations/zoho/sync-pending",
+    { method: "POST" },
+  );
+}
+
+export function retryZohoSync(enquiryId: string) {
+  return adminFetch<{ status: "success" | "failed" | "skipped"; error?: string; reason?: string }>(
+    `/api/integrations/zoho/sync/${encodeURIComponent(enquiryId)}`,
+    { method: "POST" },
+  );
 }
 
 export function getAdminListings(query: {
@@ -370,6 +398,7 @@ export function getAdminListings(query: {
   suburb?: string;
   type?: string;
   featured?: string;
+  houseLand?: string;
   archived?: boolean;
 } = {}) {
   const qs = new URLSearchParams();
@@ -381,6 +410,10 @@ export function getAdminListings(query: {
   if (query.suburb) qs.set("suburb", query.suburb);
   if (query.type) qs.set("type", query.type);
   if (query.featured === "1") qs.set("featured", "1");
+  if (query.houseLand) {
+    qs.set("houseLand", "1");
+    if (query.houseLand !== "1" && query.houseLand !== "untagged") qs.set("package", query.houseLand);
+  }
   return adminFetch<Property[]>(`/api/properties?${qs.toString()}`);
 }
 
@@ -407,6 +440,10 @@ export async function archiveListing(id: string) {
   const saved = await adminFetch<Property>(`/api/properties/${encodeURIComponent(id)}`, { method: "DELETE" });
   await revalidatePublicSite().catch(() => undefined);
   return saved;
+}
+
+export async function restoreListing(id: string) {
+  return updateListing(id, { archived: false });
 }
 
 export async function duplicateListing(id: string) {

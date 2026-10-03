@@ -3,11 +3,16 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  HOUSE_LAND_SECTION,
+  PACKAGE_SEGMENT_OPTIONS,
   PROPERTY_TYPES,
   ZONING_OPTIONS,
+  isMarketingGalleryImage,
   propertyTypeLabel,
   type Agent,
+  type PackageSegment,
   type Property,
+  type PropertyImage,
   type PropertyStatus,
   type PropertyType,
   type TransactionSide,
@@ -17,7 +22,7 @@ import { createListing, downloadReaxml, signAndUploadImage, updateListing } from
 
 const STATUSES: PropertyStatus[] = ["for-sale", "for-lease", "under-offer", "sold", "leased"];
 
-type ImageRow = { publicId: string; isHero?: boolean; alt?: string };
+type ImageRow = PropertyImage;
 
 function slugify(address: string, suburb: string) {
   return `${address} ${suburb}`
@@ -45,6 +50,8 @@ export function ListingEditor({
   const [status, setStatus] = useState<PropertyStatus>(initial?.status ?? "for-sale");
   const [propertyType, setPropertyType] = useState<PropertyType>(initial?.propertyType ?? "warehouse");
   const [featured, setFeatured] = useState(Boolean(initial?.featured));
+  const [houseLandPackage, setHouseLandPackage] = useState(Boolean(initial?.houseLandPackage));
+  const [packageSegments, setPackageSegments] = useState<PackageSegment[]>(initial?.packageSegments ?? []);
   const [address, setAddress] = useState(initial?.address ?? "");
   const [suburb, setSuburb] = useState(initial?.suburb ?? "");
   const [state, setState] = useState(initial?.state ?? "VIC");
@@ -172,6 +179,8 @@ export function ListingEditor({
       leaseTermYears: num(leaseTermYears),
       outgoingsPa: num(outgoingsPa),
       evidenceLine: evidenceLine || null,
+      houseLandPackage,
+      packageSegments: houseLandPackage ? packageSegments : [],
       internalNotes: internalNotes || null,
       pexaWorkspaceId: pexaWorkspaceId.trim(),
       portalListingId: portalListingId.trim(),
@@ -233,6 +242,35 @@ export function ListingEditor({
             <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
             Featured on homepage
           </label>
+          <fieldset className="text-sm sm:col-span-2">
+            <legend className="sr-only">House &amp; land package</legend>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={houseLandPackage}
+                onChange={(e) => setHouseLandPackage(e.target.checked)}
+              />
+              House &amp; land package (lists under {HOUSE_LAND_SECTION.path})
+            </label>
+            {houseLandPackage ? (
+              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 pl-6" role="group" aria-label="Package suits">
+                {PACKAGE_SEGMENT_OPTIONS.map((option) => (
+                  <label key={option.value} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={packageSegments.includes(option.value)}
+                      onChange={(e) =>
+                        setPackageSegments((prev) =>
+                          e.target.checked ? [...prev, option.value] : prev.filter((v) => v !== option.value),
+                        )
+                      }
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+            ) : null}
+          </fieldset>
         </div>
       </section>
 
@@ -381,7 +419,11 @@ export function ListingEditor({
 
       <section>
         <h2 className="t-h3 text-ink">Media</h2>
-        <p className="mt-2 text-sm text-mauve">{uploading ? "Uploading…" : "Cloudinary signed upload. Set a hero. Drag order with move buttons."}</p>
+        <p className="mt-2 text-sm text-mauve">
+          {uploading
+            ? "Uploading…"
+            : "Cloudinary signed upload. Set a hero, reorder with Up / Down, and hide flyers or plans from the public gallery."}
+        </p>
         <label className="mt-4 block text-sm">
           <span className="mb-1 block text-mauve">Gallery</span>
           <input type="file" accept="image/*" multiple onChange={(e) => void onImages(e.target.files)} />
@@ -390,7 +432,37 @@ export function ListingEditor({
           {images.map((img, i) => (
             <li key={`${img.publicId}-${i}`} className="border border-oxblood/10 bg-paper p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={listingImageSrc(img.publicId, 600, "original")} alt={img.alt ?? ""} className="aspect-[4/3] w-full object-cover" />
+              <img
+                src={listingImageSrc(img.publicId, 600, "original")}
+                alt={img.alt ?? ""}
+                className={`aspect-[4/3] w-full object-cover ${isMarketingGalleryImage(img) ? "opacity-50" : ""}`}
+              />
+              {isMarketingGalleryImage(img) ? (
+                <p className="mt-2 text-xs font-semibold text-oxblood">
+                  {img.excludeFromGallery ? "Hidden from public gallery" : "Auto-hidden: looks like a flyer or plan"}
+                </p>
+              ) : null}
+              <input
+                className="kc-field mt-2 w-full px-2 py-1.5 text-xs"
+                value={img.alt ?? ""}
+                placeholder="Alt text (describe the photo)"
+                aria-label={`Alt text for image ${i + 1}`}
+                onChange={(e) =>
+                  setImages((prev) => prev.map((row, idx) => (idx === i ? { ...row, alt: e.target.value } : row)))
+                }
+              />
+              <label className="mt-2 flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={Boolean(img.excludeFromGallery)}
+                  onChange={(e) =>
+                    setImages((prev) =>
+                      prev.map((row, idx) => (idx === i ? { ...row, excludeFromGallery: e.target.checked || undefined } : row)),
+                    )
+                  }
+                />
+                Hide from public gallery
+              </label>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"

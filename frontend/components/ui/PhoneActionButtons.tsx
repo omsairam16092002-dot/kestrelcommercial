@@ -54,6 +54,7 @@ export function CallButton({
   label = AGENCY.phone,
   listing,
   onAction,
+  withIcon = false,
 }: {
   page: string;
   variant?: ContactVariant;
@@ -61,6 +62,7 @@ export function CallButton({
   label?: string;
   listing?: string;
   onAction?: () => void;
+  withIcon?: boolean;
 }) {
   const styles = {
     sharp: SHARP,
@@ -97,6 +99,11 @@ export function CallButton({
         <>
           <IconPhone className={`${variant === "sticky" ? "h-5 w-5" : "h-4 w-4"} shrink-0`} />
           <span className="sr-only">Call</span>
+        </>
+      ) : withIcon ? (
+        <>
+          <IconPhone className="h-4 w-4 shrink-0" />
+          {label}
         </>
       ) : (
         label
@@ -335,7 +342,7 @@ export function PhoneActionButtons({
   );
 }
 
-/** Hero / secondary WhatsApp CTA — tan button with number, never louder than primary. */
+/** Hero / secondary call CTA — tan button with number, never louder than primary. */
 export function ContactDeskLine({
   page,
   className = "",
@@ -344,10 +351,11 @@ export function ContactDeskLine({
   className?: string;
 }) {
   return (
-    <WhatsAppActionButton
+    <CallButton
       page={page}
       variant="sharp"
-      label={`WhatsApp ${AGENCY.phone}`}
+      label={`Call ${AGENCY.phone}`}
+      withIcon
       className={`px-5 py-3.5 ${className}`.trim()}
     />
   );

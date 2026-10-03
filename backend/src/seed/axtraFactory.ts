@@ -20,6 +20,7 @@ export type AxtraCampaign = {
   commission: string;
   pack: string;
   extraCampaign?: string;
+  houseLandPackage?: boolean;
 };
 
 export type AxtraUnit = {
@@ -80,6 +81,7 @@ export type AxtraListing = {
   leaseTermYears: number | null;
   outgoingsPa: number | null;
   evidenceLine: string | null;
+  houseLandPackage: boolean;
   internalNotes: string;
   syndicateToRealcommercial: false;
   syndicateToCommercialRealEstate: false;
@@ -192,6 +194,7 @@ export function axtraListing(campaign: AxtraCampaign, unit: AxtraUnit): AxtraLis
     leaseTermYears: unit.leaseTermYears ?? null,
     outgoingsPa: unit.outgoingsPa ?? null,
     evidenceLine: unit.evidenceLine ?? null,
+    houseLandPackage: Boolean(campaign.houseLandPackage),
     internalNotes: [
       "Axtra channel-partner stock. Confidential — do not publish this note or any commission.",
       `Commission: ${campaign.commission}.`,

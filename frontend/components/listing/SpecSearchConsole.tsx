@@ -7,9 +7,12 @@ import {
   BATHROOM_PRESETS,
   CAR_PRESETS,
   CLEAR_SPAN_PRESETS,
+  COMMERCIAL_TYPE_OPTIONS,
   DOOR_HEIGHT_PRESETS,
   FLOOR_AREA_PRESETS,
+  HOUSE_LAND_SECTION,
   LAND_AREA_PRESETS,
+  PACKAGE_SEGMENT_OPTIONS,
   PRICE_PRESETS_LEASE,
   PRICE_PRESETS_SALE,
   PROPERTY_TYPES,
@@ -27,6 +30,8 @@ type Props = {
   initial?: SpecFilters;
   variant?: "hero" | "page";
   assetCategory?: AssetCategory;
+  /** Residential search scoped to house & land packages (sale only, package dial). */
+  houseLand?: boolean;
 };
 
 function Dial({
@@ -82,9 +87,9 @@ function SpecChip({
   );
 }
 
-export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "commercial" }: Props) {
+export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "commercial", houseLand = false }: Props) {
   const router = useRouter();
-  const allowLease = assetCategory !== "development-site";
+  const allowLease = assetCategory !== "development-site" && !houseLand;
   const defaultSide: TransactionSide =
     allowLease && initial?.side === "lease" ? "lease" : "sale";
   const [side, setSide] = useState<TransactionSide>(defaultSide);
@@ -101,6 +106,7 @@ export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "
   const [power, setPower] = useState(Boolean(initial?.threePhasePower));
   const [hardstand, setHardstand] = useState(Boolean(initial?.hardstand));
   const [suburb, setSuburb] = useState(initial?.suburb ?? "");
+  const [packageSegment, setPackageSegment] = useState(initial?.packageSegment ?? "");
 
   function filtersFor(next: TransactionSide, price = maxPrice): SpecFilters {
     return {
@@ -119,14 +125,16 @@ export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "
       maxPrice: price ? Number(price) : undefined,
       threePhasePower: power || undefined,
       hardstand: hardstand || undefined,
+      packageSegment: houseLand ? ((packageSegment || undefined) as SpecFilters["packageSegment"]) : undefined,
     };
   }
 
   function goToSide(next: TransactionSide, price = maxPrice) {
     const qs = specFiltersToSearchParams(filtersFor(next, price));
     track({ event: "spec_search", id: "spec-console", page: variant, source: next });
-    const base =
-      assetCategory === "commercial"
+    const base = houseLand
+      ? HOUSE_LAND_SECTION.path
+      : assetCategory === "commercial"
         ? "/properties/commercial"
         : assetCategory === "residential"
           ? "/properties/residential"
@@ -154,7 +162,9 @@ export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "
           <p className="t-body mt-1 text-ink/70">
             {isCommercial
               ? "Floor, span, door, power — then suburb if you already know the corridor."
-              : isResidential
+              : houseLand
+                ? "Package type, beds, land and price — then suburb if you already know the estate."
+                : isResidential
                 ? "Beds, baths, cars, land and price — then suburb if you already know the pocket."
                 : "Land, zoning, permit status and price — then suburb once the shortlist is real."}
           </p>
@@ -229,9 +239,9 @@ export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "
             </Dial>
             <Dial label="Type" value={propertyType} onChange={setPropertyType}>
               <option value="">All types</option>
-              {PROPERTY_TYPES.filter((t) => ["office-warehouse", "warehouse", "showroom", "yard"].includes(t)).map((t) => (
-                <option key={t} value={t}>
-                  {propertyTypeLabel(t)}
+              {COMMERCIAL_TYPE_OPTIONS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
                 </option>
               ))}
             </Dial>
@@ -274,14 +284,25 @@ export function SpecSearchConsole({ initial, variant = "hero", assetCategory = "
                 </option>
               ))}
             </Dial>
-            <Dial label="Type" value={propertyType} onChange={setPropertyType}>
-              <option value="">All homes</option>
-              {PROPERTY_TYPES.filter((t) => ["house", "townhouse", "apartment"].includes(t)).map((t) => (
-                <option key={t} value={t}>
-                  {propertyTypeLabel(t)}
-                </option>
-              ))}
-            </Dial>
+            {houseLand ? (
+              <Dial label="Package" value={packageSegment} onChange={setPackageSegment}>
+                <option value="">All packages</option>
+                {PACKAGE_SEGMENT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Dial>
+            ) : (
+              <Dial label="Type" value={propertyType} onChange={setPropertyType}>
+                <option value="">All homes</option>
+                {PROPERTY_TYPES.filter((t) => ["house", "townhouse", "apartment"].includes(t)).map((t) => (
+                  <option key={t} value={t}>
+                    {propertyTypeLabel(t)}
+                  </option>
+                ))}
+              </Dial>
+            )}
           </>
         ) : (
           <>

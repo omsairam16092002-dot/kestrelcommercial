@@ -141,7 +141,14 @@ function SelectableMarker({
       <Popup className="kc-map-popup" closeButton={false}>
         <a href={`/listing/${property.slug}`} className="kc-map-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={property.address} />
+          <img
+            src={src}
+            alt={property.address}
+            onError={(e) => {
+              const fallback = listingPlaceholderSrc(property, 640);
+              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+            }}
+          />
           <div>
             <p className="kc-map-kicker">{property.priceLabel}</p>
             <p className="kc-map-title">{property.address}</p>

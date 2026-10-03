@@ -2,7 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
+import {
+  ASSET_CATEGORY_LABELS,
+  COMMERCIAL_TYPE_OPTIONS,
+  HOUSE_LAND_SECTION,
+  PACKAGE_SEGMENT_OPTIONS,
+} from "@kestrel/shared";
 import { Logo } from "@/components/brand/Logo";
 import { IconChevronDown, IconClose, IconMenu } from "@/components/icons";
 import { HeaderContactCluster, MobileContactPanel } from "@/components/ui/PhoneActionButtons";
@@ -15,8 +20,19 @@ const NAV = [
   { href: "/contact", label: "Contact", match: ["/contact"] },
 ];
 
+const COMMERCIAL_TYPE_LINKS = COMMERCIAL_TYPE_OPTIONS.map((option) => ({
+  label: option.label,
+  href: `${ASSET_CATEGORY_LABELS.commercial.path}?type=${option.value}`,
+}));
+
+const HOUSE_LAND_LINKS = PACKAGE_SEGMENT_OPTIONS.map((option) => ({
+  label: option.label,
+  href: `${HOUSE_LAND_SECTION.path}?package=${option.value}`,
+}));
+
 const PROPERTY_LINKS = [
-  ASSET_CATEGORY_LABELS.commercial,
+  { ...ASSET_CATEGORY_LABELS.commercial, subLinks: COMMERCIAL_TYPE_LINKS },
+  { ...HOUSE_LAND_SECTION, subLinks: HOUSE_LAND_LINKS },
   ASSET_CATEGORY_LABELS.residential,
   ASSET_CATEGORY_LABELS["development-site"],
 ];
@@ -100,14 +116,28 @@ export function Header() {
             <div className="invisible absolute left-1/2 top-full z-20 mt-5 w-[420px] -translate-x-1/2 border border-oxblood/10 bg-paper p-3 opacity-0 shadow-[0_24px_60px_rgba(42,20,24,0.14)] transition-all duration-150 group-hover:visible group-hover:opacity-100">
               <div className="grid gap-2">
                 {PROPERTY_LINKS.map((item) => (
-                  <PrefetchLink
-                    key={item.path}
-                    href={item.path}
-                    className="block border border-transparent px-4 py-3.5 transition-colors duration-150 ease-out hover:border-oxblood/10 hover:bg-white"
-                  >
-                    <p className="text-sm font-semibold text-ink">{item.title}</p>
-                    <p className="mt-1 text-xs text-mauve">{item.description}</p>
-                  </PrefetchLink>
+                  <div key={item.path}>
+                    <PrefetchLink
+                      href={item.path}
+                      className="block border border-transparent px-4 py-3.5 transition-colors duration-150 ease-out hover:border-oxblood/10 hover:bg-white"
+                    >
+                      <p className="text-sm font-semibold text-ink">{item.title}</p>
+                      <p className="mt-1 text-xs text-mauve">{item.description}</p>
+                    </PrefetchLink>
+                    {"subLinks" in item ? (
+                      <div className="flex flex-wrap gap-2 px-4 pb-3">
+                        {item.subLinks.map((sub) => (
+                          <PrefetchLink
+                            key={sub.href}
+                            href={sub.href}
+                            className="border border-oxblood/15 bg-white px-3 py-1.5 text-xs font-semibold text-oxblood transition-colors duration-150 ease-out hover:bg-oxblood hover:text-paper"
+                          >
+                            {sub.label}
+                          </PrefetchLink>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 ))}
               </div>
             </div>
@@ -193,16 +223,29 @@ export function Header() {
               </button>
               <div id="mobile-properties-links" className={`mt-2 grid gap-1 ${mobilePropertiesOpen ? "" : "hidden"}`}>
                 {PROPERTY_LINKS.map((item) => (
-                  <PrefetchLink
-                    key={item.path}
-                    href={item.path}
-                    className={`min-h-11 px-4 py-3 text-base font-semibold ${
-                      pathname === item.path ? "bg-oxblood text-paper" : "text-ink hover:bg-white"
-                    }`}
-                    onClick={closeMenu}
-                  >
-                    {item.title}
-                  </PrefetchLink>
+                  <div key={item.path} className="grid gap-1">
+                    <PrefetchLink
+                      href={item.path}
+                      className={`min-h-11 px-4 py-3 text-base font-semibold ${
+                        pathname === item.path ? "bg-oxblood text-paper" : "text-ink hover:bg-white"
+                      }`}
+                      onClick={closeMenu}
+                    >
+                      {item.title}
+                    </PrefetchLink>
+                    {"subLinks" in item
+                      ? item.subLinks.map((sub) => (
+                          <PrefetchLink
+                            key={sub.href}
+                            href={sub.href}
+                            className="min-h-11 py-3 pl-8 pr-4 text-sm font-medium text-ink/80 hover:bg-white"
+                            onClick={closeMenu}
+                          >
+                            {sub.label}
+                          </PrefetchLink>
+                        ))
+                      : null}
+                  </div>
                 ))}
               </div>
             </div>

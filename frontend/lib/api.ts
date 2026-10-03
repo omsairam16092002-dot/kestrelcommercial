@@ -73,6 +73,8 @@ export async function getProperties(filters: SpecFilters = {}): Promise<Property
   if (filters.propertyType) params.set("type", filters.propertyType);
   if (filters.threePhasePower) params.set("power", "1");
   if (filters.hardstand) params.set("hardstand", "1");
+  if (filters.houseLandPackage) params.set("houseLand", "1");
+  if (filters.packageSegment) params.set("package", filters.packageSegment);
   if (filters.featured) params.set("featured", "1");
 
   const qs = params.toString();

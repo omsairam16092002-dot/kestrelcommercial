@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { ASSET_CATEGORY_LABELS } from "@kestrel/shared";
+import { ASSET_CATEGORY_LABELS, HOUSE_LAND_SECTION } from "@kestrel/shared";
 import { getProperties } from "@/lib/api";
 import { getSiteUrl } from "@/lib/siteUrl";
 
@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/privacy",
     "/properties",
     ASSET_CATEGORY_LABELS.commercial.path,
+    HOUSE_LAND_SECTION.path,
     ASSET_CATEGORY_LABELS.residential.path,
     ASSET_CATEGORY_LABELS["development-site"].path,
   ];

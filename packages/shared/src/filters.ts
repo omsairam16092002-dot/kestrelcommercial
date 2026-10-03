@@ -1,9 +1,11 @@
 import { PROPERTY_TYPES } from "./constants";
-import { deriveAssetCategory } from "./format";
+import { deriveAssetCategory, propertyTypesForFilter } from "./format";
 import { statusesForSide } from "./status";
 import {
   ASSET_CATEGORIES,
+  PACKAGE_SEGMENTS,
   PROPERTY_STATUSES,
+  type PackageSegment,
   type Property,
   type SpecFilters,
   type TransactionSide,
@@ -66,6 +68,11 @@ export function parseSpecFilters(
   const suburb = String(get("suburb") ?? "").trim();
   const zoning = String(get("zoning") ?? "").trim().toUpperCase();
 
+  const packageRaw = String(get("package") ?? "").toLowerCase();
+  const packageSegment = (PACKAGE_SEGMENTS as readonly string[]).includes(packageRaw)
+    ? (packageRaw as PackageSegment)
+    : undefined;
+
   return {
     side,
     status: status && status.length ? status : undefined,
@@ -84,6 +91,8 @@ export function parseSpecFilters(
     propertyType,
     threePhasePower: toBool(get("power")),
     hardstand: toBool(get("hardstand")),
+    houseLandPackage: toBool(get("houseLand")),
+    packageSegment,
   };
 }
 
@@ -106,6 +115,8 @@ export function specFiltersToQuery(filters: SpecFilters): Record<string, string>
   if (filters.propertyType) q.type = filters.propertyType;
   if (filters.threePhasePower) q.power = "1";
   if (filters.hardstand) q.hardstand = "1";
+  if (filters.houseLandPackage) q.houseLand = "1";
+  if (filters.packageSegment) q.package = filters.packageSegment;
   return q;
 }
 
@@ -177,9 +188,11 @@ export function matchesSpecFilters(property: Property, filters: SpecFilters): bo
   if (filters.suburb) {
     if (!property.suburb.toLowerCase().includes(filters.suburb.toLowerCase())) return false;
   }
-  if (filters.propertyType && property.propertyType !== filters.propertyType) return false;
+  if (filters.propertyType && !propertyTypesForFilter(filters.propertyType).includes(property.propertyType)) return false;
   if (filters.threePhasePower && !property.threePhasePower) return false;
   if (filters.hardstand && !property.hardstand) return false;
+  if (filters.houseLandPackage && !property.houseLandPackage) return false;
+  if (filters.packageSegment && !property.packageSegments?.includes(filters.packageSegment)) return false;
 
   return true;
 }

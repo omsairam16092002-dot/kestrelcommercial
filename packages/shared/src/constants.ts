@@ -1,4 +1,4 @@
-import type { AssetCategory } from "./types";
+import type { AssetCategory, PackageSegment } from "./types";
 
 /** Agency identity — licence must appear on every page footer and every listing detail. */
 export const SOCIAL = {
@@ -75,6 +75,8 @@ export const PROPERTY_TYPES = [
   "development-land",
   "showroom",
   "yard",
+  "office",
+  "retail",
   "house",
   "townhouse",
   "apartment",
@@ -88,7 +90,14 @@ export const INDUSTRIAL_PROPERTY_TYPES = [
   "yard",
 ] as const;
 
-export const COMMERCIAL_PROPERTY_TYPES = [...INDUSTRIAL_PROPERTY_TYPES] as const;
+export const COMMERCIAL_PROPERTY_TYPES = [...INDUSTRIAL_PROPERTY_TYPES, "office", "retail"] as const;
+
+/** Buyer-facing commercial groups: each search option covers the stored types listed in `matches`. */
+export const COMMERCIAL_TYPE_OPTIONS = [
+  { value: "warehouse", label: "Warehouse", matches: ["warehouse", "office-warehouse", "yard"] },
+  { value: "office", label: "Office space", matches: ["office"] },
+  { value: "retail", label: "Retail shops", matches: ["retail", "showroom"] },
+] as const;
 
 export const RESIDENTIAL_PROPERTY_TYPES = ["house", "townhouse", "apartment"] as const;
 
@@ -101,7 +110,7 @@ export const ASSET_CATEGORY_LABELS: Record<
   commercial: {
     title: "Commercial & industrial",
     short: "Commercial",
-    description: "Warehouses, yards, showrooms and office stock across Melbourne west.",
+    description: "Warehouses, office space and retail shops across Melbourne.",
     path: "/properties/commercial",
   },
   residential: {
@@ -117,6 +126,21 @@ export const ASSET_CATEGORY_LABELS: Record<
     path: "/properties/development-sites",
   },
 };
+
+export const PACKAGE_SEGMENT_OPTIONS: { value: PackageSegment; label: string }[] = [
+  { value: "owner-occupied", label: "Owner occupied" },
+  { value: "investor", label: "Investor" },
+  { value: "co-living", label: "Co-Living" },
+  { value: "dual-occupancy", label: "Dual-Occupancy" },
+];
+
+/** Residential listings flagged `houseLandPackage`, browsed separately from established homes. */
+export const HOUSE_LAND_SECTION = {
+  title: "House & land packages",
+  short: "House & land",
+  description: "Owner occupied, investor, co-living and dual-occupancy packages.",
+  path: "/properties/house-and-land",
+} as const;
 
 export const FLOOR_AREA_PRESETS = [
   { label: "Any size", value: "" },

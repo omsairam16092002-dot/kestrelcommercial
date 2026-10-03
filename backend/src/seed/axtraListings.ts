@@ -483,6 +483,7 @@ const PART2 = [
       secondary: "Ngayuk College",
       commission: "$30,000 inc GST, payment term 50/50",
       pack: pack.sparrowhawk,
+      houseLandPackage: true,
     }),
     [
       { slug: "sparrowhawk-drive-beveridge-lot-526", address: "Lot 526, Sparrowhawk Drive", price: 619000, floor: 176.32, land: 368, beds: 3, baths: 2, cars: 2, specNote: "House and land package. Land $264,000 + build $355,000." },
@@ -503,6 +504,7 @@ const PART2 = [
       secondary: "Wulerrp Secondary College",
       commission: "$20,000 inc GST, payment term 50/50",
       pack: pack.ceduna,
+      houseLandPackage: true,
     }),
     [
       { slug: "ceduna-estate-clyde-north-lot-3767", address: "Lot 3767, Ceduna Estate", price: 595300, floor: 92.9, land: 168, beds: 3, baths: 1, cars: 1, specNote: "House and land package. Land $301,500 + build $293,800." },

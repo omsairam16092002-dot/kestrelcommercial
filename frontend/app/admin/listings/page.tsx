@@ -4,8 +4,12 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Property } from "@kestrel/shared";
-import { PROPERTY_TYPES, propertyTypeLabel } from "@kestrel/shared";
-import { archiveListing, downloadReaxml, duplicateListing, getAdminListings } from "@/lib/adminApi";
+import { PACKAGE_SEGMENT_OPTIONS, PROPERTY_TYPES, propertyTypeLabel } from "@kestrel/shared";
+
+function segmentLabel(value: string) {
+  return PACKAGE_SEGMENT_OPTIONS.find((option) => option.value === value)?.label ?? value;
+}
+import { archiveListing, downloadReaxml, duplicateListing, getAdminListings, restoreListing } from "@/lib/adminApi";
 import { useDesk } from "@/components/admin/DeskContext";
 
 function AdminListingsPage() {
@@ -19,20 +23,21 @@ function AdminListingsPage() {
   const [status, setStatus] = useState(searchParams.get("status") ?? "");
   const [type, setType] = useState(searchParams.get("type") ?? "");
   const [featured, setFeatured] = useState(searchParams.get("featured") ?? "");
+  const [houseLand, setHouseLand] = useState(searchParams.get("houseLand") ?? "");
   const [showArchived, setShowArchived] = useState(true);
 
   const reload = useCallback(async () => {
-    setRows(
-      await getAdminListings({
-        q: q.trim() || undefined,
-        side,
-        status: status || undefined,
-        type: type || undefined,
-        featured: featured || undefined,
-        archived: showArchived,
-      }),
-    );
-  }, [q, side, status, type, featured, showArchived]);
+    const listings = await getAdminListings({
+      q: q.trim() || undefined,
+      side,
+      status: status || undefined,
+      type: type || undefined,
+      featured: featured || undefined,
+      houseLand: houseLand || undefined,
+      archived: showArchived,
+    });
+    setRows(houseLand === "untagged" ? listings.filter((row) => !row.packageSegments?.length) : listings);
+  }, [q, side, status, type, featured, houseLand, showArchived]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -41,9 +46,10 @@ function AdminListingsPage() {
     if (status) params.set("status", status);
     if (type) params.set("type", type);
     if (featured) params.set("featured", featured);
+    if (houseLand) params.set("houseLand", houseLand);
     const next = params.toString();
     router.replace(next ? `/admin/listings?${next}` : "/admin/listings", { scroll: false });
-  }, [q, side, status, type, featured, router]);
+  }, [q, side, status, type, featured, houseLand, router]);
 
   useEffect(() => {
     reload().catch((err) => setError(err instanceof Error ? err.message : "Could not load listings."));
@@ -52,6 +58,12 @@ function AdminListingsPage() {
   async function onArchive(id: string) {
     if (!confirm("Archive this listing from the public site?")) return;
     await archiveListing(id);
+    await reload();
+    await refreshDesk();
+  }
+
+  async function onRestore(id: string) {
+    await restoreListing(id);
     await reload();
     await refreshDesk();
   }
@@ -85,7 +97,7 @@ function AdminListingsPage() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="mt-6 grid gap-3 md:grid-cols-3 xl:grid-cols-7">
         <label className="text-sm md:col-span-2">
           <span className="mb-1 block text-mauve">Search</span>
           <input className="kc-field w-full px-3 py-2" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Address, suburb, slug…" />
@@ -127,6 +139,19 @@ function AdminListingsPage() {
             <option value="1">Featured only</option>
           </select>
         </label>
+        <label className="text-sm">
+          <span className="mb-1 block text-mauve">House &amp; land</span>
+          <select className="kc-field w-full px-3 py-2" value={houseLand} onChange={(e) => setHouseLand(e.target.value)}>
+            <option value="">All listings</option>
+            <option value="1">All packages</option>
+            <option value="untagged">Packages missing buyer type</option>
+            {PACKAGE_SEGMENT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <label className="mt-3 flex items-center gap-2 text-sm text-mauve">
         <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
@@ -160,7 +185,17 @@ function AdminListingsPage() {
                   </p>
                 </td>
                 <td className="px-4 py-3 capitalize">{row.transactionSide}</td>
-                <td className="px-4 py-3">{propertyTypeLabel(row.propertyType)}</td>
+                <td className="px-4 py-3">
+                  {propertyTypeLabel(row.propertyType)}
+                  {row.houseLandPackage ? (
+                    <p className="text-xs text-mauve">
+                      H&amp;L ·{" "}
+                      {row.packageSegments?.length
+                        ? row.packageSegments.map(segmentLabel).join(", ")
+                        : <span className="text-oxblood">buyer type not set</span>}
+                    </p>
+                  ) : null}
+                </td>
                 <td className="px-4 py-3">{row.status}</td>
                 <td className="px-4 py-3 t-mono">{row.leadCount ?? 0}</td>
                 <td className="px-4 py-3 t-mono">{row.images?.length ?? 0}</td>
@@ -173,11 +208,15 @@ function AdminListingsPage() {
                     <button type="button" className="text-xs font-semibold text-oxblood" onClick={() => void onDuplicate(row.id)}>
                       Duplicate
                     </button>
-                    {!row.archived ? (
+                    {row.archived ? (
+                      <button type="button" className="text-xs font-semibold text-oxblood" onClick={() => void onRestore(row.id)}>
+                        Restore
+                      </button>
+                    ) : (
                       <button type="button" className="text-xs font-semibold text-mauve" onClick={() => void onArchive(row.id)}>
                         Archive
                       </button>
-                    ) : null}
+                    )}
                   </div>
                 </td>
               </tr>

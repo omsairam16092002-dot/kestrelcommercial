@@ -3,11 +3,13 @@ import { z } from "zod";
 import {
   ASSET_CATEGORIES,
   AGENTS,
+  PACKAGE_SEGMENTS,
   PROPERTIES,
   PROPERTY_TYPES,
   deriveAssetCategory,
   filterProperties,
   parseSpecFilters,
+  propertyTypesForFilter,
   resolveImageSrc,
   sanitizeQueryKeys,
   statusesForSide,
@@ -75,6 +77,9 @@ const propertyWriteSchema = z.object({
         publicId: z.string().min(1),
         isHero: z.boolean().optional(),
         alt: z.string().optional(),
+        width: z.number().optional(),
+        height: z.number().optional(),
+        excludeFromGallery: z.boolean().optional(),
       }),
     )
     .optional(),
@@ -88,6 +93,8 @@ const propertyWriteSchema = z.object({
   leaseTermYears: z.number().nullable().optional(),
   outgoingsPa: z.number().nullable().optional(),
   evidenceLine: z.string().nullable().optional(),
+  houseLandPackage: z.boolean().optional(),
+  packageSegments: z.array(z.enum(PACKAGE_SEGMENTS)).optional(),
   internalNotes: z.string().nullable().optional(),
   archived: z.boolean().optional(),
   pexaWorkspaceId: z.string().optional(),
@@ -110,7 +117,7 @@ function fixtureList(query: Record<string, unknown>): Property[] {
 
 /** Card/list fields only — omit long description and desk-only notes from public list responses. */
 const PUBLIC_LIST_FIELDS =
-  "slug address suburb state postcode status transactionSide priceLabel priceValue floorAreaSqm landAreaSqm clearSpanM rollerDoorM threePhasePower hardstand bedrooms bathrooms carSpaces zoning propertyType assetCategory images agentLicenceNumber featured lat lng yieldPercent leaseTermYears outgoingsPa evidenceLine archived createdAt updatedAt";
+  "slug address suburb state postcode status transactionSide priceLabel priceValue floorAreaSqm landAreaSqm clearSpanM rollerDoorM threePhasePower hardstand bedrooms bathrooms carSpaces zoning propertyType assetCategory images agentLicenceNumber featured lat lng yieldPercent leaseTermYears outgoingsPa evidenceLine houseLandPackage packageSegments archived createdAt updatedAt";
 
 propertiesRouter.get("/", optionalAuth, publicCache(), async (req, res, next) => {
   try {
@@ -134,11 +141,13 @@ propertiesRouter.get("/", optionalAuth, publicCache(), async (req, res, next) =>
     }
     if (filters.status?.length) q.status = { $in: filters.status };
     if (filters.zoning) q.zoning = filters.zoning.toUpperCase();
-    if (filters.propertyType) q.propertyType = filters.propertyType;
+    if (filters.propertyType) q.propertyType = { $in: propertyTypesForFilter(filters.propertyType) };
     if (filters.assetCategory) q.assetCategory = filters.assetCategory;
     if (filters.suburb) q.suburb = new RegExp(escapeRegex(filters.suburb), "i");
     if (filters.threePhasePower) q.threePhasePower = true;
     if (filters.hardstand) q.hardstand = true;
+    if (filters.houseLandPackage) q.houseLandPackage = true;
+    if (filters.packageSegment) q.packageSegments = filters.packageSegment;
 
     const range: Record<string, unknown> = {};
     if (filters.minFloorAreaSqm != null) range.$gte = filters.minFloorAreaSqm;

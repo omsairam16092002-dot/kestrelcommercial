@@ -36,7 +36,11 @@ export function propertyToReaxml(property: Property, agent?: Agent | null) {
       ? "Land"
       : property.propertyType === "showroom"
         ? "Showrooms/Bulky Goods"
-        : property.propertyType === "house" ||
+        : property.propertyType === "office"
+          ? "Offices"
+          : property.propertyType === "retail"
+            ? "Retail"
+            : property.propertyType === "house" ||
             property.propertyType === "townhouse" ||
             property.propertyType === "apartment" ||
             property.propertyType === "rural"

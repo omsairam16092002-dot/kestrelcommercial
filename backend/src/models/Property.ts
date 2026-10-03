@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { PACKAGE_SEGMENTS } from "@kestrel/shared";
 
 const ImageSchema = new Schema(
   {
@@ -47,6 +48,8 @@ const PropertySchema = new Schema(
         "development-land",
         "showroom",
         "yard",
+        "office",
+        "retail",
         "house",
         "townhouse",
         "apartment",
@@ -71,6 +74,8 @@ const PropertySchema = new Schema(
     leaseTermYears: { type: Number, default: null },
     outgoingsPa: { type: Number, default: null },
     evidenceLine: { type: String, default: null },
+    houseLandPackage: { type: Boolean, default: false, index: true },
+    packageSegments: { type: [String], enum: PACKAGE_SEGMENTS, default: [] },
     internalNotes: { type: String, default: "" },
     pexaWorkspaceId: { type: String, default: "" },
     portalListingId: { type: String, default: "", index: true },

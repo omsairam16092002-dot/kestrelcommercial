@@ -36,10 +36,12 @@ export function DuotoneImage({
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [current, setCurrent] = useState(src);
+  const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setCurrent(src);
+    setFailed(false);
   }, [src]);
 
   useLayoutEffect(() => {
@@ -68,7 +70,7 @@ export function DuotoneImage({
         src={current}
         alt={alt}
         sizes={sizes}
-        srcSet={srcSet}
+        srcSet={failed ? undefined : srcSet}
         width={1200}
         height={900}
         data-listing-photo=""
@@ -83,6 +85,7 @@ export function DuotoneImage({
             return;
           }
           setLoaded(false);
+          setFailed(true);
           setCurrent(next);
         }}
         className={`absolute inset-0 z-[1] h-full w-full object-cover ${grade} ${

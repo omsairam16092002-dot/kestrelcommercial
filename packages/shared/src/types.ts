@@ -16,10 +16,17 @@ export type PropertyType =
   | "development-land"
   | "showroom"
   | "yard"
+  | "office"
+  | "retail"
   | "house"
   | "townhouse"
   | "apartment"
   | "rural";
+
+export const PACKAGE_SEGMENTS = ["owner-occupied", "investor", "co-living", "dual-occupancy"] as const;
+
+/** Who a house & land package is pitched at. A listing can suit more than one. */
+export type PackageSegment = (typeof PACKAGE_SEGMENTS)[number];
 
 export const ASSET_CATEGORIES = ["commercial", "residential", "development-site"] as const;
 
@@ -129,6 +136,8 @@ export interface Property {
   outgoingsPa?: number | null;
   /** One-line sold/leased result for flagship case studies. */
   evidenceLine?: string | null;
+  houseLandPackage?: boolean;
+  packageSegments?: PackageSegment[];
   /** Desk only — stripped from public listing JSON. */
   internalNotes?: string | null;
   archived?: boolean;
@@ -295,6 +304,8 @@ export interface SpecFilters {
   threePhasePower?: boolean;
   hardstand?: boolean;
   featured?: boolean;
+  houseLandPackage?: boolean;
+  packageSegment?: PackageSegment;
 }
 
 export const SPEC_FILTER_QUERY_KEYS = [
@@ -315,6 +326,8 @@ export const SPEC_FILTER_QUERY_KEYS = [
   "type",
   "power",
   "hardstand",
+  "houseLand",
+  "package",
 ] as const;
 
 export type SpecFilterQueryKey = (typeof SPEC_FILTER_QUERY_KEYS)[number];

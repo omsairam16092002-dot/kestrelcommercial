@@ -1,4 +1,5 @@
 import {
+  COMMERCIAL_TYPE_OPTIONS,
   DEVELOPMENT_PROPERTY_TYPES,
   INDUSTRIAL_PROPERTY_TYPES,
   RESIDENTIAL_PROPERTY_TYPES,
@@ -59,6 +60,10 @@ export function propertyTypeLabel(type: PropertyType): string {
       return "Showroom";
     case "yard":
       return "Yard";
+    case "office":
+      return "Office space";
+    case "retail":
+      return "Retail shop";
     case "house":
       return "House";
     case "townhouse":
@@ -70,6 +75,12 @@ export function propertyTypeLabel(type: PropertyType): string {
     default:
       return type;
   }
+}
+
+/** Stored property types a `type` search filter covers. Commercial groups expand; anything else matches exactly. */
+export function propertyTypesForFilter(type: PropertyType): PropertyType[] {
+  const group = COMMERCIAL_TYPE_OPTIONS.find((option) => option.value === type);
+  return group ? [...group.matches] : [type];
 }
 
 export function isIndustrialPropertyType(type: PropertyType): boolean {

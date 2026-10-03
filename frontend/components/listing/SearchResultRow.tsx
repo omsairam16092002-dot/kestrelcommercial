@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { isClosedListing, listingSearchSpecs, type Property } from "@kestrel/shared";
 import { StatusStamp } from "@/components/brand/StatusStamp";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
@@ -22,8 +23,11 @@ export function SearchResultRow({
 }) {
   const hero = property.images.find((i) => i.isHero) ?? property.images[0];
   const href = `/listing/${property.slug}`;
-  const imageSrc = hero ? listingImageSrc(hero.publicId, 640, "card") : listingPlaceholderSrc(property, 640);
-  const imageSrcSet = hero ? listingImageSrcSet(hero.publicId, [320, 640, 800], "card") : undefined;
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [hero?.publicId]);
+  const useHero = hero && !failed;
+  const imageSrc = useHero ? listingImageSrc(hero.publicId, 640, "card") : listingPlaceholderSrc(property, 640);
+  const imageSrcSet = useHero ? listingImageSrcSet(hero.publicId, [320, 640, 800], "card") : undefined;
 
   return (
     <article
@@ -50,6 +54,7 @@ export function SearchResultRow({
           alt={hero?.alt ?? property.address}
           loading="eager"
           decoding="async"
+          onError={() => setFailed(true)}
           className="h-full w-full object-cover"
         />
         <span className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center bg-oxblood t-mono text-[10px] text-paper">

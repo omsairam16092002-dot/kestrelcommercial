@@ -13,6 +13,7 @@ const PUBLIC_PATHS = [
   "/properties",
   "/properties/commercial",
   "/properties/residential",
+  "/properties/house-and-land",
   "/properties/development-sites",
 ];
 

@@ -2,6 +2,7 @@ import {
   normalizePropertyStatus,
   deriveAssetCategory,
   type Agent,
+  type PackageSegment,
   type Property,
   type TransactionSide,
 } from "@kestrel/shared";
@@ -66,6 +67,8 @@ export function serializeProperty(
     leaseTermYears: (doc.leaseTermYears as number | null) ?? null,
     outgoingsPa: (doc.outgoingsPa as number | null) ?? null,
     evidenceLine: (doc.evidenceLine as string | null) ?? null,
+    houseLandPackage: Boolean(doc.houseLandPackage),
+    packageSegments: Array.isArray(doc.packageSegments) ? (doc.packageSegments as PackageSegment[]) : [],
     ...(opts?.includeInternal
       ? { internalNotes: String(doc.internalNotes ?? "") || null }
       : {}),

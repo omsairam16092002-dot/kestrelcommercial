@@ -115,6 +115,14 @@ export function Footer() {
         </div>
       </Container>
 
+      <div className="border-t border-paper/10">
+        <Container className="py-5">
+          <p id="footer-copyright" className="text-xs text-paper/60">
+            Copyright © 2026 {AGENCY.tradingName}. All rights reserved.
+          </p>
+        </Container>
+      </div>
+
       <div className="h-[4.75rem] md:hidden" aria-hidden />
     </footer>
   );

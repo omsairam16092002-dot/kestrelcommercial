@@ -2,18 +2,23 @@ import { CtaLink } from "@/components/ui/CtaLink";
 import { IconSearch } from "@/components/icons";
 import { PhoneActionButtons } from "@/components/ui/PhoneActionButtons";
 
+export type EmptyStateAlternate = { href: string; label: string };
+
 export function EmptyState({
   side,
   page = side === "lease" ? "lease" : "buy",
   resetHref = side === "lease" ? "/lease" : "/buy",
   title = "Widen the span. Or call the desk.",
   body = "Nothing on the grid clears that combination of floor, span, zone and price. Most occupiers over-specify height — drop the span first.",
+  alternate,
 }: {
   side: "sale" | "lease";
   page?: string;
   resetHref?: string;
   title?: string;
   body?: string;
+  /** Closest search that does have stock, e.g. the same type on the other side. */
+  alternate?: EmptyStateAlternate | null;
 }) {
   return (
     <div className="surface px-6 py-14 text-center md:px-10">
@@ -23,10 +28,22 @@ export function EmptyState({
       <p className="t-caption mt-5 text-oxblood">No match on that spec</p>
       <h2 className="t-h2 mt-3 text-ink">{title}</h2>
       <p className="t-body mx-auto mt-4 max-w-lg text-ink/75">{body}</p>
+      {alternate ? (
+        <p className="mt-8">
+          <CtaLink
+            href={alternate.href}
+            id={`cta-empty-${side}-alternate`}
+            page={page}
+            className="btn-sharp inline-flex items-center justify-center bg-oxblood px-6 text-paper hover:bg-ink"
+          >
+            {alternate.label} →
+          </CtaLink>
+        </p>
+      ) : null}
       <PhoneActionButtons
         page={page}
         variant="sharp"
-        className="mt-8 inline-flex flex-wrap items-center justify-center gap-2"
+        className={`${alternate ? "mt-4" : "mt-8"} inline-flex flex-wrap items-center justify-center gap-2`}
       />
       <p className="mt-4">
         <CtaLink
