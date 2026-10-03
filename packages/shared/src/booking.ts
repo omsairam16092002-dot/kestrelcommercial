@@ -1,4 +1,4 @@
-import type { BookingKind, BookingSettings, BookingSlot } from "./types";
+import type { BookingKind, BookingMode, BookingSettings, BookingSlot } from "./types";
 
 export const BOOKING_TIMEZONE = "Australia/Melbourne";
 
@@ -12,7 +12,7 @@ export const BOOKING_KIND_OPTIONS: { value: BookingKind; label: string; minutesH
   {
     value: "meeting",
     label: "Meeting",
-    minutesHint: "Office or phone",
+    minutesHint: "Online, office or phone",
     blurb: "Talk through a requirement, an investment brief or a lease.",
   },
   {
@@ -32,7 +32,20 @@ export const DEFAULT_BOOKING_SETTINGS: BookingSettings = {
   maxDaysAhead: 21,
   hours: [1, 2, 3, 4, 5].map((day) => ({ day, start: "09:00", end: "17:00" })),
   blackoutDates: [],
-  meetingLocation: "17 Jolimont Road, Point Cook VIC 3030 — or by phone",
+  meetingLocation: "17 Jolimont Road, Point Cook VIC 3030",
+};
+
+export const MEETING_MODE_OPTIONS: { value: Extract<BookingMode, "online" | "office" | "phone">; label: string; hint: string }[] = [
+  { value: "online", label: "Online", hint: "Video call on Zoho Meeting — link sent straight away" },
+  { value: "office", label: "At the office", hint: "Point Cook office" },
+  { value: "phone", label: "Phone call", hint: "Jignesh calls your mobile" },
+];
+
+export const BOOKING_MODE_LABELS: Record<BookingMode, string> = {
+  online: "Online (Zoho Meeting)",
+  office: "At the office",
+  phone: "Phone call",
+  onsite: "On site",
 };
 
 export const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;

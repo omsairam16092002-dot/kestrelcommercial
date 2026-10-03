@@ -92,6 +92,11 @@ export const BOOKING_STATUSES = ["confirmed", "cancelled", "completed", "no-show
 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 
+/** How a booking happens. Meetings are online, at the office or by phone; inspections and appraisals are on site. */
+export const BOOKING_MODES = ["online", "office", "phone", "onsite"] as const;
+
+export type BookingMode = (typeof BOOKING_MODES)[number];
+
 /** A recurring weekly window. `day` is 0 (Sunday) – 6 (Saturday); times are HH:MM in the booking timezone. */
 export interface BookingHours {
   day: number;
@@ -131,6 +136,11 @@ export interface Booking {
   propertySlug?: string | null;
   propertyLabel?: string | null;
   location?: string;
+  mode: BookingMode;
+  /** Zoho Meeting join link for online meetings. */
+  meetingUrl?: string | null;
+  /** Zoho Meeting host (start) link — desk only. */
+  meetingHostUrl?: string | null;
   enquiryId?: string | null;
   contactId?: string | null;
   zohoEventId?: string | null;

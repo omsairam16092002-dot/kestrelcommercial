@@ -34,7 +34,16 @@ import { IntegrationCredentialModel } from "../models/IntegrationCredential";
 import { SyncLogModel } from "../models/SyncLog";
 import { propertyLabelFor } from "./deskEnquiry";
 
-const SCOPES = "ZohoCRM.modules.ALL,ZohoCRM.org.READ";
+/** CRM for leads and meetings; Meeting for online meeting links; Calendar free/busy so bookings avoid busy times. */
+export const MEETING_SCOPES = [
+  "ZohoMeeting.meeting.CREATE",
+  "ZohoMeeting.meeting.READ",
+  "ZohoMeeting.meeting.UPDATE",
+  "ZohoMeeting.meeting.DELETE",
+  "ZohoMeeting.manageOrg.READ",
+];
+export const CALENDAR_SCOPES = ["ZohoCalendar.freebusy.READ"];
+const SCOPES = ["ZohoCRM.modules.ALL", "ZohoCRM.org.READ", ...MEETING_SCOPES, ...CALENDAR_SCOPES].join(",");
 const API_VERSION = "v8";
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -99,6 +108,7 @@ type Credential = {
   refreshTokenEnc: string;
   accountsServer: string;
   apiDomain: string;
+  scope?: string;
   orgName?: string;
   connectedBy?: string;
   connectedAt?: Date;
@@ -258,6 +268,17 @@ async function session(): Promise<{ apiDomain: string; token: string } | null> {
   accessCache = { token: token.access_token, expiresAt: Date.now() + ((token.expires_in ?? 3600) - 120) * 1000 };
   return { apiDomain: cred.apiDomain, token: token.access_token };
 }
+
+/** Live access token plus the credential details other Zoho services (Meeting, Calendar) need. */
+export async function zohoContext() {
+  const cred = await loadCredential();
+  if (!cred) return null;
+  const sess = await session();
+  if (!sess) return null;
+  return { ...sess, accountsServer: cred.accountsServer, scope: cred.scope ?? "", orgName: cred.orgName ?? "" };
+}
+
+export { crmFetch as zohoCrmFetch };
 
 export async function zohoStatus() {
   const cred = await loadCredential();
@@ -525,6 +546,7 @@ export async function updateBookingInZoho(bookingId: string) {
         {
           Start_DateTime: zonedIsoWithOffset(new Date(booking.startAt)),
           End_DateTime: zonedIsoWithOffset(new Date(booking.endAt)),
+          ...(booking.location ? { Venue: booking.location } : {}),
         },
       ],
     }),

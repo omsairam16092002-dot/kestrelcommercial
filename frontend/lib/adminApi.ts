@@ -221,8 +221,17 @@ export function getAdminBookingSlots(id: string) {
   return adminFetch<{ slots: BookingSlot[] }>(`/api/bookings/admin/${encodeURIComponent(id)}/slots?days=21`);
 }
 
+export type ZohoWorkspaceStatus = {
+  meeting: boolean;
+  calendar: boolean;
+  needsReconnect: boolean;
+  calendarEmail: string | null;
+  lastCalendarError: { message: string; at: string } | null;
+  lastMeetingError: { message: string; at: string } | null;
+};
+
 export function getBookingSettings() {
-  return adminFetch<{ settings: BookingSettings }>("/api/bookings/admin/settings");
+  return adminFetch<{ settings: BookingSettings; zoho?: ZohoWorkspaceStatus }>("/api/bookings/admin/settings");
 }
 
 export function saveBookingSettings(settings: BookingSettings) {
@@ -437,6 +446,7 @@ export type ZohoStatus = {
   connectedBy: string | null;
   connectedAt: string | null;
   dataCentre: string;
+  workspace?: ZohoWorkspaceStatus;
 };
 
 export type IntegrationsStatus = {

@@ -242,6 +242,19 @@ export default function AdminSettingsPage() {
                 ? `Client keys are set for data centre ${zoho.dataCentre}. Connect once with the Zoho admin account to start sending enquiries.`
                 : "Set ZOHO_CLIENT_ID and ZOHO_CLIENT_SECRET in backend .env (and on Render), then Connect."}
           </p>
+          {zoho?.connected && zoho.workspace ? (
+            <ul className="mt-3 space-y-1 text-sm">
+              <li className={zoho.workspace.calendar ? "text-ink" : "text-mauve"}>
+                {zoho.workspace.calendar ? "✓" : "○"} Zoho Calendar — booking slots skip your busy times
+              </li>
+              <li className={zoho.workspace.meeting ? "text-ink" : "text-mauve"}>
+                {zoho.workspace.meeting ? "✓" : "○"} Zoho Meeting — online meetings get a video link automatically
+              </li>
+              {zoho.workspace.needsReconnect ? (
+                <li className="font-semibold text-oxblood">Click Reconnect Zoho and approve the new Calendar and Meeting permissions.</li>
+              ) : null}
+            </ul>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-2">
             {zoho?.configured ? (
               <button

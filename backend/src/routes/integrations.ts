@@ -22,6 +22,7 @@ import {
   zohoAuthorizeUrl,
   zohoStatus,
 } from "../services/zoho";
+import { zohoWorkspaceStatus } from "../services/zohoWorkspace";
 import { SyncLogModel } from "../models/SyncLog";
 import { isDbConnected } from "../db/mongoose";
 import { readAuth } from "../middleware/requireAuth";
@@ -56,7 +57,7 @@ integrationsRouter.get("/status", requireAuth, async (_req, res, next) => {
           ? "Credentials present. Connect to start OAuth. Token exchange is still stubbed until the PEXA app is live."
           : "Set PEXA_CLIENT_ID / SECRET in backend .env, then Connect. Token exchange is still stubbed until the PEXA app is live.",
       },
-      zoho: await zohoStatus(),
+      zoho: { ...(await zohoStatus()), workspace: await zohoWorkspaceStatus() },
       redis: Boolean(env.redisUrl),
       recentLogs: logs.map((log) => ({
         id: String(log._id),
@@ -142,7 +143,7 @@ integrationsRouter.get("/zoho/callback", async (req, res) => {
       type: "integration.connect",
       entityType: "integration",
       entityId: "zoho",
-      summary: `Connected Zoho CRM${orgName ? ` (${orgName})` : ""}`,
+      summary: `Connected Zoho (CRM, Meeting, Calendar)${orgName ? ` · ${orgName}` : ""}`,
       by: user.name || user.email,
     });
     res.redirect(settingsRedirect("connected"));

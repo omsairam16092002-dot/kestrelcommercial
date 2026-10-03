@@ -2,13 +2,17 @@ import { randomBytes } from "crypto";
 import {
   AGENCY,
   BOOKING_KIND_OPTIONS,
+  BOOKING_MODE_LABELS,
   DEFAULT_BOOKING_SETTINGS,
+  addDaysToDate,
   computeBookingSlots,
   formatBookingWhen,
   zonedDateString,
   zonedTimeString,
+  zonedTimeToUtc,
   type Booking,
   type BookingKind,
+  type BookingMode,
   type BookingSettings,
   type BookingStatus,
   type EnquiryTopic,
@@ -27,6 +31,7 @@ import { buildIcs } from "./ics";
 import { sendEmail } from "./sendEmail";
 import { markFirstResponse } from "./speedToLead";
 import { queueBookingZohoUpdate } from "./zoho";
+import { createZohoMeeting, deleteZohoMeeting, updateZohoMeeting, zohoBusyWindows } from "./zohoWorkspace";
 
 type BookingDoc = {
   _id: unknown;
@@ -41,6 +46,10 @@ type BookingDoc = {
   notes?: string;
   propertySlug?: string | null;
   location?: string;
+  mode?: BookingMode;
+  zohoMeetingKey?: string;
+  meetingUrl?: string;
+  meetingHostUrl?: string;
   enquiryId?: unknown;
   contactId?: unknown;
   manageToken: string;
@@ -95,19 +104,42 @@ async function busyWindows(from: Date, to: Date, excludeId?: string) {
   return rows.map((r) => ({ start: new Date(r.startAt), end: new Date(r.endAt) }));
 }
 
-export async function listOpenSlots(options: { from?: string; days?: number; excludeId?: string } = {}) {
+/** The owner's Zoho Calendar + CRM meetings, minus the booking being moved (its own event / meeting). */
+async function externalBusy(from: Date, to: Date, excludeId: string | undefined, fresh: boolean) {
+  let excludeEventIds: string[] = [];
+  let ignore: { start: Date; end: Date }[] = [];
+  if (excludeId && isDbConnected()) {
+    const own = (await BookingModel.findById(excludeId).select("startAt endAt zohoEventId").lean()) as
+      | { startAt: Date; endAt: Date; zohoEventId?: string }
+      | null;
+    if (own) {
+      excludeEventIds = own.zohoEventId ? [own.zohoEventId] : [];
+      ignore = [{ start: new Date(own.startAt), end: new Date(own.endAt) }];
+    }
+  }
+  return zohoBusyWindows(from, to, { fresh, excludeEventIds, ignore }).catch(() => []);
+}
+
+export async function listOpenSlots(options: { from?: string; days?: number; excludeId?: string; fresh?: boolean } = {}) {
   const settings = await getBookingSettings();
   const now = new Date();
   const from = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const to = new Date(now.getTime() + (settings.maxDaysAhead + 2) * 24 * 60 * 60 * 1000);
-  const busy = isDbConnected() ? await busyWindows(from, to, options.excludeId) : [];
-  const slots = computeBookingSlots(settings, busy, now, { from: options.from, days: options.days });
+  /* A fresh check (confirming a booking) only needs the requested days; listings share one cached window. */
+  const narrow = options.fresh && options.from;
+  const zohoFrom = narrow ? zonedTimeToUtc(addDaysToDate(options.from as string, -1), "00:00") : from;
+  const zohoTo = narrow ? zonedTimeToUtc(addDaysToDate(options.from as string, (options.days ?? 1) + 1), "00:00") : to;
+  const [own, external] = await Promise.all([
+    isDbConnected() ? busyWindows(from, to, options.excludeId) : Promise.resolve([]),
+    externalBusy(zohoFrom, zohoTo, options.excludeId, Boolean(options.fresh)),
+  ]);
+  const slots = computeBookingSlots(settings, [...own, ...external], now, { from: options.from, days: options.days });
   return { settings, slots };
 }
 
 async function assertSlotOpen(start: Date, excludeId?: string) {
   const date = zonedDateString(start);
-  const { settings, slots } = await listOpenSlots({ from: date, days: 1, excludeId });
+  const { settings, slots } = await listOpenSlots({ from: date, days: 1, excludeId, fresh: true });
   if (!settings.enabled) throw new HttpError(409, "Online booking is paused. Call or WhatsApp the desk to book.");
   const slot = slots.find((s) => new Date(s.start).getTime() === start.getTime());
   if (!slot) throw new HttpError(409, "That time has just been taken or is no longer available. Pick another time.");
@@ -138,6 +170,9 @@ export async function serializeBooking(doc: BookingDoc, label?: string | null): 
     propertySlug: doc.propertySlug ?? null,
     propertyLabel,
     location: doc.location ?? "",
+    mode: bookingMode(doc),
+    meetingUrl: doc.meetingUrl || null,
+    meetingHostUrl: doc.meetingHostUrl || null,
     enquiryId: doc.enquiryId ? String(doc.enquiryId) : null,
     contactId: doc.contactId ? String(doc.contactId) : null,
     zohoEventId: doc.zohoEventId || null,
@@ -159,13 +194,28 @@ export async function publicBooking(doc: BookingDoc) {
     propertySlug: full.propertySlug,
     propertyLabel: full.propertyLabel,
     location: full.location,
+    mode: full.mode,
+    modeLabel: BOOKING_MODE_LABELS[full.mode],
+    meetingUrl: full.status === "confirmed" ? full.meetingUrl : null,
   };
 }
 
-function calendarFile(doc: BookingDoc, label: string | null, opts: { cancelled?: boolean; sequence?: number } = {}) {
-  const summary = `${kindLabel(doc.kind)}${label ? ` · ${label}` : ""} — ${AGENCY.tradingName}`;
+export function bookingMode(doc: Pick<BookingDoc, "kind" | "mode">): BookingMode {
+  if (doc.mode) return doc.mode;
+  return doc.kind === "meeting" ? "office" : "onsite";
+}
+
+function calendarFile(doc: BookingDoc, label: string | null, opts: { cancelled?: boolean; sequence?: number; host?: boolean } = {}) {
+  const summary = opts.host
+    ? `${kindLabel(doc.kind)} · ${doc.name}${label ? ` · ${label}` : ""}`
+    : `${kindLabel(doc.kind)}${label ? ` · ${label}` : ""} — ${AGENCY.tradingName}`;
+  const mode = bookingMode(doc);
   const description = [
-    `${kindLabel(doc.kind)} with ${AGENCY.licenceHolder}, ${AGENCY.tradingName}.`,
+    opts.host ? `${doc.name}${doc.company ? `, ${doc.company}` : ""} · ${doc.phone || ""} ${doc.email || ""}`.trim() : `${kindLabel(doc.kind)} with ${AGENCY.licenceHolder}, ${AGENCY.tradingName}.`,
+    opts.host && doc.meetingHostUrl ? `Start the meeting (host): ${doc.meetingHostUrl}` : null,
+    doc.meetingUrl ? `Join the online meeting (Zoho Meeting): ${doc.meetingUrl}` : null,
+    mode === "online" && !doc.meetingUrl ? "Online meeting — the link will be emailed to you." : null,
+    mode === "phone" ? (opts.host ? `Call ${doc.phone || "the client"}.` : `Jignesh will call you on ${doc.phone || "your mobile"}.`) : null,
     label ? `Property: ${label}` : null,
     `Reschedule or cancel: ${manageUrl(doc.manageToken)}`,
     `Phone / WhatsApp: ${AGENCY.phone}`,
@@ -178,8 +228,8 @@ function calendarFile(doc: BookingDoc, label: string | null, opts: { cancelled?:
     end: new Date(doc.endAt),
     summary,
     description,
-    location: doc.location || undefined,
-    url: manageUrl(doc.manageToken),
+    location: doc.meetingUrl || doc.location || undefined,
+    url: doc.meetingUrl || manageUrl(doc.manageToken),
     sequence: opts.sequence ?? (doc.history?.length ?? 0),
     cancelled: opts.cancelled,
     organizerName: AGENCY.licenceHolder,
@@ -210,19 +260,34 @@ async function emailClient(doc: BookingDoc, label: string | null, notice: Notice
     cancelled: "This booking has been cancelled. If that was a mistake, pick a new time below.",
     reminder: `A quick reminder of your ${kind.toLowerCase()} with Jignesh Jhanjaria.`,
   };
+  const mode = bookingMode(doc);
+  const live = notice !== "cancelled";
+  const join = live && doc.meetingUrl ? doc.meetingUrl : null;
+  const howTo =
+    !live ? null
+    : join ? "It's a Zoho Meeting video call — open the link at the time from your browser or the Zoho Meeting app. No account needed."
+    : mode === "online" ? "It's an online meeting — Jignesh will email you the video link before the meeting."
+    : mode === "phone" ? `Jignesh will call you on ${doc.phone || "your mobile"} at this time.`
+    : null;
+  const manage = { label: "Reschedule or cancel", href: manageUrl(doc.manageToken) };
   const { html, text } = renderEmail({
     eyebrow: kind,
     heading: headings[notice],
-    paragraphs: [intro[notice]],
+    paragraphs: [intro[notice], howTo].filter((p): p is string => Boolean(p)),
     details: [
       ["When", when],
+      ["How", doc.kind === "meeting" ? BOOKING_MODE_LABELS[mode] : null],
       ["Property", label],
-      ["Where", doc.location || null],
+      ["Where", join ? null : doc.location || null],
+      ["Meeting link", join],
     ],
     cta:
       notice === "cancelled"
         ? { label: "Book a new time", href: doc.propertySlug ? siteUrl(`/listing/${doc.propertySlug}#inspect`) : siteUrl("/book") }
-        : { label: "Reschedule or cancel", href: manageUrl(doc.manageToken) },
+        : join
+          ? { label: "Join the meeting", href: join }
+          : manage,
+    secondary: join ? manage : undefined,
   });
   const subjects: Record<Notice, string> = {
     confirmed: `Confirmed: ${kind} — ${when}`,
@@ -250,6 +315,8 @@ async function emailDesk(doc: BookingDoc, label: string | null, notice: Exclude<
   const when = formatBookingWhen(new Date(doc.startAt).toISOString());
   const kind = kindLabel(doc.kind);
   const verbs = { confirmed: "New booking", rescheduled: "Booking moved", cancelled: "Booking cancelled" } as const;
+  const mode = bookingMode(doc);
+  const live = notice !== "cancelled";
   const { html, text } = renderEmail({
     eyebrow: verbs[notice],
     heading: `${kind} · ${doc.name}`,
@@ -257,9 +324,16 @@ async function emailDesk(doc: BookingDoc, label: string | null, notice: Exclude<
       notice === "confirmed"
         ? "Booked online. The calendar file is attached — open it to add this to your calendar."
         : `${notice === "cancelled" ? "Cancelled" : "Rescheduled"} by ${by === "public" ? "the client" : by}.`,
-    ],
+      live && mode === "online" && !doc.meetingUrl
+        ? "⚠ The Zoho Meeting link could not be created automatically. Create one in Zoho Meeting and email it to the client."
+        : null,
+      live && mode === "phone" ? `Call ${doc.name.split(/\s+/)[0]} on ${doc.phone || "their mobile"} at this time.` : null,
+    ].filter((p): p is string => Boolean(p)),
     details: [
       ["When", when],
+      ["How", doc.kind === "meeting" ? BOOKING_MODE_LABELS[mode] : null],
+      ["Start meeting (host)", live ? doc.meetingHostUrl || null : null],
+      ["Client join link", live ? doc.meetingUrl || null : null],
       ["Property", label],
       ["Name", doc.name],
       ["Company", doc.company || null],
@@ -278,7 +352,9 @@ async function emailDesk(doc: BookingDoc, label: string | null, notice: Exclude<
     html,
     enquiryId: doc.enquiryId ? String(doc.enquiryId) : null,
     bookingId: String(doc._id),
-    attachments: [{ filename: "booking.ics", content: calendarFile(doc, label, { cancelled: notice === "cancelled" }), contentType: "text/calendar" }],
+    attachments: [
+      { filename: "booking.ics", content: calendarFile(doc, label, { cancelled: notice === "cancelled", host: true }), contentType: "text/calendar" },
+    ],
   });
 }
 
@@ -291,7 +367,34 @@ export type CreateBookingInput = {
   company?: string;
   notes?: string;
   propertySlug?: string | null;
+  mode?: BookingMode;
 };
+
+function meetingInput(doc: Pick<BookingDoc, "kind" | "name" | "company" | "notes" | "startAt" | "endAt" | "email">, label: string | null) {
+  return {
+    topic: `${kindLabel(doc.kind)} · ${doc.name}${doc.company ? ` (${doc.company})` : ""} — ${AGENCY.tradingName}`,
+    agenda: [label ? `Property: ${label}` : null, doc.notes || null, `With ${AGENCY.licenceHolder}, ${AGENCY.tradingName}`]
+      .filter(Boolean)
+      .join("\n"),
+    start: new Date(doc.startAt),
+    end: new Date(doc.endAt),
+    participantEmail: doc.email || undefined,
+  };
+}
+
+/** Attach a Zoho Meeting to an online booking. Returns false when Zoho could not create one. */
+async function attachOnlineMeeting(booking: InstanceType<typeof BookingModel>, label: string | null) {
+  const meeting = await createZohoMeeting(meetingInput(booking.toObject() as BookingDoc, label));
+  if (!meeting) {
+    booking.location = "Online meeting — link to follow by email";
+    return false;
+  }
+  booking.zohoMeetingKey = meeting.meetingKey;
+  booking.meetingUrl = meeting.joinUrl;
+  booking.meetingHostUrl = meeting.hostUrl;
+  booking.location = `Zoho Meeting — ${meeting.joinUrl}`;
+  return true;
+}
 
 const TOPIC_FOR_KIND: Record<BookingKind, EnquiryTopic> = {
   inspection: "buying-or-leasing",
@@ -321,7 +424,13 @@ export async function createBooking(input: CreateBookingInput) {
   }
 
   const { settings, slot } = await assertSlotOpen(start);
-  const location = input.kind === "meeting" ? settings.meetingLocation : label || "";
+  const mode: BookingMode = input.kind === "meeting" ? (input.mode && input.mode !== "onsite" ? input.mode : "office") : "onsite";
+  const phone = (input.phone || "").trim();
+  const location =
+    mode === "online" ? "Online meeting"
+    : mode === "phone" ? `Phone call — Jignesh will call ${phone || "you"}`
+    : mode === "office" ? settings.meetingLocation.replace(/\s*[—–-]\s*or by phone\s*$/i, "")
+    : label || "";
 
   let booking;
   try {
@@ -337,6 +446,7 @@ export async function createBooking(input: CreateBookingInput) {
       notes: (input.notes || "").trim(),
       propertySlug,
       location,
+      mode,
       manageToken: randomBytes(24).toString("hex"),
     });
   } catch (err) {
@@ -344,11 +454,19 @@ export async function createBooking(input: CreateBookingInput) {
     throw err;
   }
 
+  /* Before the desk enquiry, so the Zoho CRM meeting it creates carries the join link as its venue. */
+  if (mode === "online") {
+    const ok = await attachOnlineMeeting(booking, label);
+    if (!ok) booking.history.push({ text: "Zoho Meeting link could not be created — send one manually", at: new Date(), by: "system" });
+    await booking.save();
+  }
+
   const when = formatBookingWhen(slot.start);
   const startLocal = new Date(slot.start);
   const message = [
-    `Booked online: ${kindLabel(input.kind)} — ${when}.`,
+    `Booked online: ${kindLabel(input.kind)}${input.kind === "meeting" ? ` (${BOOKING_MODE_LABELS[mode]})` : ""} — ${when}.`,
     label ? `Property: ${label}` : null,
+    booking.meetingUrl ? `Join link: ${booking.meetingUrl}` : null,
     input.notes?.trim() ? `\n${input.notes.trim()}` : null,
   ]
     .filter(Boolean)
@@ -423,6 +541,16 @@ export async function rescheduleBooking(id: string, startIso: string, by: string
     if (isDuplicateKey(err)) throw new HttpError(409, "That time has just been taken. Pick another time.");
     throw err;
   }
+  if (bookingMode(booking) === "online") {
+    const label = booking.propertySlug ? ((await propertyLabelFor(booking.propertySlug)) ?? booking.propertySlug) : null;
+    if (booking.zohoMeetingKey) {
+      const moved = await updateZohoMeeting(booking.zohoMeetingKey, meetingInput(booking.toObject() as BookingDoc, label));
+      if (!moved) booking.history.push({ text: "Zoho Meeting time could not be updated — move it in Zoho Meeting", at: new Date(), by: "system" });
+    } else {
+      await attachOnlineMeeting(booking, label);
+    }
+    await booking.save();
+  }
   await afterChange(booking.toObject() as BookingDoc, "rescheduled", by);
   return booking.toObject() as BookingDoc;
 }
@@ -433,6 +561,14 @@ export async function cancelBooking(id: string, by: string) {
   if (booking.status === "cancelled") return booking.toObject() as BookingDoc;
   booking.status = "cancelled";
   booking.history.push({ text: "Cancelled", at: new Date(), by });
+  if (booking.zohoMeetingKey) {
+    if (await deleteZohoMeeting(booking.zohoMeetingKey)) {
+      booking.zohoMeetingKey = "";
+      booking.meetingHostUrl = "";
+    } else {
+      booking.history.push({ text: "Zoho Meeting could not be deleted — remove it in Zoho Meeting", at: new Date(), by: "system" });
+    }
+  }
   await booking.save();
   await afterChange(booking.toObject() as BookingDoc, "cancelled", by);
   return booking.toObject() as BookingDoc;

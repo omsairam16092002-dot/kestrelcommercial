@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { BOOKING_KINDS, BOOKING_STATUSES } from "@kestrel/shared";
+import { BOOKING_KINDS, BOOKING_MODES, BOOKING_STATUSES } from "@kestrel/shared";
 import { isDbConnected } from "../db/mongoose";
 import { HttpError } from "../middleware/errorHandler";
 import { rateLimit } from "../middleware/rateLimit";
@@ -21,6 +21,7 @@ import {
   serializeBooking,
   setBookingOutcome,
 } from "../services/bookings";
+import { onlineMeetingsAvailable, zohoWorkspaceStatus } from "../services/zohoWorkspace";
 
 export const bookingsRouter = Router();
 
@@ -39,14 +40,15 @@ bookingsRouter.get("/slots", async (req, res, next) => {
   try {
     const from = dateParam.parse(typeof req.query.from === "string" ? req.query.from : undefined);
     const days = Math.min(Math.max(Number(req.query.days) || 14, 1), 42);
-    const { settings, slots } = await listOpenSlots({ from, days });
+    const [{ settings, slots }, onlineMeetings] = await Promise.all([listOpenSlots({ from, days }), onlineMeetingsAvailable()]);
     res.setHeader("Cache-Control", "no-store");
     res.json({
       enabled: settings.enabled,
       timezone: settings.timezone,
       slotMinutes: settings.slotMinutes,
       maxDaysAhead: settings.maxDaysAhead,
-      meetingLocation: settings.meetingLocation,
+      meetingLocation: settings.meetingLocation.replace(/\s*[—–-]\s*or by phone\s*$/i, ""),
+      onlineMeetings,
       slots,
     });
   } catch (err) {
@@ -74,6 +76,7 @@ const createSchema = z
       .optional()
       .nullable()
       .transform((v) => (v ? v : null)),
+    mode: z.enum(BOOKING_MODES).optional(),
     /** Honeypot — real people never fill this in. */
     website: z.string().optional(),
   })
@@ -181,7 +184,8 @@ const settingsSchema = z
 
 bookingsRouter.get("/admin/settings", requireAuth, async (_req, res, next) => {
   try {
-    res.json({ settings: await getBookingSettings() });
+    const [settings, zoho] = await Promise.all([getBookingSettings(), zohoWorkspaceStatus()]);
+    res.json({ settings, zoho });
   } catch (err) {
     next(err);
   }

@@ -5,6 +5,7 @@ import {
   parseSpecFilters,
   type Agent,
   type BookingKind,
+  type BookingMode,
   type BookingSlot,
   type BookingStatus,
   type EnquiryIntent,
@@ -202,6 +203,10 @@ export type PublicBooking = {
   propertySlug: string | null;
   propertyLabel: string | null;
   location: string;
+  mode?: BookingMode;
+  modeLabel?: string;
+  /** Zoho Meeting join link for online meetings. */
+  meetingUrl?: string | null;
 };
 
 export type SlotsResponse = {
@@ -210,6 +215,8 @@ export type SlotsResponse = {
   slotMinutes: number;
   maxDaysAhead?: number;
   meetingLocation?: string;
+  /** Zoho Meeting is connected, so "Online" can be offered for meetings. */
+  onlineMeetings?: boolean;
   slots: BookingSlot[];
 };
 
@@ -231,6 +238,7 @@ export function createBooking(body: {
   company?: string;
   notes?: string;
   propertySlug?: string | null;
+  mode?: BookingMode;
   website?: string;
 }) {
   return sendJson<{ ok: true; booking: PublicBooking; manageToken: string; manageUrl: string; enquiryId: string | null }>(

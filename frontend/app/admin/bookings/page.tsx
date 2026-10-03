@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   BOOKING_KIND_OPTIONS,
+  BOOKING_MODE_LABELS,
   WEEKDAY_LABELS,
   formatBookingDay,
   formatBookingTime,
@@ -18,6 +19,7 @@ import {
   getBookingSettings,
   patchAdminBooking,
   saveBookingSettings,
+  type ZohoWorkspaceStatus,
 } from "@/lib/adminApi";
 import { useDesk } from "@/components/admin/DeskContext";
 import { SlotPicker } from "@/components/booking/SlotPicker";
@@ -161,17 +163,48 @@ export default function AdminBookingsPage() {
                                 b.propertyLabel
                               )}
                             </p>
+                          ) : b.kind === "meeting" ? (
+                            <p className="mt-1 text-sm text-ink">
+                              {BOOKING_MODE_LABELS[b.mode ?? "office"]}
+                              {b.mode === "online" && !b.meetingUrl && b.status === "confirmed" ? (
+                                <span className="ml-2 text-xs font-semibold text-oxblood">No meeting link — send one manually</span>
+                              ) : b.mode !== "online" && b.location ? (
+                                <span className="text-mauve"> · {b.location}</span>
+                              ) : null}
+                            </p>
                           ) : (
                             <p className="mt-1 text-sm text-mauve">{b.location}</p>
                           )}
                           <p className="mt-1 text-xs text-mauve">
                             {[b.phone, b.email].filter(Boolean).join(" · ")}
-                            {b.zohoEventId ? " · In Zoho" : ""}
+                            {b.zohoEventId ? " · In Zoho CRM" : ""}
+                            {b.meetingUrl ? " · Zoho Meeting" : ""}
                           </p>
                           {b.notes ? <p className="mt-2 max-w-xl whitespace-pre-line text-sm text-ink/80">“{b.notes}”</p> : null}
                         </div>
                         {b.status === "confirmed" ? (
                           <div className="flex flex-wrap gap-2">
+                            {!past && (b.meetingHostUrl || b.meetingUrl) ? (
+                              <a
+                                href={b.meetingHostUrl || b.meetingUrl || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-sharp bg-oxblood text-paper hover:bg-ink"
+                                title="Opens Zoho Meeting as the host"
+                              >
+                                Start meeting
+                              </a>
+                            ) : null}
+                            {!past && b.meetingUrl ? (
+                              <button
+                                type="button"
+                                onClick={() => void navigator.clipboard?.writeText(b.meetingUrl ?? "")}
+                                className="btn-sharp border border-oxblood/20 text-ink hover:border-oxblood"
+                                title={b.meetingUrl}
+                              >
+                                Copy join link
+                              </button>
+                            ) : null}
                             {tel ? (
                               <a href={tel} className="btn-sharp border border-oxblood text-oxblood hover:bg-oxblood hover:text-paper">
                                 Call
@@ -257,16 +290,64 @@ export default function AdminBookingsPage() {
   );
 }
 
+function ZohoLinkPanel({ zoho }: { zoho: ZohoWorkspaceStatus | null }) {
+  if (!zoho) return null;
+  const row = (on: boolean, title: string, detail: string, warn?: string | null) => (
+    <li className="flex items-start gap-3">
+      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${on && !warn ? "bg-emerald-600" : on ? "bg-amber-500" : "bg-mauve/50"}`} aria-hidden="true" />
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-ink">{title}</span>
+        <span className="block text-xs text-mauve">{detail}</span>
+        {warn ? <span className="mt-0.5 block break-words text-xs text-oxblood">{warn}</span> : null}
+      </span>
+    </li>
+  );
+  return (
+    <div className="mt-6 border border-oxblood/10 bg-paper p-4">
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {row(
+          zoho.calendar,
+          zoho.calendar ? "Checking your Zoho Calendar" : "Zoho Calendar not linked",
+          zoho.calendar
+            ? `Busy times in ${zoho.calendarEmail ?? "your Zoho Calendar"} and Zoho CRM meetings are hidden from clients.`
+            : "Only website bookings block times. Reconnect Zoho to also hide your calendar's busy times.",
+          zoho.lastCalendarError?.message,
+        )}
+        {row(
+          zoho.meeting,
+          zoho.meeting ? "Online meetings on Zoho Meeting" : "Zoho Meeting not linked",
+          zoho.meeting
+            ? "Clients can pick “Online” — a Zoho Meeting link is created, moved and cancelled with the booking."
+            : "The “Online” option is hidden on the website until Zoho Meeting is linked.",
+          zoho.lastMeetingError?.message,
+        )}
+      </ul>
+      {zoho.needsReconnect ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-oxblood/10 pt-4">
+          <p className="text-sm text-ink">Zoho needs one more permission for Calendar and Meeting.</p>
+          <a href="/api/integrations/zoho/connect" className="btn-sharp bg-oxblood text-paper hover:bg-ink">
+            Reconnect Zoho
+          </a>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function AvailabilityEditor() {
   const [settings, setSettings] = useState<BookingSettings | null>(null);
   const [blackout, setBlackout] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [zoho, setZoho] = useState<ZohoWorkspaceStatus | null>(null);
 
   useEffect(() => {
     getBookingSettings()
-      .then((d) => setSettings(d.settings))
+      .then((d) => {
+        setSettings(d.settings);
+        setZoho(d.zoho ?? null);
+      })
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load availability."));
   }, []);
 
@@ -329,6 +410,8 @@ function AvailabilityEditor() {
           Online booking on
         </label>
       </div>
+
+      <ZohoLinkPanel zoho={zoho} />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         <div>

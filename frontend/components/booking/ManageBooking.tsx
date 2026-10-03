@@ -112,10 +112,25 @@ export function ManageBooking({ token }: { token: string }) {
             </dd>
           </div>
         ) : null}
-        {booking.location ? (
+        {booking.kind === "meeting" && booking.modeLabel ? (
+          <div>
+            <dt className="t-caption text-mauve">How</dt>
+            <dd className="mt-1 text-ink">{booking.modeLabel}</dd>
+          </div>
+        ) : null}
+        {booking.meetingUrl ? (
+          <div>
+            <dt className="t-caption text-mauve">Meeting link</dt>
+            <dd className="mt-1 break-all">
+              <a href={booking.meetingUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-oxblood underline underline-offset-2">
+                {booking.meetingUrl}
+              </a>
+            </dd>
+          </div>
+        ) : booking.location ? (
           <div>
             <dt className="t-caption text-mauve">Where</dt>
-            <dd className="mt-1 text-ink">{booking.location}</dd>
+            <dd className="mt-1 break-words text-ink">{booking.location}</dd>
           </div>
         ) : null}
         <div>
@@ -136,8 +151,16 @@ export function ManageBooking({ token }: { token: string }) {
       ) : null}
 
       {upcoming && mode === "view" ? (
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <a href={bookingIcsUrl(token)} className="btn-sharp bg-oxblood text-paper hover:bg-ink">
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          {booking.meetingUrl ? (
+            <a href={booking.meetingUrl} target="_blank" rel="noopener noreferrer" className="btn-sharp bg-oxblood text-paper hover:bg-ink">
+              Join online meeting
+            </a>
+          ) : null}
+          <a
+            href={bookingIcsUrl(token)}
+            className={`btn-sharp ${booking.meetingUrl ? "bg-tan text-ink hover:bg-paper" : "bg-oxblood text-paper hover:bg-ink"}`}
+          >
             Add to calendar
           </a>
           <button type="button" onClick={() => setMode("reschedule")} className="btn-sharp bg-tan text-ink hover:bg-paper">

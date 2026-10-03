@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { BOOKING_KINDS, BOOKING_STATUSES } from "@kestrel/shared";
+import { BOOKING_KINDS, BOOKING_MODES, BOOKING_STATUSES } from "@kestrel/shared";
 
 const BookingSchema = new Schema(
   {
@@ -14,6 +14,11 @@ const BookingSchema = new Schema(
     notes: { type: String, default: "" },
     propertySlug: { type: String, default: null, index: true },
     location: { type: String, default: "" },
+    mode: { type: String, enum: BOOKING_MODES, default: "onsite" },
+    /** Zoho Meeting session for online meetings. */
+    zohoMeetingKey: { type: String, default: "" },
+    meetingUrl: { type: String, default: "" },
+    meetingHostUrl: { type: String, default: "" },
     enquiryId: { type: Schema.Types.ObjectId, ref: "Enquiry", default: null, index: true },
     contactId: { type: Schema.Types.ObjectId, ref: "Contact", default: null, index: true },
     /** Capability token for the public reschedule / cancel page. */

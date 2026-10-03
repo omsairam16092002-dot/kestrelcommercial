@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useState } from "react";
 import { usePathname } from "next/navigation";
-import { AGENCY, formatBookingWhen, type BookingKind } from "@kestrel/shared";
+import { AGENCY, MEETING_MODE_OPTIONS, formatBookingWhen, type BookingKind, type BookingMode } from "@kestrel/shared";
 import { bookingIcsUrl, createBooking, getBookingSlots, type PublicBooking } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { unlockDocuments } from "@/lib/documents";
@@ -30,8 +30,19 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
   const [pending, setPending] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [done, setDone] = useState<{ booking: PublicBooking; manageToken: string } | null>(null);
+  const [onlineOk, setOnlineOk] = useState(false);
+  const [officeAddress, setOfficeAddress] = useState("");
+  const [pickedMode, setPickedMode] = useState<BookingMode | null>(null);
+  const isMeeting = kind === "meeting";
+  const mode: BookingMode = !isMeeting ? "onsite" : pickedMode ?? (onlineOk ? "online" : "office");
+  const modeOptions = MEETING_MODE_OPTIONS.filter((o) => o.value !== "online" || onlineOk);
 
-  const loadSlots = useCallback(() => getBookingSlots({ days: 21 }), []);
+  const loadSlots = useCallback(async () => {
+    const res = await getBookingSlots({ days: 21 });
+    setOnlineOk(Boolean(res.onlineMeetings));
+    setOfficeAddress(res.meetingLocation ?? "");
+    return res;
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -52,6 +63,7 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
         company: company.trim() || undefined,
         notes: notes.trim() || undefined,
         propertySlug: propertySlug ?? null,
+        mode: isMeeting ? mode : undefined,
         website,
       });
       track({ event: "form_success", id: formId, page, listing: propertySlug, source: kind });
@@ -76,11 +88,31 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
         <p className="t-caption text-oxblood">{done.booking.kindLabel} booked</p>
         <h3 className="t-h2 mt-2 text-ink">{formatBookingWhen(done.booking.startAt)}</h3>
         {done.booking.propertyLabel ? <p className="mt-2 text-sm font-semibold text-ink">{done.booking.propertyLabel}</p> : null}
+        {isMeeting && done.booking.modeLabel ? <p className="mt-2 text-sm font-semibold text-ink">{done.booking.modeLabel}</p> : null}
         <p className="t-body mt-3 text-ink/80">
           A confirmation is on its way to {email.trim()} with a calendar invite. Jignesh has the booking in his diary.
+          {done.booking.mode === "online" && !done.booking.meetingUrl ? " The video link will follow by email." : null}
+          {done.booking.mode === "phone" ? ` Jignesh will call you on ${phone.trim()}.` : null}
         </p>
+        {done.booking.meetingUrl ? (
+          <div className="mt-4 border border-oxblood/15 bg-oxblood/5 px-4 py-3">
+            <p className="t-caption text-oxblood">Your meeting link</p>
+            <a href={done.booking.meetingUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block break-all text-sm font-medium text-ink underline underline-offset-2">
+              {done.booking.meetingUrl}
+            </a>
+            <p className="mt-1 text-xs text-mauve">Zoho Meeting — opens in your browser, no account needed.</p>
+          </div>
+        ) : null}
         <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-          <a href={bookingIcsUrl(done.manageToken)} className="btn-sharp bg-oxblood text-paper hover:bg-ink">
+          {done.booking.meetingUrl ? (
+            <a href={done.booking.meetingUrl} target="_blank" rel="noopener noreferrer" className="btn-sharp bg-oxblood text-paper hover:bg-ink">
+              Join meeting
+            </a>
+          ) : null}
+          <a
+            href={bookingIcsUrl(done.manageToken)}
+            className={`btn-sharp ${done.booking.meetingUrl ? "bg-tan text-ink hover:bg-paper" : "bg-oxblood text-paper hover:bg-ink"}`}
+          >
             Add to calendar
           </a>
           <a href={`/booking/${done.manageToken}`} className="btn-sharp bg-tan text-ink hover:bg-paper">
@@ -104,8 +136,38 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
         </p>
       ) : null}
 
+      {isMeeting ? (
+        <fieldset className="min-w-0">
+          <legend className="mb-2 block text-sm font-medium text-ink">How would you like to meet?</legend>
+          <div className={`grid min-w-0 gap-2 ${modeOptions.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`} role="radiogroup">
+            {modeOptions.map((option) => {
+              const active = mode === option.value;
+              const hint = option.value === "office" && officeAddress ? officeAddress : option.hint;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  id={`${formId}-mode-${option.value}`}
+                  onClick={() => setPickedMode(option.value)}
+                  className={`min-w-0 border px-3 py-2.5 text-left transition-colors ${
+                    active ? "border-oxblood bg-oxblood text-paper" : `border-oxblood/15 text-ink hover:border-oxblood ${tone === "paper" ? "bg-paper" : "bg-white"}`
+                  }`}
+                >
+                  <span className="block text-sm font-semibold">{option.label}</span>
+                  <span className={`mt-0.5 block text-xs leading-snug ${active ? "text-paper/80" : "text-mauve"}`}>{hint}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      ) : null}
+
       <fieldset className="min-w-0">
-        <legend className="mb-2 block text-sm font-medium text-ink">Choose a time</legend>
+        <legend className="mb-2 block text-sm font-medium text-ink">
+          Choose a time{isMeeting ? <span className="font-normal text-mauve"> — live from Jignesh&apos;s calendar</span> : null}
+        </legend>
         <SlotPicker load={loadSlots} selected={start} onSelect={setStart} idPrefix={formId} tone={tone} refreshKey={refreshKey} />
       </fieldset>
 
@@ -113,6 +175,7 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
         <>
           <p className="bg-oxblood/5 px-4 py-3 text-sm text-ink" aria-live="polite">
             <span className="font-semibold">{formatBookingWhen(start)}</span>
+            {isMeeting ? <span className="text-ink/70"> · {modeOptions.find((o) => o.value === mode)?.label ?? ""}</span> : null}
           </p>
           <label className="block" htmlFor={`${formId}-name`}>
             <span className="mb-1.5 block text-sm font-medium text-ink">Name</span>
