@@ -14,8 +14,8 @@ export default function BookPage({ searchParams }: { searchParams: Record<string
 
   return (
     <div className="bg-paper">
-      <Container className="grid gap-10 py-14 md:grid-cols-12 md:py-20">
-        <div className="md:col-span-5">
+      <Container className="grid gap-10 py-10 md:grid-cols-12 md:py-20">
+        <div className="min-w-0 md:col-span-5">
           <p className="eyebrow-rule t-caption text-oxblood">Book a time</p>
           <h1 className="t-h1 mt-5 text-ink">Pick a time. It is locked in.</h1>
           <p className="t-body mt-5 max-w-md text-pretty text-mauve">
@@ -35,7 +35,7 @@ export default function BookPage({ searchParams }: { searchParams: Record<string
             </div>
           </dl>
         </div>
-        <div className="premium-panel bg-paper p-6 md:col-span-7 md:p-9">
+        <div className="premium-panel min-w-0 p-4 sm:p-6 md:col-span-7 md:p-9">
           <BookChooser initial={kind} />
         </div>
       </Container>

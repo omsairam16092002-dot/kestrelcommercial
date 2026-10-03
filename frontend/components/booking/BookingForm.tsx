@@ -96,7 +96,7 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
   }`;
 
   return (
-    <form id={formId} onSubmit={onSubmit} className="space-y-4" noValidate>
+    <form id={formId} onSubmit={onSubmit} className="min-w-0 space-y-4" noValidate>
       {propertyLabel ? (
         <p className="border-l-2 border-oxblood pl-3">
           <span className="t-caption text-oxblood">Property</span>
@@ -104,7 +104,7 @@ export function BookingForm({ kind, propertySlug, propertyLabel, formId = `book-
         </p>
       ) : null}
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className="mb-2 block text-sm font-medium text-ink">Choose a time</legend>
         <SlotPicker load={loadSlots} selected={start} onSelect={setStart} idPrefix={formId} tone={tone} refreshKey={refreshKey} />
       </fieldset>

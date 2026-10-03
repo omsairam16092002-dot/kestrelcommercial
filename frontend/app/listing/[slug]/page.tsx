@@ -135,7 +135,7 @@ export default async function ListingPage({ params }: { params: { slug: string }
             <ListingMap property={property} />
           </div>
 
-          <div className="lg:col-span-4 lg:sticky lg:top-24">
+          <div className="min-w-0 lg:col-span-4 lg:sticky lg:top-24">
             <ListingLeadDesk property={property} agent={agent} />
           </div>
         </div>

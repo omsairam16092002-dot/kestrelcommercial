@@ -46,7 +46,7 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
   }
 
   return (
-    <div id="enquire" className="premium-panel scroll-mt-24 p-5 sm:p-6">
+    <div id="enquire" className="premium-panel min-w-0 scroll-mt-24 p-5 sm:p-6">
       <div id="inspect" className="sr-only" />
       <div id="brochure" className="sr-only" />
 
