@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { fullAddress, type Agent, type EnquiryIntent, type Property } from "@kestrel/shared";
 import { EnquiryForm } from "@/components/forms/EnquiryForm";
+import { BookingForm } from "@/components/booking/BookingForm";
 import { Monogram } from "@/components/brand/Monogram";
 import { useUnlockedDocuments } from "@/lib/documents";
 import { apiUrl } from "@/lib/api";
@@ -24,6 +25,8 @@ function tabFromHash(): EnquiryIntent {
 
 export function ListingLeadDesk({ property, agent }: { property: Property; agent: Agent }) {
   const [tab, setTab] = useState<EnquiryIntent>("inspection");
+  const [requestMode, setRequestMode] = useState(false);
+  const bookable = property.status === "for-sale" || property.status === "for-lease";
   const leadId = useUnlockedDocuments(property.slug);
   const label = fullAddress(property);
   const photo = agentPortraitSrc(agent.photoPublicId, 240);
@@ -102,7 +105,9 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
 
       <p className="mt-4 text-sm text-mauve">
         {tab === "inspection"
-          ? "Qualified occupiers only. Pick a window and we will confirm."
+          ? bookable && !requestMode
+            ? "Pick a time that suits — it is locked in instantly, with a calendar invite."
+            : "Qualified occupiers only. Pick a window and we will confirm."
           : tab === "brochure"
             ? "Unlock the IM and floorplan. One form. Desk is pinged immediately."
             : "Tell us what you need. One business day, sooner on WhatsApp."}
@@ -130,6 +135,24 @@ export function ListingLeadDesk({ property, agent }: { property: Property; agent
               <p className="text-sm text-mauve">Floorplan not on file — request it on inspection.</p>
             )}
           </div>
+        ) : tab === "inspection" && bookable && !requestMode ? (
+          <>
+            <BookingForm
+              kind="inspection"
+              propertySlug={property.slug}
+              propertyLabel={label}
+              formId={`book-inspection-${property.slug}`}
+              tone="paper"
+              submitLabel="Book inspection"
+            />
+            <button
+              type="button"
+              onClick={() => setRequestMode(true)}
+              className="mt-3 text-sm font-medium text-oxblood underline underline-offset-2"
+            >
+              None of these times work? Send a request instead
+            </button>
+          </>
         ) : (
           <EnquiryForm
             key={tab}

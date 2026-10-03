@@ -4,6 +4,9 @@ import {
   filterProperties,
   parseSpecFilters,
   type Agent,
+  type BookingKind,
+  type BookingSlot,
+  type BookingStatus,
   type EnquiryIntent,
   type EnquirySource,
   type EnquiryTopic,
@@ -170,6 +173,136 @@ export async function subscribeNewsletter(email: string): Promise<{ ok: true; pe
     throw new Error(err.error ?? "Could not subscribe");
   }
   return res.json();
+}
+
+async function sendJson<T>(path: string, method: string, body?: unknown, fallback = "Something went wrong"): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(`${fallback}. Check your connection and try again.`);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((data as { error?: string }).error ?? fallback);
+  return data as T;
+}
+
+export type PublicBooking = {
+  kind: BookingKind;
+  kindLabel: string;
+  status: BookingStatus;
+  startAt: string;
+  endAt: string;
+  name: string;
+  propertySlug: string | null;
+  propertyLabel: string | null;
+  location: string;
+};
+
+export type SlotsResponse = {
+  enabled: boolean;
+  timezone: string;
+  slotMinutes: number;
+  maxDaysAhead?: number;
+  meetingLocation?: string;
+  slots: BookingSlot[];
+};
+
+export function getBookingSlots(opts: { from?: string; days?: number; token?: string } = {}) {
+  const params = new URLSearchParams();
+  if (opts.from) params.set("from", opts.from);
+  if (opts.days) params.set("days", String(opts.days));
+  const qs = params.toString();
+  const base = opts.token ? `/api/bookings/manage/${encodeURIComponent(opts.token)}/slots` : "/api/bookings/slots";
+  return sendJson<SlotsResponse>(`${base}${qs ? `?${qs}` : ""}`, "GET", undefined, "Could not load available times");
+}
+
+export function createBooking(body: {
+  kind: BookingKind;
+  start: string;
+  name: string;
+  email: string;
+  phone: string;
+  company?: string;
+  notes?: string;
+  propertySlug?: string | null;
+  website?: string;
+}) {
+  return sendJson<{ ok: true; booking: PublicBooking; manageToken: string; manageUrl: string; enquiryId: string | null }>(
+    "/api/bookings",
+    "POST",
+    body,
+    "Could not book that time",
+  );
+}
+
+export function getManagedBooking(token: string) {
+  return sendJson<{ booking: PublicBooking }>(`/api/bookings/manage/${encodeURIComponent(token)}`, "GET", undefined, "Could not load that booking");
+}
+
+export function rescheduleManagedBooking(token: string, start: string) {
+  return sendJson<{ booking: PublicBooking }>(
+    `/api/bookings/manage/${encodeURIComponent(token)}/reschedule`,
+    "POST",
+    { start },
+    "Could not move that booking",
+  );
+}
+
+export function cancelManagedBooking(token: string) {
+  return sendJson<{ booking: PublicBooking }>(
+    `/api/bookings/manage/${encodeURIComponent(token)}/cancel`,
+    "POST",
+    {},
+    "Could not cancel that booking",
+  );
+}
+
+export function bookingIcsUrl(token: string) {
+  return apiUrl(`/api/bookings/manage/${encodeURIComponent(token)}/ics`);
+}
+
+export type PublicAlert = {
+  label: string;
+  summary: string;
+  searchPath: string;
+  email: string;
+  confirmed: boolean;
+  active: boolean;
+  emailAlerts: boolean;
+};
+
+export type AlertMatch = { id: string; slug: string; address: string; priceLabel?: string; status: string };
+
+export function createPropertyAlert(body: { email: string; name?: string; query: string; label?: string; website?: string }) {
+  return sendJson<{ ok: true; status: "confirm-sent" | "already-active" | "reactivated" }>(
+    "/api/alerts",
+    "POST",
+    body,
+    "Could not save that alert",
+  );
+}
+
+export function getPropertyAlert(token: string) {
+  return sendJson<{ alert: PublicAlert; matches: AlertMatch[] }>(
+    `/api/alerts/manage/${encodeURIComponent(token)}`,
+    "GET",
+    undefined,
+    "Could not load that alert",
+  );
+}
+
+export function updatePropertyAlert(token: string, patch: { confirm?: boolean; active?: boolean }) {
+  return sendJson<{ alert: PublicAlert }>(`/api/alerts/manage/${encodeURIComponent(token)}`, "POST", patch, "Could not update that alert");
+}
+
+export function deletePropertyAlert(token: string) {
+  return sendJson<{ ok: true }>(`/api/alerts/manage/${encodeURIComponent(token)}`, "DELETE", undefined, "Could not remove that alert");
 }
 
 export function filtersFromSearchParams(

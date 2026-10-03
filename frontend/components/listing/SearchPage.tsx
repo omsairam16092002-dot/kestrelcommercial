@@ -3,9 +3,12 @@ import {
   ASSET_CATEGORY_LABELS,
   COMMERCIAL_TYPE_OPTIONS,
   HOUSE_LAND_SECTION,
+  canonicalSearchQuery,
+  describeSpecFilters,
   filterProperties,
   specFiltersToSearchParams,
 } from "@kestrel/shared";
+import { SaveSearchBar } from "@/components/alerts/SaveSearchBar";
 import { Container } from "@/components/brand/Container";
 import { HeroBleed } from "@/components/brand/HeroBleed";
 import { DualCtaBand } from "@/components/brand/DualCtaBand";
@@ -138,6 +141,7 @@ export async function SearchPage({
 
       <Container className="space-y-8 py-14 md:py-20">
         <SpecSearchConsole initial={merged} variant="page" assetCategory={assetCategory} houseLand={houseLand} />
+        <SaveSearchBar query={canonicalSearchQuery(merged)} label={describeSpecFilters(merged)} emptyResults={!available.length} />
         {available.length ? (
           <SearchResultsWorkspace properties={available} side={side} />
         ) : (

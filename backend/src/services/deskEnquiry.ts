@@ -2,6 +2,7 @@ import {
   INTENT_LABELS,
   PROPERTIES,
   fullAddress,
+  scoreLead,
   type EnquiryIntent,
   type EnquirySource,
   type EnquiryTopic,
@@ -32,6 +33,9 @@ export type CreateDeskEnquiryInput = {
   propertySlug?: string | null;
   portalListingId?: string | null;
   inboundEmailId?: string | null;
+  bookingId?: string | null;
+  /** Booking flows send their own confirmation instead of the generic acknowledgement. */
+  skipAcknowledgement?: boolean;
   by?: string;
 };
 
@@ -100,6 +104,7 @@ export async function createDeskEnquiry(input: CreateDeskEnquiryInput): Promise<
   const { propertySlug, propertyId } = await resolveListingRefs(input);
   const label = (await propertyLabelFor(propertySlug)) || propertySlug || undefined;
   const crmStage = intent === "inspection" ? "inspecting" : "new";
+  const leadScore = scoreLead({ intent, source, topic: input.topic, propertySlug, booked: Boolean(input.bookingId) });
   const message =
     label && !String(input.message || "").toLowerCase().includes(String(label).slice(0, 20).toLowerCase())
       ? `${input.message}\n\nProperty: ${label}`
@@ -125,6 +130,7 @@ export async function createDeskEnquiry(input: CreateDeskEnquiryInput): Promise<
       propertyId,
       inboundEmailId: input.inboundEmailId || null,
       crmStage,
+      leadScore,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -144,7 +150,9 @@ export async function createDeskEnquiry(input: CreateDeskEnquiryInput): Promise<
       propertySlug: propertySlug || null,
       propertyId: propertyId || null,
       inboundEmailId: input.inboundEmailId || null,
+      bookingId: input.bookingId || null,
       crmStage,
+      leadScore,
     });
     record = { id: String(created._id), ...created.toObject() };
     persistence = "mongo";
@@ -202,13 +210,17 @@ export async function createDeskEnquiry(input: CreateDeskEnquiryInput): Promise<
     }).catch(() => undefined);
   }
 
-  await sendEnquiryAcknowledgement({
-    id: String(record.id),
-    name: input.name,
-    email: input.email,
-    propertySlug,
-    contactId: record.contactId ? String(record.contactId) : null,
-  }).catch((err) => console.error("[deskEnquiry] acknowledgement failed", err));
+  if (!input.skipAcknowledgement) {
+    await sendEnquiryAcknowledgement({
+      id: String(record.id),
+      name: input.name,
+      email: input.email,
+      propertySlug,
+      propertyLabel: label,
+      intent,
+      contactId: record.contactId ? String(record.contactId) : null,
+    }).catch((err) => console.error("[deskEnquiry] acknowledgement failed", err));
+  }
 
   return { record, persistence, notify };
 }

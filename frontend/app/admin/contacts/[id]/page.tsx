@@ -20,6 +20,7 @@ import {
   type DeskLeadLite,
 } from "@/lib/adminApi";
 import { LeadContactStrip } from "@/components/admin/LeadContactStrip";
+import { RequirementsPanel } from "@/components/admin/RequirementsPanel";
 import { listingCaption } from "@/lib/contactLinks";
 
 export default function AdminContactDetailPage() {
@@ -107,6 +108,8 @@ export default function AdminContactDetailPage() {
           ))}
         </select>
       </label>
+
+      <RequirementsPanel contactId={contact.id} hasEmail={Boolean(contact.email)} />
 
       <section className="mt-10">
         <h2 className="t-h3 text-ink">Tasks</h2>

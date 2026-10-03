@@ -10,6 +10,7 @@ import { useDesk } from "@/components/admin/DeskContext";
 import { LeadContactStrip } from "@/components/admin/LeadContactStrip";
 import { NeedsReviewQueue } from "@/components/admin/NeedsReviewQueue";
 import { SourceBadge } from "@/components/admin/SourceBadge";
+import { LeadScoreBadge } from "@/components/admin/LeadScoreBadge";
 
 const STAGES: CrmStage[] = ["new", "contacted", "qualified", "inspecting", "negotiating", "won", "lost"];
 
@@ -200,6 +201,7 @@ function AdminEnquiriesPage() {
                       </Link>
                       <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-mauve">
                         {row.intent} · <SourceBadge source={row.source} />
+                        <LeadScoreBadge score={row.leadScore} booked={Boolean(row.bookingId)} />
                       </p>
                       <LeadContactStrip
                         name={row.name}
@@ -260,6 +262,9 @@ function AdminEnquiriesPage() {
                     <Link href={`/admin/enquiries/${row.id}`} className="font-semibold text-oxblood hover:underline">
                       {row.name}
                     </Link>
+                    <div className="mt-1">
+                      <LeadScoreBadge score={row.leadScore} booked={Boolean(row.bookingId)} />
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <LeadContactStrip name={row.name} phone={row.phone} email={row.email} compact />

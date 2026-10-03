@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { BOOKING_KIND_OPTIONS, formatBookingWhen } from "@kestrel/shared";
 import { useDesk } from "@/components/admin/DeskContext";
 import { LeadContactStrip } from "@/components/admin/LeadContactStrip";
 
 const STAGES = ["new", "contacted", "qualified", "inspecting", "negotiating", "won", "lost"];
+
+function formatMinutes(minutes: number | null) {
+  if (minutes == null) return "—";
+  if (minutes < 60) return `${Math.round(minutes)} min`;
+  if (minutes < 48 * 60) return `${(minutes / 60).toFixed(minutes < 600 ? 1 : 0)} h`;
+  return `${Math.round(minutes / (24 * 60))} days`;
+}
 
 export default function AdminHomePage() {
   const { stats, refreshDesk } = useDesk();
@@ -42,6 +50,62 @@ export default function AdminHomePage() {
           </Link>
         ))}
       </div>
+
+      <section className="mt-12">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 className="t-h3 text-ink">Speed to lead · 30 days</h2>
+          <p className="text-xs text-mauve">First call, note, follow-up or stage change counts as a response. Online bookings are excluded.</p>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              k: "Median first response",
+              v: formatMinutes(stats.response?.medianMinutes ?? null),
+              tone: (stats.response?.medianMinutes ?? 0) > 60 ? "text-oxblood" : "text-ink",
+            },
+            {
+              k: "Answered within 15 min",
+              v: stats.response?.within15Pct == null ? "—" : `${stats.response.within15Pct}%`,
+              tone: "text-ink",
+            },
+            {
+              k: "Waiting on a first reply",
+              v: String(stats.response?.awaiting ?? 0),
+              tone: (stats.response?.awaiting ?? 0) > 0 ? "text-oxblood" : "text-ink",
+            },
+            { k: "Property alerts live", v: String(stats.activeAlerts ?? 0), tone: "text-ink" },
+          ].map((card) => (
+            <div key={card.k} className="border border-oxblood/10 bg-paper px-5 py-5">
+              <p className="t-caption text-mauve">{card.k}</p>
+              <p className={`t-h2 mt-2 ${card.tone}`}>{card.v}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <div className="flex items-end justify-between gap-4">
+          <h2 className="t-h3 text-ink">Booked · next 7 days</h2>
+          <Link href="/admin/bookings" className="text-xs font-semibold text-oxblood hover:underline">
+            All bookings →
+          </Link>
+        </div>
+        <ul className="mt-4 divide-y divide-oxblood/10 border border-oxblood/10 bg-paper">
+          {stats.upcomingBookings?.length ? (
+            stats.upcomingBookings.map((b) => (
+              <li key={b.id} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3">
+                <Link href={b.enquiryId ? `/admin/enquiries/${b.enquiryId}` : "/admin/bookings"} className="text-sm font-semibold text-ink hover:text-oxblood">
+                  {b.name} · {BOOKING_KIND_OPTIONS.find((k) => k.value === b.kind)?.label ?? b.kind}
+                  {b.propertyLabel ? <span className="font-normal text-mauve"> · {b.propertyLabel}</span> : null}
+                </Link>
+                <span className="t-mono text-xs text-ink">{formatBookingWhen(b.startAt)}</span>
+              </li>
+            ))
+          ) : (
+            <li className="px-4 py-6 text-sm text-mauve">No bookings in the next week.</li>
+          )}
+        </ul>
+      </section>
 
       <section className="mt-12">
         <h2 className="t-h3 text-ink">Pipeline</h2>

@@ -84,6 +84,13 @@ export default function ContactPage() {
           <div id="enquire" className="premium-panel bg-paper p-6 text-ink md:col-span-8 md:p-9">
             <h2 className="t-h2 text-ink">If you would rather write</h2>
             <p className="t-body mt-2 text-mauve">One business day. Sooner if you call, WA or text.</p>
+            <a
+              href="/book"
+              className="mt-5 flex items-center justify-between gap-4 border-l-2 border-oxblood bg-white px-4 py-3 text-sm font-semibold text-ink hover:text-oxblood"
+            >
+              <span>Want to meet? Book a time at the office or by phone.</span>
+              <span aria-hidden="true">→</span>
+            </a>
             <div className="mt-6">
               <EnquiryForm source="contact" defaultTopic="other" submitLabel="Enquire" formId="form-contact" />
             </div>

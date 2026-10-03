@@ -1,5 +1,8 @@
 import type {
   Agent,
+  Booking,
+  BookingSettings,
+  BookingSlot,
   ContactRole,
   CrmStage,
   DeskContact,
@@ -10,6 +13,7 @@ import type {
   EnquiryPropertySummary,
   InspectionAttendance,
   Property,
+  SavedSearch,
 } from "@kestrel/shared";
 
 async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -143,6 +147,16 @@ export type AdminStats = {
     leadCount: number;
   }[];
   activity: DeskActivity[];
+  response?: ResponseStats;
+  activeAlerts?: number;
+  upcomingBookings?: Booking[];
+};
+
+export type ResponseStats = {
+  medianMinutes: number | null;
+  within15Pct: number | null;
+  responded: number;
+  awaiting: number;
 };
 
 export function getAdminStats() {
@@ -184,6 +198,70 @@ export function getInspections(from?: string, days = 7) {
   return adminFetch<{ from: string; to: string; inspections: DeskLeadLite[] }>(
     `/api/admin/inspections?${qs.toString()}`,
   );
+}
+
+export function getAdminBookings(query: { from?: string; to?: string; status?: string; enquiryId?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (query.from) qs.set("from", query.from);
+  if (query.to) qs.set("to", query.to);
+  if (query.status) qs.set("status", query.status);
+  if (query.enquiryId) qs.set("enquiryId", query.enquiryId);
+  const q = qs.toString();
+  return adminFetch<{ bookings: Booking[] }>(`/api/bookings/admin${q ? `?${q}` : ""}`);
+}
+
+export function patchAdminBooking(id: string, body: { status?: "cancelled" | "completed" | "no-show"; start?: string }) {
+  return adminFetch<{ booking: Booking }>(`/api/bookings/admin/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getAdminBookingSlots(id: string) {
+  return adminFetch<{ slots: BookingSlot[] }>(`/api/bookings/admin/${encodeURIComponent(id)}/slots?days=21`);
+}
+
+export function getBookingSettings() {
+  return adminFetch<{ settings: BookingSettings }>("/api/bookings/admin/settings");
+}
+
+export function saveBookingSettings(settings: BookingSettings) {
+  return adminFetch<{ settings: BookingSettings }>("/api/bookings/admin/settings", {
+    method: "PUT",
+    body: JSON.stringify(settings),
+  });
+}
+
+export type AlertMatchLite = { id: string; slug: string; address: string; priceLabel?: string; status: string };
+
+export function getSavedSearches(query: { contactId?: string; origin?: "public" | "desk" } = {}) {
+  const qs = new URLSearchParams();
+  if (query.contactId) qs.set("contactId", query.contactId);
+  if (query.origin) qs.set("origin", query.origin);
+  const q = qs.toString();
+  return adminFetch<{ searches: SavedSearch[] }>(`/api/alerts/admin${q ? `?${q}` : ""}`);
+}
+
+export function createDeskRequirement(body: { contactId: string; query: string; label?: string; emailAlerts: boolean }) {
+  return adminFetch<{ search: SavedSearch; matches: AlertMatchLite[] }>("/api/alerts/admin", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function patchSavedSearch(id: string, body: { active?: boolean; emailAlerts?: boolean; label?: string }) {
+  return adminFetch<{ search: SavedSearch }>(`/api/alerts/admin/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteSavedSearch(id: string) {
+  return adminFetch<{ ok: true }>(`/api/alerts/admin/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export function getSavedSearchMatches(id: string) {
+  return adminFetch<{ matches: AlertMatchLite[] }>(`/api/alerts/admin/${encodeURIComponent(id)}/matches`);
 }
 
 export type DeskSearchHit = { id: string; name: string; href: string; detail: string };

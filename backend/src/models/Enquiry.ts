@@ -70,6 +70,11 @@ const EnquirySchema = new Schema(
         "lost",
       ],
     },
+    bookingId: { type: Schema.Types.ObjectId, ref: "Booking", default: null },
+    leadScore: { type: String, enum: ["hot", "warm", "cold"], default: null, index: true },
+    /** First desk action on the lead (stage change, note, booking update, or Zoho status). Drives response-time stats. */
+    firstResponseAt: { type: Date, default: null, index: true },
+    escalatedAt: { type: Date, default: null },
     followUpAt: { type: Date, default: null },
     followUpNote: { type: String, default: "" },
     notifiedAt: { type: Date, default: null },

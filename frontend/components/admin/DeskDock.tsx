@@ -11,7 +11,7 @@ const DOCK = [
   { href: "/admin/enquiries", label: "Leads", icon: IconInbox, badgeKey: "leads" as const },
   { href: "/admin/contacts", label: "People", icon: IconUsers },
   { href: "/admin/listings", label: "Stock", icon: IconBuilding },
-  { href: "/admin/inspections", label: "Inspect", icon: IconCalendar },
+  { href: "/admin/bookings", label: "Diary", icon: IconCalendar },
 ];
 
 export function DeskDock() {

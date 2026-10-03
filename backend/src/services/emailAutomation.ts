@@ -1,8 +1,9 @@
-import { AGENCY } from "@kestrel/shared";
+import { AGENCY, type EnquiryIntent } from "@kestrel/shared";
 import { isDbConnected } from "../db/mongoose";
 import { EnquiryModel } from "../models/Enquiry";
 import { CommunicationModel } from "../models/Communication";
 import { sendEmail } from "./sendEmail";
+import { renderEmail, siteUrl } from "./emailTemplates";
 
 function listingLine(slug?: string | null) {
   if (!slug) return "";
@@ -18,6 +19,8 @@ export async function sendEnquiryAcknowledgement(enquiry: {
   name: string;
   email?: string | null;
   propertySlug?: string | null;
+  propertyLabel?: string | null;
+  intent?: EnquiryIntent;
   contactId?: string | null;
 }) {
   const email = String(enquiry.email || "").trim().toLowerCase();
@@ -26,16 +29,28 @@ export async function sendEnquiryAcknowledgement(enquiry: {
     const already = await CommunicationModel.exists({ enquiryId: enquiry.id, kind: "acknowledgement", status: { $in: ["sent", "skipped"] } });
     if (already) return null;
   }
-  const listing = listingLine(enquiry.propertySlug);
-  const text = `Hello ${enquiry.name},\n\nThis is Kestrel Commercial. We have your enquiry and will come back within one business day. If it is urgent, WhatsApp ${AGENCY.whatsapp}.${listing}\n\n${AGENCY.licenceHolder} · Licence ${AGENCY.licenceNumber}`;
+  const first = enquiry.name.trim().split(/\s+/)[0] || enquiry.name;
+  const onListing = enquiry.propertyLabel ? ` on ${enquiry.propertyLabel}` : "";
+  const bookHref = enquiry.propertySlug ? siteUrl(`/listing/${encodeURIComponent(enquiry.propertySlug)}#inspect`) : siteUrl("/book");
+  const { html, text } = renderEmail({
+    heading: `Thanks ${first} — your enquiry is with Jignesh`,
+    paragraphs: [
+      `Jignesh Jhanjaria has your enquiry${onListing} and will be in touch shortly, usually the same business day.`,
+      enquiry.propertySlug
+        ? "Want to lock in a time now? Pick an inspection slot that suits you and it goes straight into our diary."
+        : "Want to lock in a time now? Pick a meeting or appraisal slot that suits you and it goes straight into our diary.",
+    ],
+    cta: { label: enquiry.propertySlug ? "Book an inspection time" : "Book a time", href: bookHref },
+    secondary: enquiry.propertySlug ? { label: "View the listing", href: siteUrl(`/listing/${encodeURIComponent(enquiry.propertySlug)}`) } : undefined,
+  });
   return sendEmail({
     kind: "acknowledgement",
     to: email,
     enquiryId: enquiry.id,
     contactId: enquiry.contactId,
-    subject: `Kestrel Commercial — we have your enquiry`,
+    subject: `We have your enquiry${onListing} — Kestrel Commercial`,
     text,
-    html: `<p>Hello ${escapeHtml(enquiry.name)},</p><p>This is Kestrel Commercial. We have your enquiry and will come back within one business day. If it is urgent, WhatsApp ${escapeHtml(AGENCY.whatsapp)}.</p>${enquiry.propertySlug ? `<p>Listing: ${escapeHtml(envSite())}/listing/${escapeHtml(enquiry.propertySlug)}</p>` : ""}<p>${escapeHtml(AGENCY.licenceHolder)} · Licence ${escapeHtml(AGENCY.licenceNumber)}</p>`,
+    html,
   });
 }
 
@@ -75,6 +90,7 @@ export async function runScheduledEmails() {
     crmStage: "new",
     createdAt: { $lte: staleBefore },
     email: { $nin: [null, ""] },
+    bookingId: null,
   })
     .limit(40)
     .lean();
@@ -100,6 +116,7 @@ export async function runScheduledEmails() {
   const inspections = await EnquiryModel.find({
     preferredInspectionAt: { $in: [today, tomorrow] },
     email: { $nin: [null, ""] },
+    bookingId: null,
   })
     .limit(40)
     .lean();

@@ -6,7 +6,7 @@ const ActivitySchema = new Schema(
     entityType: {
       type: String,
       required: true,
-      enum: ["enquiry", "listing", "agent", "subscriber", "contact", "task", "integration"],
+      enum: ["enquiry", "listing", "agent", "subscriber", "contact", "task", "integration", "booking", "search"],
       index: true,
     },
     entityId: { type: String, required: true, index: true },

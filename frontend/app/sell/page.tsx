@@ -92,6 +92,13 @@ export default async function SellPage() {
             <p className="t-caption text-oxblood">Appraisal request</p>
             <h2 className="t-h3 mt-2 text-ink">Request an appraisal</h2>
             <p className="t-body mt-2 text-mauve">Address, GFA, tenure. I will call you back.</p>
+            <a
+              href="/book?kind=appraisal"
+              className="mt-5 flex items-center justify-between gap-4 border-l-2 border-oxblood bg-white px-4 py-3 text-sm font-semibold text-ink hover:text-oxblood"
+            >
+              <span>Rather lock in a time? Book an on-site appraisal now.</span>
+              <span aria-hidden="true">→</span>
+            </a>
             <div className="mt-6">
               <EnquiryForm
                 source="appraisal"

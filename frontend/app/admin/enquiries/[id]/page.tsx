@@ -3,12 +3,13 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { CrmStage, Enquiry, InspectionAttendance, Property } from "@kestrel/shared";
-import { INSPECTION_ATTENDANCE } from "@kestrel/shared";
+import type { Booking, CrmStage, Enquiry, InspectionAttendance, Property } from "@kestrel/shared";
+import { BOOKING_KIND_OPTIONS, INSPECTION_ATTENDANCE, formatBookingWhen } from "@kestrel/shared";
 import {
   addEnquiryNote,
   attachEnquiryListing,
   createAdminTask,
+  getAdminBookings,
   getAdminEnquiry,
   getAdminListings,
   getDeskActivity,
@@ -20,6 +21,7 @@ import {
 import { useDesk } from "@/components/admin/DeskContext";
 import { LeadContactStrip } from "@/components/admin/LeadContactStrip";
 import { SourceBadge } from "@/components/admin/SourceBadge";
+import { LeadScoreBadge } from "@/components/admin/LeadScoreBadge";
 import type { InboundEmailRow } from "@/lib/adminApi";
 import {
   followUpEmailBody,
@@ -33,11 +35,19 @@ import {
 
 const STAGES: CrmStage[] = ["new", "contacted", "qualified", "inspecting", "negotiating", "won", "lost"];
 
+function responseGap(from: string, to: string) {
+  const minutes = Math.max(0, Math.round((new Date(to).getTime() - new Date(from).getTime()) / 60000));
+  if (minutes < 60) return `in ${minutes} min`;
+  if (minutes < 48 * 60) return `in ${Math.round(minutes / 60)} h`;
+  return `in ${Math.round(minutes / (24 * 60))} days`;
+}
+
 export default function AdminEnquiryDetailPage() {
   const params = useParams<{ id: string }>();
   const { refreshDesk } = useDesk();
   const [row, setRow] = useState<(Enquiry & { inboundEmail?: InboundEmailRow | null }) | null>(null);
   const [activity, setActivity] = useState<DeskActivity[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [followAt, setFollowAt] = useState("");
@@ -49,11 +59,13 @@ export default function AdminEnquiryDetailPage() {
   const [showAttach, setShowAttach] = useState(false);
 
   async function load(id: string) {
-    const [lead, feed] = await Promise.all([
+    const [lead, feed, booked] = await Promise.all([
       getAdminEnquiry(id),
       getDeskActivity({ entityType: "enquiry", entityId: id, limit: 30 }).catch(() => ({ activity: [] })),
+      getAdminBookings({ enquiryId: id }).catch(() => ({ bookings: [] as Booking[] })),
     ]);
     setRow(lead);
+    setBookings(booked.bookings);
     setFollowAt(lead.followUpAt ? lead.followUpAt.slice(0, 10) : "");
     setFollowNote(lead.followUpNote ?? "");
     setActivity(feed.activity);
@@ -157,9 +169,20 @@ export default function AdminEnquiryDetailPage() {
           {row.intent}
           {row.topic ? ` · ${row.topic}` : ""}
         </span>
+        <LeadScoreBadge score={row.leadScore} booked={Boolean(row.bookingId)} />
       </p>
       <h1 className="t-h1 mt-2 text-ink">{row.name}</h1>
-      <p className="t-mono mt-2 text-mauve">{new Date(row.createdAt).toLocaleString("en-AU")}</p>
+      <p className="t-mono mt-2 text-mauve">
+        {new Date(row.createdAt).toLocaleString("en-AU")}
+        {row.firstResponseAt
+          ? ` · first response ${responseGap(row.createdAt, row.firstResponseAt)}`
+          : row.bookingId
+            ? " · self-booked"
+            : row.crmStage === "new"
+              ? " · awaiting first response"
+              : ""}
+        {row.escalatedAt ? " · escalated" : ""}
+      </p>
       <LeadContactStrip
         name={row.name}
         phone={row.phone}
@@ -242,6 +265,28 @@ export default function AdminEnquiryDetailPage() {
           </button>
         )}
       </section>
+
+      {bookings.length ? (
+        <section className="mt-8 border-t-2 border-oxblood pt-6">
+          <p className="t-caption text-oxblood">Booked online</p>
+          <ul className="mt-3 space-y-2">
+            {bookings.map((b) => (
+              <li key={b.id} className="flex flex-wrap items-baseline justify-between gap-2 bg-paper px-4 py-3">
+                <span className="text-sm font-semibold text-ink">
+                  {BOOKING_KIND_OPTIONS.find((k) => k.value === b.kind)?.label ?? b.kind} · {formatBookingWhen(b.startAt)}
+                </span>
+                <span className="text-xs uppercase tracking-wide text-mauve">
+                  {b.status}
+                  {b.zohoEventId ? " · in Zoho" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Link href="/admin/bookings" className="mt-3 inline-block text-sm font-semibold text-oxblood hover:underline">
+            Reschedule or mark attended in Bookings →
+          </Link>
+        </section>
+      ) : null}
 
       <dl className="mt-8 grid gap-4 sm:grid-cols-2">
         <div className="border-t border-oxblood/15 pt-3">

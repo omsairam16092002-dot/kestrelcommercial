@@ -11,6 +11,8 @@ import { contactsRouter } from "./routes/contacts";
 import { tasksRouter } from "./routes/tasks";
 import { webhooksRouter } from "./routes/webhooks";
 import { inboundAdminRouter } from "./routes/inboundAdmin";
+import { bookingsRouter } from "./routes/bookings";
+import { alertsRouter } from "./routes/alerts";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { isCloudinaryReady } from "./services/cloudinary";
 import { isXeroConfigured } from "./services/xero";
@@ -26,6 +28,8 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
+  // Behind Render's load balancer (and Vercel's rewrite) — needed for per-visitor rate limits.
+  app.set("trust proxy", true);
   app.use(compression());
   app.use(
     helmet({
@@ -83,6 +87,8 @@ export function createApp() {
   app.use("/api/agents", agentsRouter);
   app.use("/api/uploads", uploadsRouter);
   app.use("/api/integrations", integrationsRouter);
+  app.use("/api/bookings", bookingsRouter);
+  app.use("/api/alerts", alertsRouter);
 
   app.use(notFound);
   app.use(errorHandler);

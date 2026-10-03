@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/admin/NotificationBell";
 import {
   IconBuilding,
   IconCalendar,
+  IconClock,
   IconCog,
   IconGrid,
   IconInbox,
@@ -22,6 +23,7 @@ const LINKS = [
   { href: "/admin/enquiries", label: "Enquiries", icon: IconInbox, badge: "leads" as const },
   { href: "/admin/contacts", label: "Contacts", icon: IconUsers },
   { href: "/admin/tasks", label: "Tasks", icon: IconTasks, badge: "tasks" as const },
+  { href: "/admin/bookings", label: "Bookings", icon: IconClock, badge: "bookings" as const },
   { href: "/admin/inspections", label: "Inspections", icon: IconCalendar },
   { href: "/admin/listings", label: "Listings", icon: IconBuilding },
   { href: "/admin/subscribers", label: "Subscribers", icon: IconMail },
@@ -53,7 +55,14 @@ export function AdminNav() {
         {LINKS.map((item) => {
           const active = item.exact ? pathname === "/admin" : pathname.startsWith(item.href);
           const Icon = item.icon;
-          const badge = item.badge === "leads" ? leadBadge : item.badge === "tasks" ? taskBadge : 0;
+          const badge =
+            item.badge === "leads"
+              ? leadBadge
+              : item.badge === "tasks"
+                ? taskBadge
+                : item.badge === "bookings"
+                  ? (stats?.upcomingBookings?.length ?? 0)
+                  : 0;
           return (
             <Link
               key={item.href}

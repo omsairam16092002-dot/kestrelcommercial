@@ -1,9 +1,11 @@
-import { AGENCY } from "@kestrel/shared";
+import { AGENCY, type CommunicationKind } from "@kestrel/shared";
 import { env } from "../config/env";
 import { isDbConnected } from "../db/mongoose";
 import { CommunicationModel } from "../models/Communication";
 
-export type SendEmailKind = "acknowledgement" | "stale-follow-up" | "inspection-reminder" | "newsletter-welcome";
+export type SendEmailKind = CommunicationKind;
+
+export type EmailAttachment = { filename: string; content: string; contentType?: string };
 
 export type SendEmailInput = {
   kind: SendEmailKind;
@@ -13,6 +15,9 @@ export type SendEmailInput = {
   html?: string;
   enquiryId?: string | null;
   contactId?: string | null;
+  bookingId?: string | null;
+  replyTo?: string | null;
+  attachments?: EmailAttachment[];
 };
 
 export type SendEmailResult = {
@@ -45,10 +50,17 @@ async function postResend(from: string, input: SendEmailInput, to: string) {
     body: JSON.stringify({
       from,
       to: [to],
-      reply_to: AGENCY.email,
+      reply_to: input.replyTo || AGENCY.email,
       subject: input.subject,
       text: input.text,
       html: input.html || undefined,
+      attachments: input.attachments?.length
+        ? input.attachments.map((a) => ({
+            filename: a.filename,
+            content: Buffer.from(a.content, "utf8").toString("base64"),
+            ...(a.contentType ? { content_type: a.contentType } : {}),
+          }))
+        : undefined,
     }),
   });
 }
@@ -116,6 +128,7 @@ async function persist(row: SendEmailInput & { status: "sent" | "skipped" | "fai
     subject: row.subject,
     enquiryId: row.enquiryId || null,
     contactId: row.contactId || null,
+    bookingId: row.bookingId || null,
     providerMessageId: row.providerMessageId || "",
     status: row.status,
     error: row.error || "",

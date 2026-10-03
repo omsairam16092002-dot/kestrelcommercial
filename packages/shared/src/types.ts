@@ -84,6 +84,85 @@ export const DESK_TASK_KINDS = ["follow-up", "call", "inspect", "appraisal", "ot
 
 export type DeskTaskStatus = "open" | "done";
 
+export const BOOKING_KINDS = ["inspection", "meeting", "appraisal"] as const;
+
+export type BookingKind = (typeof BOOKING_KINDS)[number];
+
+export const BOOKING_STATUSES = ["confirmed", "cancelled", "completed", "no-show"] as const;
+
+export type BookingStatus = (typeof BOOKING_STATUSES)[number];
+
+/** A recurring weekly window. `day` is 0 (Sunday) – 6 (Saturday); times are HH:MM in the booking timezone. */
+export interface BookingHours {
+  day: number;
+  start: string;
+  end: string;
+}
+
+export interface BookingSettings {
+  enabled: boolean;
+  timezone: string;
+  slotMinutes: number;
+  bufferMinutes: number;
+  minNoticeHours: number;
+  maxDaysAhead: number;
+  hours: BookingHours[];
+  /** YYYY-MM-DD days with no bookings (leave, public holidays). */
+  blackoutDates: string[];
+  meetingLocation: string;
+}
+
+export interface BookingSlot {
+  start: string;
+  end: string;
+}
+
+export interface Booking {
+  id: string;
+  kind: BookingKind;
+  status: BookingStatus;
+  startAt: string;
+  endAt: string;
+  name: string;
+  email: string;
+  phone: string;
+  company?: string;
+  notes?: string;
+  propertySlug?: string | null;
+  propertyLabel?: string | null;
+  location?: string;
+  enquiryId?: string | null;
+  contactId?: string | null;
+  zohoEventId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Hot: booked, inspecting, appraisal or EOI. Warm: documents or a listing-specific enquiry. Cold: general. */
+export type LeadScore = "hot" | "warm" | "cold";
+
+export const LEAD_SCORES = ["hot", "warm", "cold"] as const;
+
+export type SavedSearchOrigin = "public" | "desk";
+
+export interface SavedSearch {
+  id: string;
+  email: string;
+  name?: string;
+  contactId?: string | null;
+  origin: SavedSearchOrigin;
+  label: string;
+  /** Spec-filter query string, e.g. `side=sale&category=commercial&maxPrice=2000000`. */
+  query: string;
+  confirmed: boolean;
+  active: boolean;
+  /** Desk requirements can be kept for matching without emailing the contact. */
+  emailAlerts: boolean;
+  alertCount?: number;
+  lastAlertAt?: string | null;
+  createdAt: string;
+}
+
 export interface PropertyImage {
   /** Cloudinary public_id, or `unsplash:<photo-id>` for local fixtures. */
   publicId: string;
@@ -199,6 +278,10 @@ export interface Enquiry {
   notifyChannels?: string[];
   notes?: { text: string; at: string; by?: string }[];
   inboundEmailId?: string | null;
+  bookingId?: string | null;
+  leadScore?: LeadScore | null;
+  firstResponseAt?: string | null;
+  escalatedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -233,7 +316,21 @@ export interface InboundEmail {
   updatedAt: string;
 }
 
-export type CommunicationKind = "acknowledgement" | "stale-follow-up" | "inspection-reminder" | "newsletter-welcome";
+export const COMMUNICATION_KINDS = [
+  "acknowledgement",
+  "stale-follow-up",
+  "inspection-reminder",
+  "newsletter-welcome",
+  "booking-confirmation",
+  "booking-desk",
+  "booking-update",
+  "booking-reminder",
+  "lead-escalation",
+  "alert-confirm",
+  "listing-alert",
+] as const;
+
+export type CommunicationKind = (typeof COMMUNICATION_KINDS)[number];
 
 export type CommunicationStatus = "sent" | "skipped" | "failed";
 

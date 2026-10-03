@@ -13,6 +13,7 @@ import {
   publicEnquiry,
 } from "../services/deskEnquiry";
 import { serializeInbound } from "../services/inboundLeads";
+import { afterDeskStageChange, markFirstResponse } from "../services/speedToLead";
 import {
   lookupEnquiryProperties,
   pickEnquiryProperty,
@@ -144,6 +145,7 @@ enquiriesRouter.post("/bulk-stage", requireAuth, async (req, res, next) => {
       .parse(req.body);
     const by = req.user?.name || req.user?.email || "desk";
     await EnquiryModel.updateMany({ _id: { $in: parsed.ids } }, { crmStage: parsed.crmStage });
+    await Promise.all(parsed.ids.map((id) => afterDeskStageChange(id)));
     await Promise.all(
       parsed.ids.map((id) =>
         logActivity({
@@ -205,6 +207,7 @@ enquiriesRouter.patch("/:id/stage", requireAuth, async (req, res, next) => {
       { new: true },
     );
     if (!updated) throw new HttpError(404, "Enquiry not found");
+    await afterDeskStageChange(String(updated._id));
     await logActivity({
       type: "enquiry.stage",
       entityType: "enquiry",
@@ -212,7 +215,8 @@ enquiriesRouter.patch("/:id/stage", requireAuth, async (req, res, next) => {
       summary: `${updated.name}: ${previous.crmStage || "new"} → ${stage}`,
       by: req.user?.name || req.user?.email || "desk",
     });
-    res.json(await serializeEnquiryWithProperty(updated.toObject()));
+    const fresh = await EnquiryModel.findById(updated._id);
+    res.json(await serializeEnquiryWithProperty((fresh || updated).toObject()));
   } catch (err) {
     next(err);
   }
@@ -277,6 +281,7 @@ enquiriesRouter.patch("/:id/follow-up", requireAuth, async (req, res, next) => {
       { new: true },
     );
     if (!updated) throw new HttpError(404, "Enquiry not found");
+    if (followUpAt) await markFirstResponse(String(updated._id));
     await logActivity({
       type: "enquiry.followup",
       entityType: "enquiry",
@@ -316,6 +321,7 @@ enquiriesRouter.patch("/:id/attendance", requireAuth, async (req, res, next) => 
     if (inspectionAttendance === "attended" && updated.crmStage !== "won" && updated.crmStage !== "lost") {
       await EnquiryModel.findByIdAndUpdate(updated._id, { crmStage: "inspecting" });
     }
+    await afterDeskStageChange(String(updated._id));
     await logActivity({
       type: "enquiry.attendance",
       entityType: "enquiry",
@@ -344,6 +350,7 @@ enquiriesRouter.post("/:id/notes", requireAuth, async (req, res, next) => {
       { new: true },
     );
     if (!updated) throw new HttpError(404, "Enquiry not found");
+    await markFirstResponse(String(updated._id));
     await logActivity({
       type: "enquiry.note",
       entityType: "enquiry",
@@ -351,7 +358,8 @@ enquiriesRouter.post("/:id/notes", requireAuth, async (req, res, next) => {
       summary: `Note on ${updated.name}`,
       by: req.user?.name || req.user?.email || "desk",
     });
-    res.json(await serializeEnquiryWithProperty(updated.toObject()));
+    const fresh = await EnquiryModel.findById(updated._id);
+    res.json(await serializeEnquiryWithProperty((fresh || updated).toObject()));
   } catch (err) {
     next(err);
   }
@@ -399,6 +407,10 @@ function serializeEnquiry(doc: Record<string, unknown>, property: EnquiryPropert
     notifyChannels: Array.isArray(doc.notifyChannels) ? doc.notifyChannels : [],
     notes,
     inboundEmailId: doc.inboundEmailId ? String(doc.inboundEmailId) : null,
+    bookingId: doc.bookingId ? String(doc.bookingId) : null,
+    leadScore: (doc.leadScore as string | null) ?? null,
+    firstResponseAt: doc.firstResponseAt ? new Date(doc.firstResponseAt as string | Date).toISOString() : null,
+    escalatedAt: doc.escalatedAt ? new Date(doc.escalatedAt as string | Date).toISOString() : null,
     createdAt: doc.createdAt ? new Date(doc.createdAt as string | Date).toISOString() : new Date().toISOString(),
     updatedAt: doc.updatedAt ? new Date(doc.updatedAt as string | Date).toISOString() : new Date().toISOString(),
   };

@@ -2,7 +2,7 @@ import { env } from "./config/env";
 import { connectDb } from "./db/mongoose";
 import { createApp } from "./app";
 import { seedAdminUser } from "./services/seedAdmin";
-import { runScheduledEmails } from "./services/emailAutomation";
+import { startScheduler } from "./services/scheduler";
 
 async function main() {
   try {
@@ -19,10 +19,7 @@ async function main() {
     console.info(`[kestrel-api] CORS origin: ${env.frontendOrigin}`);
   });
 
-  const tick = 15 * 60 * 1000;
-  setInterval(() => {
-    void runScheduledEmails().catch((err) => console.error("[email-automations]", err));
-  }, tick);
+  startScheduler();
 }
 
 main().catch((err) => {

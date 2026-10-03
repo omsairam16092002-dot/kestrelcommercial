@@ -12,6 +12,8 @@ const IntegrationCredentialSchema = new Schema(
     orgName: { type: String, default: "" },
     connectedBy: { type: String, default: "" },
     connectedAt: { type: Date, default: Date.now },
+    /** Watermark for pulling lead-status changes back from Zoho. */
+    lastPolledAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

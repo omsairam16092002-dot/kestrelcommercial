@@ -6,14 +6,29 @@
  *   GET /api/integrations/zoho/callback → code exchanged for a refresh token, stored encrypted.
  *
  * Every desk enquiry is pushed after it is saved: the person is upserted as a CRM Lead
- * (deduped on Email, then Phone), the enquiry is added as a Note, and inspection requests
- * also create a Task. Each attempt writes a SyncLog row; failures can be retried from Settings.
+ * (deduped on Email, then Phone) with status, source, tags and score; the enquiry is added as a Note;
+ * online bookings become a Meeting (Events) and unbooked inspection requests a Task.
+ * Each attempt writes a SyncLog row; failures can be retried from Settings.
+ *
+ * Lead status stays in step both ways: desk stage changes are pushed to Lead_Status, and
+ * `pollZohoLeadStatuses` pulls status changes made in Zoho back onto the desk.
  */
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 import { isValidObjectId } from "mongoose";
-import { INTENT_LABELS, type EnquiryIntent } from "@kestrel/shared";
+import {
+  BOOKING_KIND_OPTIONS,
+  INTENT_LABELS,
+  LEAD_SCORE_LABELS,
+  formatBookingWhen,
+  zonedIsoWithOffset,
+  type BookingKind,
+  type CrmStage,
+  type EnquiryIntent,
+  type LeadScore,
+} from "@kestrel/shared";
 import { env } from "../config/env";
 import { isDbConnected } from "../db/mongoose";
+import { BookingModel } from "../models/Booking";
 import { EnquiryModel } from "../models/Enquiry";
 import { IntegrationCredentialModel } from "../models/IntegrationCredential";
 import { SyncLogModel } from "../models/SyncLog";
@@ -33,6 +48,52 @@ const SOURCE_LABELS: Record<string, string> = {
   "portal-rea": "realestate.com.au",
   "portal-realcommercial": "realcommercial.com.au",
 };
+
+/** Lead_Source picklist value and a short CRM tag per desk source. */
+const SOURCE_ZOHO: Record<string, { leadSource: string; tag: string }> = {
+  web: { leadSource: "Website", tag: "Website" },
+  phone: { leadSource: "Website", tag: "Website" },
+  eoi: { leadSource: "Website", tag: "EOI" },
+  appraisal: { leadSource: "Website", tag: "Appraisal" },
+  "appraisal-quick": { leadSource: "Website", tag: "Appraisal" },
+  contact: { leadSource: "Website", tag: "Website" },
+  newsletter: { leadSource: "Website", tag: "Newsletter" },
+  "portal-rea": { leadSource: "realestate.com.au", tag: "REA" },
+  "portal-realcommercial": { leadSource: "realcommercial.com.au", tag: "realcommercial" },
+};
+
+/** Desk stage → Zoho's standard Lead_Status values. */
+const STAGE_TO_STATUS: Record<CrmStage, string> = {
+  new: "Not Contacted",
+  contacted: "Contacted",
+  qualified: "Pre-Qualified",
+  inspecting: "Pre-Qualified",
+  negotiating: "Pre-Qualified",
+  won: "Pre-Qualified",
+  lost: "Lost Lead",
+};
+
+/** Zoho Lead_Status → desk stage. "Attempted to Contact" only counts as a first response. */
+const STATUS_TO_STAGE: Record<string, CrmStage | null> = {
+  "Not Contacted": null,
+  "Attempted to Contact": null,
+  "Contact in Future": "contacted",
+  Contacted: "contacted",
+  "Pre-Qualified": "qualified",
+  "Not Qualified": "lost",
+  "Junk Lead": "lost",
+  "Lost Lead": "lost",
+};
+
+const STAGE_ORDER: CrmStage[] = ["new", "contacted", "qualified", "inspecting", "negotiating", "won"];
+
+/** Fields Zoho may reject on a customised org (picklist edited, tags disabled) — dropped and retried. */
+const OPTIONAL_LEAD_FIELDS = new Set(["Lead_Source", "Tag", "Lead_Status"]);
+
+function expectedLeadStatus(enquiry: { crmStage?: CrmStage; firstResponseAt?: Date | null }) {
+  if (!enquiry.firstResponseAt) return "Not Contacted";
+  return STAGE_TO_STATUS[enquiry.crmStage ?? "new"];
+}
 
 type Credential = {
   refreshTokenEnc: string;
@@ -238,50 +299,128 @@ type EnquiryDoc = {
   message: string;
   intent?: EnquiryIntent;
   source: string;
+  topic?: string;
   propertySlug?: string | null;
   preferredInspectionAt?: string;
   inspectionWindow?: string;
+  bookingId?: unknown;
+  leadScore?: LeadScore | null;
+  crmStage?: CrmStage;
+  firstResponseAt?: Date | null;
   createdAt?: Date;
 };
 
-async function pushEnquiry(enquiry: EnquiryDoc, sess: { apiDomain: string; token: string }) {
+type BookingLite = {
+  _id: unknown;
+  kind: BookingKind;
+  status: string;
+  startAt: Date;
+  endAt: Date;
+  location?: string;
+  notes?: string;
+  zohoEventId?: string;
+};
+
+type Session = { apiDomain: string; token: string };
+
+type RowResult = { code?: string; message?: string; details?: { id?: string; api_name?: string }; action?: string };
+
+/** Upsert a lead, dropping optional fields Zoho rejects (customised picklists, tags off) and retrying. */
+async function upsertLead(sess: Session, record: Record<string, unknown>, duplicateCheck: string[]) {
+  const payload = { ...record };
+  const dropped: string[] = [];
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const res = await crmFetch(sess.apiDomain, sess.token, "Leads/upsert", {
+      method: "POST",
+      body: JSON.stringify({ data: [payload], duplicate_check_fields: duplicateCheck }),
+    });
+    const row = (res.data.data as RowResult[] | undefined)?.[0];
+    const field = row?.details?.api_name;
+    if (row && row.code !== "SUCCESS" && field && OPTIONAL_LEAD_FIELDS.has(field) && field in payload) {
+      delete payload[field];
+      dropped.push(field);
+      continue;
+    }
+    return { ...recordResult(res.data, "Lead upsert"), dropped };
+  }
+  throw new ZohoError("Lead upsert failed — too many rejected fields");
+}
+
+function kindTitle(kind: BookingKind) {
+  return BOOKING_KIND_OPTIONS.find((k) => k.value === kind)?.label ?? kind;
+}
+
+async function createMeeting(sess: Session, leadId: string, booking: BookingLite, enquiry: EnquiryDoc, label: string, lines: string[]) {
+  const res = await crmFetch(sess.apiDomain, sess.token, "Events", {
+    method: "POST",
+    body: JSON.stringify({
+      data: [
+        {
+          Event_Title: `${kindTitle(booking.kind)}${label ? ` · ${label}` : ""} · ${enquiry.name}`,
+          Start_DateTime: zonedIsoWithOffset(new Date(booking.startAt)),
+          End_DateTime: zonedIsoWithOffset(new Date(booking.endAt)),
+          ...(booking.location ? { Venue: booking.location } : {}),
+          Description: lines.join("\n"),
+          What_Id: { id: leadId },
+          $se_module: "Leads",
+        },
+      ],
+    }),
+  });
+  const eventId = recordResult(res.data, "Meeting").id;
+  await BookingModel.updateOne({ _id: booking._id }, { zohoEventId: eventId }).catch(() => undefined);
+  return eventId;
+}
+
+async function pushEnquiry(enquiry: EnquiryDoc, sess: Session) {
   const id = String(enquiry._id);
   const intent = enquiry.intent ?? "enquire";
   const label = (await propertyLabelFor(enquiry.propertySlug)) || enquiry.propertySlug || "";
   const sourceLabel = SOURCE_LABELS[enquiry.source] ?? enquiry.source;
+  const zohoSource = SOURCE_ZOHO[enquiry.source] ?? { leadSource: "Website", tag: "Website" };
   const { first, last } = splitName(enquiry.name);
   const email = enquiry.email?.trim() || "";
   const phone = enquiry.phone?.trim() || "";
   if (!email && !phone) throw new ZohoError("Enquiry has no email or phone to match a Zoho lead on.");
 
+  const booking = enquiry.bookingId
+    ? ((await BookingModel.findById(enquiry.bookingId).lean()) as BookingLite | null)
+    : null;
+  const liveBooking = booking && booking.status === "confirmed" ? booking : null;
+  const score = enquiry.leadScore ? LEAD_SCORE_LABELS[enquiry.leadScore] : null;
+
   const lines = [
     `${INTENT_LABELS[intent]} via ${sourceLabel}`,
+    score ? `Lead score: ${score}` : null,
     label ? `Property: ${label}` : null,
     enquiry.propertySlug ? `Listing: ${env.siteUrl}/listing/${enquiry.propertySlug}` : null,
-    enquiry.preferredInspectionAt ? `Preferred inspection: ${enquiry.preferredInspectionAt}` : null,
-    enquiry.inspectionWindow ? `Window: ${enquiry.inspectionWindow}` : null,
+    liveBooking ? `Booked: ${kindTitle(liveBooking.kind)} — ${formatBookingWhen(new Date(liveBooking.startAt).toISOString())}` : null,
+    !liveBooking && enquiry.preferredInspectionAt ? `Preferred inspection: ${enquiry.preferredInspectionAt}` : null,
+    !liveBooking && enquiry.inspectionWindow ? `Window: ${enquiry.inspectionWindow}` : null,
     `Desk record: ${env.siteUrl}/admin/enquiries/${id}`,
     "",
     enquiry.message,
-  ].filter((line) => line !== null);
+  ].filter((line) => line !== null) as string[];
 
-  const lead = await crmFetch(sess.apiDomain, sess.token, "Leads/upsert", {
-    method: "POST",
-    body: JSON.stringify({
-      data: [
-        {
-          ...(first ? { First_Name: first } : {}),
-          Last_Name: last,
-          Company: enquiry.company?.trim() || "Individual",
-          ...(email ? { Email: email } : {}),
-          ...(phone ? { Phone: phone } : {}),
-          Description: lines.join("\n"),
-        },
-      ],
-      duplicate_check_fields: email ? ["Email"] : ["Phone"],
-    }),
-  });
-  const leadResult = recordResult(lead.data, "Lead upsert");
+  const tags = [zohoSource.tag, score ? `${score} lead` : null, liveBooking ? `${kindTitle(liveBooking.kind)} booked` : null]
+    .filter((t): t is string => Boolean(t))
+    .map((name) => ({ name }));
+
+  const leadResult = await upsertLead(
+    sess,
+    {
+      ...(first ? { First_Name: first } : {}),
+      Last_Name: last,
+      Company: enquiry.company?.trim() || "Individual",
+      ...(email ? { Email: email } : {}),
+      ...(phone ? { Phone: phone } : {}),
+      Description: lines.join("\n"),
+      Lead_Status: expectedLeadStatus(enquiry),
+      Lead_Source: zohoSource.leadSource,
+      Tag: tags,
+    },
+    email ? ["Email"] : ["Phone"],
+  );
 
   const note = await crmFetch(sess.apiDomain, sess.token, `Leads/${leadResult.id}/Notes`, {
     method: "POST",
@@ -291,15 +430,14 @@ async function pushEnquiry(enquiry: EnquiryDoc, sess: { apiDomain: string; token
   });
   recordResult(note.data, "Note");
 
-  let taskId: string | null = null;
-  if (intent === "inspection") {
+  const createTask = async (subject: string, dueDate: string) => {
     const task = await crmFetch(sess.apiDomain, sess.token, "Tasks", {
       method: "POST",
       body: JSON.stringify({
         data: [
           {
-            Subject: `Book inspection${label ? ` · ${label}` : ""} · ${enquiry.name}`,
-            Due_Date: melbourneDate(),
+            Subject: subject,
+            Due_Date: dueDate,
             Status: "Not Started",
             Priority: "High",
             Description: lines.join("\n"),
@@ -309,10 +447,153 @@ async function pushEnquiry(enquiry: EnquiryDoc, sess: { apiDomain: string; token
         ],
       }),
     });
-    taskId = recordResult(task.data, "Task").id;
+    return recordResult(task.data, "Task").id;
+  };
+
+  let taskId: string | null = null;
+  let eventId: string | null = null;
+  let meetingError: string | null = null;
+  if (liveBooking) {
+    try {
+      eventId = await createMeeting(sess, leadResult.id, liveBooking, enquiry, label, lines);
+    } catch (err) {
+      meetingError = err instanceof Error ? err.message : String(err);
+      taskId = await createTask(
+        `${kindTitle(liveBooking.kind)} booked${label ? ` · ${label}` : ""} · ${enquiry.name}`,
+        melbourneDate(new Date(liveBooking.startAt)),
+      );
+    }
+  } else if (intent === "inspection") {
+    taskId = await createTask(`Book inspection${label ? ` · ${label}` : ""} · ${enquiry.name}`, melbourneDate());
   }
 
-  return { leadId: leadResult.id, leadAction: leadResult.action ?? null, taskId };
+  return {
+    leadId: leadResult.id,
+    leadAction: leadResult.action ?? null,
+    taskId,
+    eventId,
+    ...(meetingError ? { meetingError } : {}),
+    ...(leadResult.dropped.length ? { droppedFields: leadResult.dropped } : {}),
+  };
+}
+
+async function leadIdForEnquiry(enquiryId: string): Promise<string | null> {
+  const log = (await SyncLogModel.findOne({ integration: "zoho", recordRef: enquiryId, status: "success" })
+    .sort({ createdAt: -1 })
+    .lean()) as { meta?: { leadId?: string } } | null;
+  return log?.meta?.leadId ?? null;
+}
+
+/** Desk → Zoho: mirror the desk stage onto the lead's Lead_Status. */
+export async function pushLeadStatus(enquiryId: string) {
+  if (!isDbConnected()) return;
+  const sess = await session();
+  if (!sess) return;
+  const leadId = await leadIdForEnquiry(enquiryId);
+  if (!leadId) return;
+  const enquiry = (await EnquiryModel.findById(enquiryId).select("crmStage firstResponseAt").lean()) as EnquiryDoc | null;
+  if (!enquiry) return;
+  const res = await crmFetch(sess.apiDomain, sess.token, `Leads/${leadId}`, {
+    method: "PUT",
+    body: JSON.stringify({ data: [{ Lead_Status: expectedLeadStatus(enquiry) }] }),
+  });
+  recordResult(res.data, "Lead status");
+}
+
+export function queueLeadStatusPush(enquiryId: string) {
+  if (!isZohoConfigured()) return;
+  void pushLeadStatus(enquiryId).catch((err) => console.error("[zoho] lead status push failed", err));
+}
+
+/** Mirror a booking reschedule / cancellation onto its Zoho meeting. */
+export async function updateBookingInZoho(bookingId: string) {
+  if (!isDbConnected()) return;
+  const booking = (await BookingModel.findById(bookingId).lean()) as BookingLite | null;
+  if (!booking?.zohoEventId) return;
+  const sess = await session();
+  if (!sess) return;
+  if (booking.status === "cancelled") {
+    const res = await crmFetch(sess.apiDomain, sess.token, `Events?ids=${encodeURIComponent(booking.zohoEventId)}`, { method: "DELETE" });
+    recordResult(res.data, "Meeting delete");
+    await BookingModel.updateOne({ _id: booking._id }, { zohoEventId: "" });
+    return;
+  }
+  const res = await crmFetch(sess.apiDomain, sess.token, `Events/${booking.zohoEventId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      data: [
+        {
+          Start_DateTime: zonedIsoWithOffset(new Date(booking.startAt)),
+          End_DateTime: zonedIsoWithOffset(new Date(booking.endAt)),
+        },
+      ],
+    }),
+  });
+  recordResult(res.data, "Meeting update");
+}
+
+export function queueBookingZohoUpdate(bookingId: string) {
+  if (!isZohoConfigured()) return;
+  void updateBookingInZoho(bookingId).catch((err) => console.error("[zoho] booking update failed", err));
+}
+
+/**
+ * Zoho → desk: pull Lead_Status changes made in Zoho since the last poll onto the newest linked enquiry.
+ * The first run only sets the watermark so historic edits are not replayed.
+ */
+export async function pollZohoLeadStatuses() {
+  if (!isDbConnected() || !isZohoConfigured()) return { checked: 0, updated: 0 };
+  const cred = (await IntegrationCredentialModel.findOne({ integration: "zoho" }).lean()) as (Credential & { lastPolledAt?: Date | null }) | null;
+  if (!cred) return { checked: 0, updated: 0 };
+  const startedAt = new Date();
+  if (!cred.lastPolledAt) {
+    await IntegrationCredentialModel.updateOne({ integration: "zoho" }, { lastPolledAt: startedAt });
+    return { checked: 0, updated: 0 };
+  }
+  const sess = await session();
+  if (!sess) return { checked: 0, updated: 0 };
+
+  const since = new Date(new Date(cred.lastPolledAt).getTime() - 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "+00:00");
+  const res = await fetch(
+    `${sess.apiDomain}/crm/${API_VERSION}/Leads?fields=Lead_Status,Modified_Time&sort_by=Modified_Time&sort_order=desc&per_page=100`,
+    { headers: { Authorization: `Zoho-oauthtoken ${sess.token}`, "If-Modified-Since": since } },
+  );
+  if (res.status === 304 || res.status === 204) {
+    await IntegrationCredentialModel.updateOne({ integration: "zoho" }, { lastPolledAt: startedAt });
+    return { checked: 0, updated: 0 };
+  }
+  const body = (await res.json().catch(() => ({}))) as { data?: { id: string; Lead_Status?: string | null }[]; code?: string };
+  if (!res.ok) throw new ZohoError(`Lead poll failed: ${body.code ?? res.status}`);
+  const leads = body.data ?? [];
+
+  let updated = 0;
+  for (const lead of leads) {
+    const status = lead.Lead_Status ?? "";
+    if (!(status in STATUS_TO_STAGE)) continue;
+    const refs = (await SyncLogModel.distinct("recordRef", { integration: "zoho", status: "success", "meta.leadId": lead.id })) as string[];
+    const ids = refs.filter((ref) => isValidObjectId(ref));
+    if (!ids.length) continue;
+    const enquiry = (await EnquiryModel.findOne({ _id: { $in: ids } })
+      .sort({ createdAt: -1 })
+      .select("crmStage firstResponseAt name")
+      .lean()) as (EnquiryDoc & { _id: unknown }) | null;
+    if (!enquiry || expectedLeadStatus(enquiry) === status) continue;
+
+    const patch: Record<string, unknown> = {};
+    if (status !== "Not Contacted" && !enquiry.firstResponseAt) patch.firstResponseAt = startedAt;
+    const target = STATUS_TO_STAGE[status];
+    const current = enquiry.crmStage ?? "new";
+    const regress = target === "qualified" && STAGE_ORDER.indexOf(current) > STAGE_ORDER.indexOf("qualified");
+    if (target && target !== current && !regress) {
+      patch.crmStage = target;
+      patch.$push = { notes: { text: `Stage ${current} → ${target} (Zoho lead status: ${status})`, at: startedAt, by: "Zoho CRM" } };
+    }
+    if (!Object.keys(patch).length) continue;
+    await EnquiryModel.updateOne({ _id: enquiry._id }, patch);
+    updated += 1;
+  }
+  await IntegrationCredentialModel.updateOne({ integration: "zoho" }, { lastPolledAt: startedAt });
+  return { checked: leads.length, updated };
 }
 
 /** Push one enquiry. Safe to call repeatedly — already-synced enquiries are skipped. */

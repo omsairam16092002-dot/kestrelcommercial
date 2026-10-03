@@ -17,6 +17,10 @@ import { env } from "../config/env";
 import { lookupEnquiryProperties, pickEnquiryProperty } from "../utils/enquiryProperty";
 import type { EnquiryPropertySummary } from "@kestrel/shared";
 import { portalHealth } from "./inboundAdmin";
+import { BookingModel } from "../models/Booking";
+import { SavedSearchModel } from "../models/SavedSearch";
+import { serializeBooking } from "../services/bookings";
+import { responseStats } from "../services/speedToLead";
 
 export const adminRouter = Router();
 
@@ -73,6 +77,9 @@ adminRouter.get("/stats", async (_req, res, next) => {
       contacts,
       dueTasks,
       dueTaskRows,
+      response,
+      upcomingBookingRows,
+      activeAlerts,
     ] = await Promise.all([
       EnquiryModel.countDocuments({ createdAt: { $gte: since7d } }),
       EnquiryModel.countDocuments({ notifiedAt: null, source: { $ne: "newsletter" } }),
@@ -138,6 +145,12 @@ adminRouter.get("/stats", async (_req, res, next) => {
         .sort({ dueAt: 1 })
         .limit(8)
         .lean(),
+      responseStats(30),
+      BookingModel.find({ status: "confirmed", startAt: { $gte: now, $lte: inspectTo } })
+        .sort({ startAt: 1 })
+        .limit(8)
+        .lean(),
+      SavedSearchModel.countDocuments({ active: true, confirmed: true }),
     ]);
 
     const byStage: Record<string, number> = {};
@@ -172,6 +185,11 @@ adminRouter.get("/stats", async (_req, res, next) => {
       contacts,
       dueTasks,
       needsReviewCount: portals.needsReviewCount,
+      response,
+      activeAlerts,
+      upcomingBookings: upcomingBookingRows.map((d) =>
+        serializeBooking(d as unknown as Parameters<typeof serializeBooking>[0]),
+      ),
       byStage,
       listings,
       attention: {

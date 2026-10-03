@@ -10,6 +10,8 @@ const SHORTCUTS = [
   { href: "/admin/enquiries", label: "Enquiries" },
   { href: "/admin/contacts", label: "Contacts" },
   { href: "/admin/tasks", label: "Tasks" },
+  { href: "/admin/bookings", label: "Bookings" },
+  { href: "/admin/bookings#availability", label: "Booking availability" },
   { href: "/admin/inspections", label: "Inspections" },
   { href: "/admin/listings", label: "Listings" },
   { href: "/admin/listings/new", label: "New listing" },
