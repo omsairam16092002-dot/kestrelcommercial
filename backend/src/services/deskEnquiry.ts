@@ -155,22 +155,26 @@ export async function createDeskEnquiry(input: CreateDeskEnquiryInput): Promise<
       summary: `New ${intent} lead · ${input.name}${label ? ` · ${label}` : ""}`,
       by,
     });
-    const contact = await attachEnquiryContact(
-      String(record.id),
-      {
-        name: input.name,
-        email: input.email,
-        phone: input.phone,
-        company: input.company,
-        topic: input.topic,
-        source,
-        intent,
-        preferredInspectionAt: input.preferredInspectionAt || undefined,
-        propertySlug,
-      },
-      by,
-    );
-    if (contact) record.contactId = String(contact._id);
+    try {
+      const contact = await attachEnquiryContact(
+        String(record.id),
+        {
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+          company: input.company,
+          topic: input.topic,
+          source,
+          intent,
+          preferredInspectionAt: input.preferredInspectionAt || undefined,
+          propertySlug,
+        },
+        by,
+      );
+      if (contact) record.contactId = String(contact._id);
+    } catch (err) {
+      console.error(`[enquiry] contact/task attach failed for ${String(record.id)}:`, err);
+    }
     queueEnquirySync(String(record.id));
   }
 

@@ -161,10 +161,12 @@ export async function attachEnquiryContact(
   const shouldTask =
     kind === "appraisal" || kind === "inspect" || lead.source === "appraisal" || lead.source === "appraisal-quick";
   if (shouldTask) {
-    const due =
-      kind === "inspect" && lead.preferredInspectionAt
-        ? new Date(`${lead.preferredInspectionAt}T09:00:00`)
-        : new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    const fallbackDue = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    const preferred = kind === "inspect" ? (lead.preferredInspectionAt || "").trim() : "";
+    const preferredDue = preferred
+      ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(preferred) ? `${preferred}T09:00:00` : preferred)
+      : null;
+    const due = preferredDue && !Number.isNaN(preferredDue.getTime()) ? preferredDue : fallbackDue;
     const title =
       kind === "appraisal"
         ? `Appraisal follow-up · ${lead.name}`
