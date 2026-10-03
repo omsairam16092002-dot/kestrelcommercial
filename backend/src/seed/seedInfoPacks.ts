@@ -21,17 +21,24 @@ const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
 type DriveFile = { id: string; name: string; thumbnail?: boolean };
 
+const PARAMOUNT_MEDIA: DriveFile[] = [
+  { id: "1t3BvEU4cQFCJ4_AVOQYc5SwRBPiLJOBD", name: "01.jpeg" },
+  { id: "128cVSSrex16BvIUUw2biPSyj3H0ZFRy3", name: "02.jpeg" },
+  { id: "1CGz8hRufXtyb0WIVPMmmQRV_wbDJeWf6", name: "03.jpeg" },
+  { id: "1OWI9iIjVmIhE2fjPeCrtLBXIeDRojhrc", name: "04.jpeg" },
+  { id: "10Gf5Mggwqdts38EEowmb5zY8cn1KkvDz", name: "05.jpeg" },
+  { id: "1_oDjvQ7H8E1GsQ3C21_SEKXYjBYDfv7f", name: "06.jpeg" },
+  { id: "17H4omhS84orJ9XDUwKv7tG7v8egt8j6Y", name: "07.jpeg" },
+  { id: "1odGJUVOaNl7MNg4UENaN2ChEqhMsDB0H", name: "08.jpg" },
+];
+
 const MEDIA: Record<string, DriveFile[]> = {
-  "19-23-paramount-road-west-footscray": [
-    { id: "1tqW1Hg1TXOSw163C7xNK-x6yFTUpVBwm", name: "01.jpg" },
-    { id: "16KP0AnsOQ1FCl2uVkfIKsAT0vB9n4hji", name: "02.jpg" },
-    { id: "1IXOdXQAc9AwBlQr_iiTrxTIbne1uIXBS", name: "03.jpg" },
-    { id: "1xbaj7WaqWvmt3RVuRLKtTKRURfwfim1D", name: "04.jpg" },
-    { id: "1E5Sm5ZHvyKnxqkeIHUoC1dsDthXW62OS", name: "05.jpg" },
-    { id: "1WIhb3Al-96JMcwY7uCo0qhBgHgmUB3rO", name: "06.jpg" },
-    { id: "1M7pwOdpLwk8UN6QrkN4Uoao3UwRTZ0UI", name: "07.jpg" },
-    { id: "1GUxta31x4d0lzzkWy-uazvGykt5t2eLs", name: "08.jpg" },
-  ],
+  "wh12-19-23-paramount-road-west-footscray": PARAMOUNT_MEDIA,
+  "wh13-19-23-paramount-road-west-footscray": PARAMOUNT_MEDIA,
+  "wh14-19-23-paramount-road-west-footscray": PARAMOUNT_MEDIA,
+  "wh15-19-23-paramount-road-west-footscray": PARAMOUNT_MEDIA,
+  "wh16-19-23-paramount-road-west-footscray": PARAMOUNT_MEDIA,
+  "wh17-19-23-paramount-road-west-footscray": PARAMOUNT_MEDIA,
   "g03-288-albert-street-brunswick": [
     { id: "1AwbgPrQcSPZI3efkVk0MrX6o-qepRokx", name: "01.jpg", thumbnail: true },
     { id: "1LCV7Ki3GiaCtjFnj94HkiVZQFe1KhyOM", name: "02.jpg", thumbnail: true },
@@ -50,6 +57,12 @@ const MEDIA: Record<string, DriveFile[]> = {
     { id: "1Z9shYozAoRYLqH4y31Kkl9s6K-Z7jCAM", name: "02.jpg" },
     { id: "1ltepyqQecfJ-B51h6VP3dowVb04ByhnT", name: "03.jpg" },
     { id: "1FdeHR3Js2OUHhFKFk1hj8QoEXun9RIqK", name: "04.jpg" },
+  ],
+  "2-17-felstead-drive-truganina": [
+    { id: "19697shiVo_iwm9kaEGvaPxfpnptLq3Oe", name: "01.jpeg" },
+    { id: "1ciaV4X5hDGR9zBSUyan5ygYmIInMaZ92", name: "02.webp" },
+    { id: "1vOe8Fpd2t7MdlBDc3hkvI9g9Z0yRs6XA", name: "03.jpeg" },
+    { id: "1vhup80b6Mjab8PHKa14RIsV1FosP5qKR", name: "04.jpeg" },
   ],
 };
 

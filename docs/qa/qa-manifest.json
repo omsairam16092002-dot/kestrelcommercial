@@ -1,0 +1,18 @@
+{
+  "runId": "qa-1787808558900",
+  "startedAt": "2026-08-27T05:29:18.900Z",
+  "environment": "local",
+  "cleanupCompletedAt": "2026-08-27T05:38:00.000Z",
+  "cleanupDeletedCount": 58,
+  "postCleanupQaListings": 0,
+  "postCleanupActiveCommercial": 13,
+  "listingSlugs": [],
+  "listingIds": [],
+  "enquiryEmails": [],
+  "contactEmails": [],
+  "subscriberEmails": [],
+  "taskIds": [],
+  "inboundEmailIds": [],
+  "userIds": [],
+  "enquiryIds": []
+}

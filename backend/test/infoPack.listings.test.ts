@@ -5,7 +5,7 @@ import { DEMO_LISTING_SLUGS, INFO_PACK_LISTINGS } from "../src/seed/infoPackList
 test("information-pack import has unique slugs and no published Drive URLs", () => {
   const slugs = INFO_PACK_LISTINGS.map((p) => p.slug);
   assert.equal(new Set(slugs).size, slugs.length);
-  assert.equal(INFO_PACK_LISTINGS.length, 6);
+  assert.equal(INFO_PACK_LISTINGS.length, 13);
   for (const p of INFO_PACK_LISTINGS) {
     assert.ok(p.address);
     assert.ok(p.suburb);
