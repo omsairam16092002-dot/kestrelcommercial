@@ -3,8 +3,11 @@
 import { FormEvent, useEffect, useState } from "react";
 import type { Agent } from "@kestrel/shared";
 import {
+  disconnectZoho,
   getAdminAgents,
   getDeskHealth,
+  retryZohoSync,
+  syncPendingZoho,
   getIntegrationsStatus,
   getLeadSources,
   getSyndicationStatus,
@@ -29,6 +32,40 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
   const [pending, setPending] = useState(false);
+  const [zohoMessage, setZohoMessage] = useState("");
+  const [zohoBusy, setZohoBusy] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get("zoho");
+    if (!result) return;
+    const reason = params.get("reason");
+    setZohoMessage(
+      result === "connected"
+        ? "Zoho CRM connected. New enquiries will now appear in Zoho as leads."
+        : result === "denied"
+          ? "Zoho access was declined, so nothing was connected."
+          : `Zoho connection failed${reason ? `: ${reason}` : "."}`,
+    );
+    window.history.replaceState(null, "", "/admin/settings");
+  }, []);
+
+  async function refreshIntegrations() {
+    setIntegrations(await getIntegrationsStatus());
+  }
+
+  async function runZoho(action: () => Promise<string>) {
+    setZohoBusy(true);
+    setZohoMessage("");
+    try {
+      setZohoMessage(await action());
+      await refreshIntegrations();
+    } catch (err) {
+      setZohoMessage(err instanceof Error ? err.message : "Zoho request failed.");
+    } finally {
+      setZohoBusy(false);
+    }
+  }
 
   useEffect(() => {
     Promise.all([getAdminAgents(), uploadStatus(), getDeskHealth(), getIntegrationsStatus(), getLeadSources(), getSyndicationStatus()])
@@ -100,7 +137,12 @@ export default function AdminSettingsPage() {
     { k: "Cloudinary", v: (health?.cloudinary || cloudinary?.ready) ? "Live" : "Off", note: cloudinary?.note },
     { k: "Xero", v: health?.xero ? "Configured" : "Off" },
     { k: "PEXA", v: health?.pexa ? "Configured" : "Off" },
+    {
+      k: "Zoho CRM",
+      v: integrations?.zoho.connected ? "Connected" : integrations?.zoho.configured ? "Ready to connect" : "Off",
+    },
   ];
+  const zoho = integrations?.zoho;
 
   return (
     <div className="max-w-3xl">
@@ -182,9 +224,73 @@ export default function AdminSettingsPage() {
       <section className="mt-12">
         <h2 className="t-h3 text-ink">Integrations</h2>
         <p className="mt-2 text-sm text-mauve">
-          Connect Xero and Pexa Clear when credentials are in backend <span className="t-mono">.env</span>. We never invent invoice or workspace IDs.
+          Connect Zoho CRM, Xero and Pexa Clear when credentials are in backend <span className="t-mono">.env</span>. We never invent invoice or workspace IDs.
         </p>
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <div id="zoho" className="mt-6 border-t-2 border-oxblood bg-paper p-5">
+          <p className="t-caption text-oxblood">Zoho CRM</p>
+          <p className="t-h3 mt-2 text-ink">
+            {zoho?.connected
+              ? `Connected${zoho.orgName ? ` · ${zoho.orgName}` : ""}`
+              : zoho?.configured
+                ? "Ready to connect"
+                : "Not configured"}
+          </p>
+          <p className="mt-2 text-sm text-mauve">
+            {zoho?.connected
+              ? `Every new enquiry becomes a Zoho lead with the listing, source and message attached. Inspection requests also create a follow-up task. Data centre ${zoho.dataCentre}${zoho.connectedBy ? ` · connected by ${zoho.connectedBy}` : ""}${zoho.connectedAt ? ` on ${new Date(zoho.connectedAt).toLocaleDateString("en-AU")}` : ""}.`
+              : zoho?.configured
+                ? `Client keys are set for data centre ${zoho.dataCentre}. Connect once with the Zoho admin account to start sending enquiries.`
+                : "Set ZOHO_CLIENT_ID and ZOHO_CLIENT_SECRET in backend .env (and on Render), then Connect."}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {zoho?.configured ? (
+              <button
+                type="button"
+                disabled={zohoBusy}
+                className="btn-sharp bg-oxblood text-paper hover:bg-ink disabled:opacity-50"
+                onClick={() => {
+                  window.location.href = "/api/integrations/zoho/connect";
+                }}
+              >
+                {zoho.connected ? "Reconnect Zoho" : "Connect Zoho"}
+              </button>
+            ) : null}
+            {zoho?.connected ? (
+              <>
+                <button
+                  type="button"
+                  disabled={zohoBusy}
+                  className="btn-sharp border border-oxblood text-oxblood hover:bg-oxblood hover:text-paper disabled:opacity-50"
+                  onClick={() =>
+                    void runZoho(async () => {
+                      const r = await syncPendingZoho();
+                      if (!r.attempted) return "Everything from the last 90 days is already in Zoho.";
+                      return `Sent ${r.success} of ${r.attempted} enquiries to Zoho${r.failed ? `, ${r.failed} failed (see log below)` : ""}.${r.remaining ? ` ${r.remaining} still to go, so run it again.` : ""}`;
+                    })
+                  }
+                >
+                  {zohoBusy ? "Working…" : "Sync recent enquiries"}
+                </button>
+                <button
+                  type="button"
+                  disabled={zohoBusy}
+                  className="btn-sharp text-mauve hover:text-oxblood disabled:opacity-50"
+                  onClick={() => {
+                    if (!confirm("Disconnect Zoho? New enquiries will stop flowing into Zoho CRM.")) return;
+                    void runZoho(async () => {
+                      await disconnectZoho();
+                      return "Zoho disconnected.";
+                    });
+                  }}
+                >
+                  Disconnect
+                </button>
+              </>
+            ) : null}
+          </div>
+          {zohoMessage ? <p className="mt-3 text-sm font-semibold text-oxblood">{zohoMessage}</p> : null}
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <div className="border border-oxblood/15 bg-paper p-5">
             <p className="t-caption text-oxblood">Xero</p>
             <p className="t-h3 mt-2 text-ink">{integrations?.xero.configured ? "Ready to connect" : "Not configured"}</p>
@@ -240,6 +346,25 @@ export default function AdminSettingsPage() {
                     <td className="px-4 py-3">
                       {log.status}
                       {log.error ? <p className="mt-1 text-xs text-mauve">{log.error}</p> : null}
+                      {log.integration === "zoho" && log.status === "failed" && zoho?.connected ? (
+                        <button
+                          type="button"
+                          disabled={zohoBusy}
+                          className="mt-1 block text-xs font-semibold text-oxblood hover:underline disabled:opacity-50"
+                          onClick={() =>
+                            void runZoho(async () => {
+                              const r = await retryZohoSync(log.recordRef);
+                              return r.status === "success"
+                                ? "Enquiry sent to Zoho."
+                                : r.status === "skipped"
+                                  ? "Already in Zoho."
+                                  : `Still failing: ${r.error ?? "unknown error"}`;
+                            })
+                          }
+                        >
+                          Retry
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 ))

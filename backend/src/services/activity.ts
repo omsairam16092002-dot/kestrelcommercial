@@ -3,7 +3,7 @@ import { ActivityModel } from "../models/Activity";
 
 export async function logActivity(input: {
   type: string;
-  entityType: "enquiry" | "listing" | "agent" | "subscriber" | "contact" | "task";
+  entityType: "enquiry" | "listing" | "agent" | "subscriber" | "contact" | "task" | "integration";
   entityId: string;
   summary: string;
   by?: string;

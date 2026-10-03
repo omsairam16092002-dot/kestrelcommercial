@@ -51,6 +51,18 @@ export const env = {
       "http://localhost:4000/api/integrations/pexa/callback",
     apiBase: process.env.PEXA_API_BASE ?? "https://api.pexa.com.au",
   },
+  zoho: {
+    clientId: optional("ZOHO_CLIENT_ID"),
+    clientSecret: optional("ZOHO_CLIENT_SECRET"),
+    /** Must match the data centre the API client was registered on (.com.au, .in, .com, .eu…). */
+    accountsUrl: (optional("ZOHO_ACCOUNTS_URL") ?? "https://accounts.zoho.com.au").replace(/\/+$/, ""),
+    apiUrl: (optional("ZOHO_API_URL") ?? "https://www.zohoapis.com.au").replace(/\/+$/, ""),
+    redirectUri:
+      optional("ZOHO_REDIRECT_URI") ??
+      "http://localhost:3000/api/integrations/zoho/callback",
+    /** Encrypts the stored refresh token. Falls back to JWT_SECRET; rotating either means reconnecting Zoho. */
+    tokenKey: optional("ZOHO_TOKEN_KEY"),
+  },
   internalApiKey: optional("INTERNAL_API_KEY"),
   jwtSecret: optional("JWT_SECRET") ?? "kestrel-dev-jwt-change-me",
   adminSeedEmail: optional("ADMIN_SEED_EMAIL") ?? "jignesh@kestrelcommercial.com",

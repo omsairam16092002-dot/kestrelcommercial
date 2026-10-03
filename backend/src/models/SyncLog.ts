@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const SyncLogSchema = new Schema(
   {
-    integration: { type: String, required: true, enum: ["xero", "pexa"] },
+    integration: { type: String, required: true, enum: ["xero", "pexa", "zoho"] },
     recordRef: { type: String, required: true },
     status: {
       type: String,

@@ -15,6 +15,7 @@ import { serializeProperty } from "../utils/serialize";
 import { logActivity } from "./activity";
 import { attachEnquiryContact } from "./contacts";
 import { sendEnquiryAcknowledgement } from "./emailAutomation";
+import { queueEnquirySync } from "./zoho";
 
 export type CreateDeskEnquiryInput = {
   name: string;
@@ -170,6 +171,7 @@ export async function createDeskEnquiry(input: CreateDeskEnquiryInput): Promise<
       by,
     );
     if (contact) record.contactId = String(contact._id);
+    queueEnquirySync(String(record.id));
   }
 
   const lead: LeadPing = {

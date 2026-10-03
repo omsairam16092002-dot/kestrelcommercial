@@ -12,6 +12,24 @@ Needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
 
 Until then: `GET /api/uploads/status` reports `ready: false`. Fixture listings use `unsplash:` public ids.
 
+## Zoho CRM — live once connected
+
+Documented in `backend/src/services/zoho.ts`.
+
+1. Create a **Server-based** client in the Zoho API Console of the account's data centre (e.g. `api-console.zoho.com.au`). Redirect URIs go through the frontend, because the desk cookie lives there:
+   - `https://www.kestrelcommercial.com.au/api/integrations/zoho/callback`
+   - `http://localhost:3000/api/integrations/zoho/callback`
+2. Set `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_ACCOUNTS_URL`, `ZOHO_API_URL`, `ZOHO_REDIRECT_URI` on the backend.
+3. Admin → Settings → **Connect Zoho**, signed in to Zoho as the CRM admin. The refresh token is stored AES-256-GCM encrypted in `IntegrationCredential` (key: `ZOHO_TOKEN_KEY`, else `JWT_SECRET` — rotating it means reconnecting).
+
+After every `createDeskEnquiry` (web form, call/WA click, EOI, appraisal, portal email) the enquiry is pushed in the background, no Redis needed:
+
+- **Lead** upserted (dedupe on Email, else Phone) with the message, listing, source and a link back to the desk record.
+- **Note** on the lead for each enquiry, so repeat enquiries keep their history.
+- **Task** (High, due today) for inspection requests.
+
+Each attempt writes `SyncLog { integration: "zoho" }`. Settings shows failures with **Retry**, and **Sync recent enquiries** backfills the last 90 days (25 per click).
+
 ## Xero — STUB
 
 Documented in `backend/src/services/xero.ts`.
