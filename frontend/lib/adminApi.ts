@@ -454,6 +454,21 @@ export type ZohoStatus = {
     needsReconnect: boolean;
     lastPulledAt: string | null;
     lastError: { message: string; at: string } | null;
+    sync?: {
+      running: boolean;
+      started: boolean;
+      result: {
+        pulled: { checked: number; created: number; updated: number; skipped: number; error?: string };
+        pushed: { attempted: number; success: number; failed: number; skipped: number };
+      } | null;
+      error: string | null;
+    };
+  };
+  enquirySync?: {
+    running: boolean;
+    started: boolean;
+    result: { attempted: number; success: number; failed: number; skipped: number; remaining: number } | null;
+    error: string | null;
   };
 };
 
@@ -473,18 +488,35 @@ export function disconnectZoho() {
   return adminFetch<ZohoStatus>("/api/integrations/zoho/disconnect", { method: "POST" });
 }
 
-export function syncPendingZoho() {
-  return adminFetch<{ attempted: number; success: number; failed: number; skipped: number; remaining: number }>(
-    "/api/integrations/zoho/sync-pending",
-    { method: "POST" },
-  );
+export async function syncPendingZoho() {
+  await adminFetch<{ running: boolean }>("/api/integrations/zoho/sync-pending", { method: "POST" });
+  const start = Date.now();
+  while (Date.now() - start < 8 * 60 * 1000) {
+    await new Promise((r) => setTimeout(r, 2500));
+    const status = await getIntegrationsStatus();
+    const job = status.zoho.enquirySync;
+    if (!job?.running) {
+      if (job?.error) throw new Error(job.error);
+      return job?.result ?? { attempted: 0, success: 0, failed: 0, skipped: 0, remaining: 0 };
+    }
+  }
+  throw new Error("Enquiry sync is still running on the server. Refresh in a minute.");
 }
 
-export function syncZohoListings() {
-  return adminFetch<{
-    pulled: { checked: number; created: number; updated: number; skipped: number; error?: string };
-    pushed: { attempted: number; success: number; failed: number; skipped: number };
-  }>("/api/integrations/zoho/sync-listings", { method: "POST" });
+export async function syncZohoListings() {
+  await adminFetch<{ running: boolean }>("/api/integrations/zoho/sync-listings", { method: "POST" });
+  const start = Date.now();
+  while (Date.now() - start < 8 * 60 * 1000) {
+    await new Promise((r) => setTimeout(r, 2500));
+    const status = await getIntegrationsStatus();
+    const job = status.zoho.listings?.sync;
+    if (!job?.running) {
+      if (job?.error && !job.result) throw new Error(job.error);
+      if (!job?.result) throw new Error(job?.error || "Listing sync finished without a result.");
+      return job.result;
+    }
+  }
+  throw new Error("Listing sync is still running on the server. Refresh in a minute.");
 }
 
 export function retryZohoSync(enquiryId: string) {

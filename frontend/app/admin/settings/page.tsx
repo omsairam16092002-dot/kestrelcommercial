@@ -357,7 +357,10 @@ export default function AdminSettingsPage() {
             </button>
           </div>
         </div>
-        <div className="mt-6 overflow-x-auto border border-oxblood/10 bg-paper">
+        <p className="mt-6 text-xs text-mauve">
+          The table below is enquiry → Zoho lead history. Connecting Zoho and syncing listings do not add rows here.
+        </p>
+        <div className="mt-2 overflow-x-auto border border-oxblood/10 bg-paper">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-oxblood/10 t-caption text-mauve">
               <tr>

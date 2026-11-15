@@ -673,3 +673,30 @@ export async function syncPendingEnquiries({ days = 90, limit = 25 } = {}) {
   );
   return { ...totals, remaining };
 }
+
+type EnquirySyncJob = {
+  running: boolean;
+  started: boolean;
+  result: Awaited<ReturnType<typeof syncPendingEnquiries>> | null;
+  error: string | null;
+};
+
+let enquirySync: EnquirySyncJob = { running: false, started: false, result: null, error: null };
+
+export function enquirySyncStatus() {
+  return enquirySync;
+}
+
+export function startEnquirySync() {
+  if (enquirySync.running) return enquirySync;
+  enquirySync = { running: true, started: true, result: null, error: null };
+  void (async () => {
+    try {
+      const result = await syncPendingEnquiries();
+      enquirySync = { running: false, started: true, result, error: null };
+    } catch (err) {
+      enquirySync = { running: false, started: true, result: null, error: err instanceof Error ? err.message : String(err) };
+    }
+  })();
+  return enquirySync;
+}

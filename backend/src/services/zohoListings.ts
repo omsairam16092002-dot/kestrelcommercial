@@ -22,6 +22,7 @@ import { env } from "../config/env";
 import { isDbConnected } from "../db/mongoose";
 import { IntegrationCredentialModel } from "../models/IntegrationCredential";
 import { PropertyModel } from "../models/Property";
+import { SyncLogModel } from "../models/SyncLog";
 import { invalidatePropertyListCache } from "./propertyCache";
 import { isCloudinaryReady, uploadImageFromUrl } from "./cloudinary";
 import { SETTINGS_SCOPES, ZohoError, zohoContext, zohoCrmFetch } from "./zoho";
@@ -376,6 +377,7 @@ export async function zohoListingsStatus() {
     needsReconnect: Boolean(ctx && !settings),
     lastPulledAt: cred?.lastListingPolledAt ? new Date(cred.lastListingPolledAt).toISOString() : null,
     lastError: lastListingError,
+    sync: listingSyncStatus(),
   };
 }
 
@@ -579,4 +581,60 @@ export async function syncListingsBothWays() {
     pushed[result.status] += 1;
   }
   return { pulled, pushed };
+}
+
+type ListingSyncJob = {
+  running: boolean;
+  started: boolean;
+  startedAt: string | null;
+  finishedAt: string | null;
+  result: Awaited<ReturnType<typeof syncListingsBothWays>> | null;
+  error: string | null;
+};
+
+let listingSync: ListingSyncJob = {
+  running: false,
+  started: false,
+  startedAt: null,
+  finishedAt: null,
+  result: null,
+  error: null,
+};
+
+export function listingSyncStatus(): ListingSyncJob {
+  return listingSync;
+}
+
+/** Starts a full two-way listing sync in the background so the Settings request is not killed by a 502 timeout. */
+export function startListingSync() {
+  if (listingSync.running) return listingSync;
+  listingSync = {
+    running: true,
+    started: true,
+    startedAt: new Date().toISOString(),
+    finishedAt: null,
+    result: null,
+    error: null,
+  };
+  void (async () => {
+    try {
+      const result = await syncListingsBothWays();
+      listingSync = { ...listingSync, running: false, finishedAt: new Date().toISOString(), result, error: result.pulled.error ?? null };
+      await SyncLogModel.create({
+        integration: "zoho",
+        recordRef: "listings",
+        status: result.pulled.error ? "failed" : "success",
+        error: result.pulled.error ?? "",
+        meta: result,
+      }).catch(() => undefined);
+    } catch (err) {
+      listingSync = {
+        ...listingSync,
+        running: false,
+        finishedAt: new Date().toISOString(),
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  })();
+  return listingSync;
 }
