@@ -124,7 +124,15 @@ function setField(record: Record<string, unknown>, fields: Field[], key: MapKey,
   if (value === undefined || value === null || value === "") return;
   const names = new Set(fields.map((f) => f.api_name));
   const api = ALIASES[key].find((name) => names.has(name));
-  if (api) record[api] = value;
+  if (!api) return;
+  const meta = fields.find((f) => f.api_name === api);
+  if ((key === "bathrooms" || key === "bedrooms" || key === "cars") && (typeof value !== "number" || value <= 0)) return;
+  /* Zoho Products often has Bathrooms as a picklist (1, 2, 3) — sending 0 or a double is INVALID_DATA. */
+  if (meta?.data_type === "picklist" || meta?.data_type === "text") {
+    record[api] = String(value);
+    return;
+  }
+  record[api] = value;
 }
 
 function getField(row: Record<string, unknown>, fields: Field[], key: MapKey): unknown {
@@ -350,9 +358,9 @@ function toZohoRecord(doc: PropertyDoc, fields: Field[]) {
   setField(record, fields, "description", doc.description);
   setField(record, fields, "featured", Boolean(doc.featured));
   setField(record, fields, "active", !doc.archived);
-  if (doc.bedrooms != null) setField(record, fields, "bedrooms", doc.bedrooms);
-  if (doc.bathrooms != null) setField(record, fields, "bathrooms", doc.bathrooms);
-  if (doc.carSpaces != null) setField(record, fields, "cars", doc.carSpaces);
+  if (doc.bedrooms != null && doc.bedrooms > 0) setField(record, fields, "bedrooms", doc.bedrooms);
+  if (doc.bathrooms != null && doc.bathrooms > 0) setField(record, fields, "bathrooms", Math.round(doc.bathrooms));
+  if (doc.carSpaces != null && doc.carSpaces > 0) setField(record, fields, "cars", doc.carSpaces);
   setField(record, fields, "website", `${env.siteUrl.replace(/\/+$/, "")}/listing/${doc.slug}`);
   const hero = heroUrl(doc);
   if (hero) setField(record, fields, "hero", hero);
@@ -403,36 +411,43 @@ export async function pushListingToZoho(propertyId: string) {
     const record = toZohoRecord(doc, fields);
     const slugField = ALIASES.slug.find((name) => fields.some((f) => f.api_name === name));
 
+    const write = async (path: string, method: "POST" | "PUT", extra?: Record<string, unknown>) => {
+      let payload = { ...record };
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        const { data } = await zohoCrmFetch(ctx.apiDomain, ctx.token, path, {
+          method,
+          body: JSON.stringify({ data: [payload], ...extra }),
+        });
+        const row = (data.data as { code?: string; message?: string; details?: { id?: string; api_name?: string } }[] | undefined)?.[0];
+        const rejected = row?.details?.api_name;
+        if (row?.code === "SUCCESS" && row.details?.id) return row.details.id;
+        if (row?.code === "INVALID_DATA" && rejected && rejected in payload) {
+          delete payload[rejected];
+          continue;
+        }
+        if (row?.code === "DUPLICATE_DATA") {
+          const nameKey = Object.keys(payload).find((k) => ALIASES.name.includes(k as (typeof ALIASES.name)[number]));
+          if (nameKey) payload[nameKey] = String(doc.slug).slice(0, 120);
+          extra = undefined;
+          path = module;
+          method = "POST";
+          continue;
+        }
+        throw new ZohoError(`Listing ${method === "PUT" ? "update" : "upsert"} failed — ${row?.code ?? "ERROR"}: ${row?.message ?? "no response"}${rejected ? ` (${rejected})` : ""}`);
+      }
+      throw new ZohoError("Listing write failed — too many rejected fields");
+    };
+
     let id = doc.zohoListingId || "";
     if (id) {
-      const { res, data } = await zohoCrmFetch(ctx.apiDomain, ctx.token, `${module}/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ data: [record] }),
-      });
-      if (res.status === 404) id = "";
-      else id = await listingIdFromResult(data, "Listing update");
+      try {
+        id = await write(`${module}/${id}`, "PUT");
+      } catch {
+        id = "";
+      }
     }
     if (!id) {
-      const payload: Record<string, unknown> = { data: [record] };
-      if (slugField) payload.duplicate_check_fields = [slugField];
-      let { res, data } = await zohoCrmFetch(ctx.apiDomain, ctx.token, `${module}/upsert`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      const row = (data.data as { code?: string; message?: string; details?: { api_name?: string } }[] | undefined)?.[0];
-      const duplicateName = row?.code === "DUPLICATE_DATA" || /duplicate/i.test(row?.message ?? "");
-      if (!res.ok || (row && row.code !== "SUCCESS")) {
-        if (duplicateName || row?.details?.api_name === "Product_Name") {
-          const nameKey = Object.keys(record).find((k) => ALIASES.name.includes(k as (typeof ALIASES.name)[number]));
-          if (nameKey) record[nameKey] = String(doc.slug).slice(0, 120);
-        }
-        const created = await zohoCrmFetch(ctx.apiDomain, ctx.token, `${module}`, {
-          method: "POST",
-          body: JSON.stringify({ data: [record] }),
-        });
-        data = created.data;
-      }
-      id = await listingIdFromResult(data, "Listing upsert");
+      id = await write(slugField ? `${module}/upsert` : module, "POST", slugField ? { duplicate_check_fields: [slugField] } : undefined);
     }
     await PropertyModel.updateOne({ _id: propertyId }, { zohoListingId: id, zohoListingSyncedAt: new Date() });
     lastListingError = null;
