@@ -330,8 +330,9 @@ function heroUrl(doc: PropertyDoc) {
 
 function toZohoRecord(doc: PropertyDoc, fields: Field[]) {
   const record: Record<string, unknown> = {};
-  const name = `${doc.address}, ${doc.suburb}`.slice(0, 120);
-  setField(record, fields, "name", name);
+  /* Include the slug so lots/units on the same street stay unique in Zoho Products. */
+  const name = `${doc.address}, ${doc.suburb}`.slice(0, 90);
+  setField(record, fields, "name", `${name} [${doc.slug}]`.slice(0, 120));
   setField(record, fields, "slug", slugCode(doc.slug));
   setField(record, fields, "address", doc.address);
   setField(record, fields, "suburb", doc.suburb);
@@ -412,13 +413,25 @@ export async function pushListingToZoho(propertyId: string) {
       else id = await listingIdFromResult(data, "Listing update");
     }
     if (!id) {
-      const { data } = await zohoCrmFetch(ctx.apiDomain, ctx.token, `${module}/upsert`, {
+      const payload: Record<string, unknown> = { data: [record] };
+      if (slugField) payload.duplicate_check_fields = [slugField];
+      let { res, data } = await zohoCrmFetch(ctx.apiDomain, ctx.token, `${module}/upsert`, {
         method: "POST",
-        body: JSON.stringify({
-          data: [record],
-          duplicate_check_fields: slugField ? [slugField] : undefined,
-        }),
+        body: JSON.stringify(payload),
       });
+      const row = (data.data as { code?: string; message?: string; details?: { api_name?: string } }[] | undefined)?.[0];
+      const duplicateName = row?.code === "DUPLICATE_DATA" || /duplicate/i.test(row?.message ?? "");
+      if (!res.ok || (row && row.code !== "SUCCESS")) {
+        if (duplicateName || row?.details?.api_name === "Product_Name") {
+          const nameKey = Object.keys(record).find((k) => ALIASES.name.includes(k as (typeof ALIASES.name)[number]));
+          if (nameKey) record[nameKey] = String(doc.slug).slice(0, 120);
+        }
+        const created = await zohoCrmFetch(ctx.apiDomain, ctx.token, `${module}`, {
+          method: "POST",
+          body: JSON.stringify({ data: [record] }),
+        });
+        data = created.data;
+      }
       id = await listingIdFromResult(data, "Listing upsert");
     }
     await PropertyModel.updateOne({ _id: propertyId }, { zohoListingId: id, zohoListingSyncedAt: new Date() });
@@ -588,11 +601,18 @@ export async function syncListingsBothWays() {
     .select("_id zohoListingId")
     .sort({ zohoListingId: 1, updatedAt: -1 })
     .lean()) as { _id: unknown }[];
-  const pushed = { attempted: pending.length, success: 0, failed: 0, skipped: 0 };
+  const pushed = { attempted: pending.length, success: 0, failed: 0, skipped: 0, errors: [] as string[] };
   for (const row of pending) {
-    const result = await pushListingToZoho(String(row._id));
+    let result = await pushListingToZoho(String(row._id));
+    if (result.status === "failed") {
+      await new Promise((r) => setTimeout(r, 1500));
+      result = await pushListingToZoho(String(row._id));
+    }
     pushed[result.status] += 1;
+    if (result.status === "failed" && result.error) pushed.errors.push(result.error.slice(0, 180));
+    await new Promise((r) => setTimeout(r, 400));
   }
+  pushed.errors = [...new Set(pushed.errors)].slice(0, 8);
   return { pulled, pushed };
 }
 

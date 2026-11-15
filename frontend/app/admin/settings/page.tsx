@@ -305,7 +305,7 @@ export default function AdminSettingsPage() {
                       const pullBit = r.pulled.error
                         ? `Pull failed: ${r.pulled.error}`
                         : `Pulled ${r.pulled.created} new and ${r.pulled.updated} updated from Zoho`;
-                      return `${pullBit}. Pushed ${r.pushed.success} of ${r.pushed.attempted} website listings${r.pushed.failed ? `, ${r.pushed.failed} failed` : ""}.`;
+                      return `${pullBit}. Pushed ${r.pushed.success} of ${r.pushed.attempted} website listings${r.pushed.failed ? `, ${r.pushed.failed} failed` : ""}${r.pushed.errors?.length ? ` — ${r.pushed.errors[0]}` : ""}.`;
                     })
                   }
                 >

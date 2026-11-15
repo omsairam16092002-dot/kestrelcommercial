@@ -460,7 +460,7 @@ export type ZohoStatus = {
       started: boolean;
       result: {
         pulled: { checked: number; created: number; updated: number; skipped: number; error?: string };
-        pushed: { attempted: number; success: number; failed: number; skipped: number };
+        pushed: { attempted: number; success: number; failed: number; skipped: number; errors?: string[] };
       } | null;
       error: string | null;
     };
