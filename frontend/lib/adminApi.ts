@@ -454,6 +454,7 @@ export type ZohoStatus = {
     needsReconnect: boolean;
     lastPulledAt: string | null;
     lastError: { message: string; at: string } | null;
+    counts?: { total: number; live: number; archived: number; linked: number; unlinked: number };
     sync?: {
       running: boolean;
       started: boolean;

@@ -370,6 +370,14 @@ export async function zohoListingsStatus() {
     | { listingModule?: string; lastListingPolledAt?: Date | null; scope?: string }
     | null;
   const settings = Boolean(ctx && hasScopes(ctx.scope, SETTINGS_SCOPES));
+  const [total, live, archived, linked] = isDbConnected()
+    ? await Promise.all([
+        PropertyModel.countDocuments({}),
+        PropertyModel.countDocuments({ archived: { $ne: true } }),
+        PropertyModel.countDocuments({ archived: true }),
+        PropertyModel.countDocuments({ zohoListingId: { $nin: [null, ""] } }),
+      ])
+    : [0, 0, 0, 0];
   return {
     enabled: Boolean(ctx),
     module: cred?.listingModule || cachedModule || null,
@@ -378,6 +386,7 @@ export async function zohoListingsStatus() {
     lastPulledAt: cred?.lastListingPolledAt ? new Date(cred.lastListingPolledAt).toISOString() : null,
     lastError: lastListingError,
     sync: listingSyncStatus(),
+    counts: { total, live, archived, linked, unlinked: Math.max(0, total - linked) },
   };
 }
 
@@ -574,7 +583,11 @@ export async function pullZohoListings({ full = false } = {}) {
 
 export async function syncListingsBothWays() {
   const pulled = await pullZohoListings({ full: true });
-  const pending = (await PropertyModel.find({}).select("_id").limit(80).lean()) as { _id: unknown }[];
+  /* Unlinked first so a long run still covers stock that has never been in Zoho. */
+  const pending = (await PropertyModel.find({})
+    .select("_id zohoListingId")
+    .sort({ zohoListingId: 1, updatedAt: -1 })
+    .lean()) as { _id: unknown }[];
   const pushed = { attempted: pending.length, success: 0, failed: 0, skipped: 0 };
   for (const row of pending) {
     const result = await pushListingToZoho(String(row._id));

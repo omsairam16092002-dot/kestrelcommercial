@@ -253,6 +253,11 @@ export default function AdminSettingsPage() {
               </li>
               <li className={zoho.listings?.enabled ? "text-ink" : "text-mauve"}>
                 {zoho.listings?.enabled ? "✓" : "○"} Listings — website stock {zoho.listings?.module ? `in Zoho ${zoho.listings.module}` : "in Zoho CRM"}, and Zoho records back onto the site
+                {zoho.listings?.counts ? (
+                  <span className="mt-1 block text-xs text-mauve">
+                    Website {zoho.listings.counts.live} live ({zoho.listings.counts.total} including archived) · {zoho.listings.counts.linked} linked in Zoho · {zoho.listings.counts.unlinked} still to push
+                  </span>
+                ) : null}
               </li>
               {zoho.workspace?.needsReconnect || zoho.listings?.needsReconnect ? (
                 <li className="font-semibold text-oxblood">
