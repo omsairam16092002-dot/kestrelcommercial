@@ -447,6 +447,14 @@ export type ZohoStatus = {
   connectedAt: string | null;
   dataCentre: string;
   workspace?: ZohoWorkspaceStatus;
+  listings?: {
+    enabled: boolean;
+    module: string | null;
+    settings: boolean;
+    needsReconnect: boolean;
+    lastPulledAt: string | null;
+    lastError: { message: string; at: string } | null;
+  };
 };
 
 export type IntegrationsStatus = {
@@ -470,6 +478,13 @@ export function syncPendingZoho() {
     "/api/integrations/zoho/sync-pending",
     { method: "POST" },
   );
+}
+
+export function syncZohoListings() {
+  return adminFetch<{
+    pulled: { checked: number; created: number; updated: number; skipped: number; error?: string };
+    pushed: { attempted: number; success: number; failed: number; skipped: number };
+  }>("/api/integrations/zoho/sync-listings", { method: "POST" });
 }
 
 export function retryZohoSync(enquiryId: string) {

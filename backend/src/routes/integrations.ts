@@ -22,6 +22,7 @@ import {
   zohoAuthorizeUrl,
   zohoStatus,
 } from "../services/zoho";
+import { clearZohoListingCache, syncListingsBothWays, zohoListingsStatus } from "../services/zohoListings";
 import { zohoWorkspaceStatus } from "../services/zohoWorkspace";
 import { SyncLogModel } from "../models/SyncLog";
 import { isDbConnected } from "../db/mongoose";
@@ -57,7 +58,7 @@ integrationsRouter.get("/status", requireAuth, async (_req, res, next) => {
           ? "Credentials present. Connect to start OAuth. Token exchange is still stubbed until the PEXA app is live."
           : "Set PEXA_CLIENT_ID / SECRET in backend .env, then Connect. Token exchange is still stubbed until the PEXA app is live.",
       },
-      zoho: { ...(await zohoStatus()), workspace: await zohoWorkspaceStatus() },
+      zoho: { ...(await zohoStatus()), workspace: await zohoWorkspaceStatus(), listings: await zohoListingsStatus() },
       redis: Boolean(env.redisUrl),
       recentLogs: logs.map((log) => ({
         id: String(log._id),
@@ -134,6 +135,7 @@ integrationsRouter.get("/zoho/callback", async (req, res) => {
     return res.redirect(settingsRedirect("error", "Sign-in expired or was not started from Settings. Try Connect again."));
   }
   try {
+    clearZohoListingCache();
     const { orgName } = await exchangeZohoCode({
       code,
       accountsServer: req.query["accounts-server"],
@@ -155,6 +157,7 @@ integrationsRouter.get("/zoho/callback", async (req, res) => {
 integrationsRouter.post("/zoho/disconnect", requireAuth, async (req, res, next) => {
   try {
     await disconnectZoho();
+    clearZohoListingCache();
     await logActivity({
       type: "integration.disconnect",
       entityType: "integration",
@@ -171,6 +174,14 @@ integrationsRouter.post("/zoho/disconnect", requireAuth, async (req, res, next) 
 integrationsRouter.post("/zoho/sync-pending", requireAuth, async (_req, res, next) => {
   try {
     res.json(await syncPendingEnquiries());
+  } catch (err) {
+    next(err instanceof Error && !(err instanceof HttpError) ? new HttpError(400, err.message) : err);
+  }
+});
+
+integrationsRouter.post("/zoho/sync-listings", requireAuth, async (_req, res, next) => {
+  try {
+    res.json(await syncListingsBothWays());
   } catch (err) {
     next(err instanceof Error && !(err instanceof HttpError) ? new HttpError(400, err.message) : err);
   }

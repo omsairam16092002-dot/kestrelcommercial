@@ -73,6 +73,7 @@ export function serializeProperty(
       ? { internalNotes: String(doc.internalNotes ?? "") || null }
       : {}),
     pexaWorkspaceId: String(doc.pexaWorkspaceId ?? "") || null,
+    zohoListingId: String(doc.zohoListingId ?? "") || null,
     portalListingId: String(doc.portalListingId ?? "") || null,
     syndicateToRealcommercial: Boolean(doc.syndicateToRealcommercial),
     syndicateToCommercialRealEstate: Boolean(doc.syndicateToCommercialRealEstate),

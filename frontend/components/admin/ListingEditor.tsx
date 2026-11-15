@@ -577,6 +577,23 @@ export function ListingEditor({
         ) : null}
       </section>
 
+      {initial?.zohoListingId ? (
+        <section>
+          <h2 className="t-h3 text-ink">Zoho CRM</h2>
+          <p className="mt-2 text-sm text-mauve">
+            This listing is linked to Zoho. Saving here updates Zoho; changes made in Zoho appear on the website within a few minutes.
+          </p>
+          <p className="mt-3 t-mono text-xs text-ink">{initial.zohoListingId}</p>
+        </section>
+      ) : initial ? (
+        <section>
+          <h2 className="t-h3 text-ink">Zoho CRM</h2>
+          <p className="mt-2 text-sm text-mauve">
+            Saving this listing pushes it to Zoho. Click “Sync listings both ways” in Settings to import stock that already lives in Zoho.
+          </p>
+        </section>
+      ) : null}
+
       <section>
         <h2 className="t-h3 text-ink">Settlement</h2>
         <p className="mt-2 text-sm text-mauve">

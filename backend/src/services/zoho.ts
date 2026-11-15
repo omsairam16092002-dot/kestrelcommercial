@@ -43,7 +43,8 @@ export const MEETING_SCOPES = [
   "ZohoMeeting.manageOrg.READ",
 ];
 export const CALENDAR_SCOPES = ["ZohoCalendar.freebusy.READ"];
-const SCOPES = ["ZohoCRM.modules.ALL", "ZohoCRM.org.READ", ...MEETING_SCOPES, ...CALENDAR_SCOPES].join(",");
+export const SETTINGS_SCOPES = ["ZohoCRM.settings.modules.READ", "ZohoCRM.settings.fields.READ", "ZohoCRM.settings.fields.CREATE"];
+const SCOPES = ["ZohoCRM.modules.ALL", "ZohoCRM.org.READ", ...MEETING_SCOPES, ...CALENDAR_SCOPES, ...SETTINGS_SCOPES].join(",");
 const API_VERSION = "v8";
 
 const SOURCE_LABELS: Record<string, string> = {

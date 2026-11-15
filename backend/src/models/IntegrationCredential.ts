@@ -14,6 +14,9 @@ const IntegrationCredentialSchema = new Schema(
     connectedAt: { type: Date, default: Date.now },
     /** Watermark for pulling lead-status changes back from Zoho. */
     lastPolledAt: { type: Date, default: null },
+    /** CRM module used for listings (Properties, Listings or Products). */
+    listingModule: { type: String, default: "" },
+    lastListingPolledAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

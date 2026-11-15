@@ -182,6 +182,7 @@ function AdminListingsPage() {
                   <p className="text-xs text-mauve">
                     {row.suburb} {row.postcode}
                     {row.archived ? " · archived" : ""}
+                    {row.zohoListingId ? " · Zoho" : ""}
                   </p>
                 </td>
                 <td className="px-4 py-3 capitalize">{row.transactionSide}</td>

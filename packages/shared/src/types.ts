@@ -233,6 +233,8 @@ export interface Property {
   leadCount?: number;
   /** PEXA Clear workspace id — desk only, not shown on the public listing. */
   pexaWorkspaceId?: string | null;
+  /** Zoho CRM Properties/Products record id — desk only. */
+  zohoListingId?: string | null;
   /** Portal listing ID used to match inbound REA / realcommercial enquiry emails. */
   portalListingId?: string | null;
   syndicateToRealcommercial?: boolean;

@@ -8,6 +8,7 @@ import {
   getDeskHealth,
   retryZohoSync,
   syncPendingZoho,
+  syncZohoListings,
   getIntegrationsStatus,
   getLeadSources,
   getSyndicationStatus,
@@ -42,7 +43,7 @@ export default function AdminSettingsPage() {
     const reason = params.get("reason");
     setZohoMessage(
       result === "connected"
-        ? "Zoho CRM connected. New enquiries will now appear in Zoho as leads."
+        ? "Zoho connected. Enquiries become leads, and listings can sync both ways."
         : result === "denied"
           ? "Zoho access was declined, so nothing was connected."
           : `Zoho connection failed${reason ? `: ${reason}` : "."}`,
@@ -237,21 +238,26 @@ export default function AdminSettingsPage() {
           </p>
           <p className="mt-2 text-sm text-mauve">
             {zoho?.connected
-              ? `Every new enquiry becomes a Zoho lead with the listing, source and message attached. Inspection requests also create a follow-up task. Data centre ${zoho.dataCentre}${zoho.connectedBy ? ` · connected by ${zoho.connectedBy}` : ""}${zoho.connectedAt ? ` on ${new Date(zoho.connectedAt).toLocaleDateString("en-AU")}` : ""}.`
+              ? `Enquiries become Zoho leads. Listings you save here go into Zoho, and listings you add in Zoho appear on the website. Data centre ${zoho.dataCentre}${zoho.connectedBy ? ` · connected by ${zoho.connectedBy}` : ""}${zoho.connectedAt ? ` on ${new Date(zoho.connectedAt).toLocaleDateString("en-AU")}` : ""}.`
               : zoho?.configured
                 ? `Client keys are set for data centre ${zoho.dataCentre}. Connect once with the Zoho admin account to start sending enquiries.`
                 : "Set ZOHO_CLIENT_ID and ZOHO_CLIENT_SECRET in backend .env (and on Render), then Connect."}
           </p>
-          {zoho?.connected && zoho.workspace ? (
+          {zoho?.connected && (zoho.workspace || zoho.listings) ? (
             <ul className="mt-3 space-y-1 text-sm">
-              <li className={zoho.workspace.calendar ? "text-ink" : "text-mauve"}>
-                {zoho.workspace.calendar ? "✓" : "○"} Zoho Calendar — booking slots skip your busy times
+              <li className={zoho.workspace?.calendar ? "text-ink" : "text-mauve"}>
+                {zoho.workspace?.calendar ? "✓" : "○"} Zoho Calendar — booking slots skip your busy times
               </li>
-              <li className={zoho.workspace.meeting ? "text-ink" : "text-mauve"}>
-                {zoho.workspace.meeting ? "✓" : "○"} Zoho Meeting — online meetings get a video link automatically
+              <li className={zoho.workspace?.meeting ? "text-ink" : "text-mauve"}>
+                {zoho.workspace?.meeting ? "✓" : "○"} Zoho Meeting — online meetings get a video link automatically
               </li>
-              {zoho.workspace.needsReconnect ? (
-                <li className="font-semibold text-oxblood">Click Reconnect Zoho and approve the new Calendar and Meeting permissions.</li>
+              <li className={zoho.listings?.enabled ? "text-ink" : "text-mauve"}>
+                {zoho.listings?.enabled ? "✓" : "○"} Listings — website stock {zoho.listings?.module ? `in Zoho ${zoho.listings.module}` : "in Zoho CRM"}, and Zoho records back onto the site
+              </li>
+              {zoho.workspace?.needsReconnect || zoho.listings?.needsReconnect ? (
+                <li className="font-semibold text-oxblood">
+                  Click Reconnect Zoho and approve Calendar, Meeting, and CRM field permissions so listings can map in full.
+                </li>
               ) : null}
             </ul>
           ) : null}
@@ -283,6 +289,22 @@ export default function AdminSettingsPage() {
                   }
                 >
                   {zohoBusy ? "Working…" : "Sync recent enquiries"}
+                </button>
+                <button
+                  type="button"
+                  disabled={zohoBusy}
+                  className="btn-sharp border border-oxblood text-oxblood hover:bg-oxblood hover:text-paper disabled:opacity-50"
+                  onClick={() =>
+                    void runZoho(async () => {
+                      const r = await syncZohoListings();
+                      const pullBit = r.pulled.error
+                        ? `Pull failed: ${r.pulled.error}`
+                        : `Pulled ${r.pulled.created} new and ${r.pulled.updated} updated from Zoho`;
+                      return `${pullBit}. Pushed ${r.pushed.success} of ${r.pushed.attempted} website listings${r.pushed.failed ? `, ${r.pushed.failed} failed` : ""}.`;
+                    })
+                  }
+                >
+                  {zohoBusy ? "Working…" : "Sync listings both ways"}
                 </button>
                 <button
                   type="button"

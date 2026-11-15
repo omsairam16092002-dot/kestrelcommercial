@@ -79,6 +79,8 @@ const PropertySchema = new Schema(
     internalNotes: { type: String, default: "" },
     pexaWorkspaceId: { type: String, default: "" },
     portalListingId: { type: String, default: "", index: true },
+    zohoListingId: { type: String, default: "", index: true },
+    zohoListingSyncedAt: { type: Date, default: null },
     syndicateToRealcommercial: { type: Boolean, default: false },
     syndicateToCommercialRealEstate: { type: Boolean, default: false },
     externalListingIds: {

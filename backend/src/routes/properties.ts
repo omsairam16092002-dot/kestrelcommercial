@@ -30,6 +30,7 @@ import { enqueueXeroSoldInvoice, enqueuePexaPoll } from "../jobs/queue";
 import { buildBrochurePdf } from "../services/brochurePdf";
 import { env } from "../config/env";
 import { logActivity } from "../services/activity";
+import { queueListingSync } from "../services/zohoListings";
 import { propertiesToReaxml, propertyToReaxml } from "../services/reaxml";
 
 function serializePublicProperty(doc: Record<string, unknown>): Property {
@@ -357,6 +358,7 @@ propertiesRouter.post("/", requireAuth, async (req, res, next) => {
       by: req.user?.name || req.user?.email || "desk",
     });
     await invalidatePropertyListCache();
+    queueListingSync(String(created._id));
     res.status(201).json(serializeProperty(created.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);
@@ -405,6 +407,7 @@ propertiesRouter.patch("/:id", requireAuth, async (req, res, next) => {
       by: req.user?.name || req.user?.email || "desk",
     });
     await invalidatePropertyListCache();
+    queueListingSync(String(updated._id));
     res.json(serializeProperty(updated.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);
@@ -416,7 +419,9 @@ propertiesRouter.post("/:id/duplicate", requireAuth, async (req, res, next) => {
     if (!isDbConnected()) throw new HttpError(503, "MongoDB is not connected.");
     const source = await PropertyModel.findById(req.params.id).lean();
     if (!source) throw new HttpError(404, "Listing not found");
-    const { _id: _unused, __v, createdAt, updatedAt, ...rest } = source as Record<string, unknown>;
+    const { _id: _unused, __v, createdAt, updatedAt, zohoListingId: _zohoId, zohoListingSyncedAt: _zohoAt, ...rest } = source as Record<string, unknown>;
+    void _zohoId;
+    void _zohoAt;
     void _unused;
     void __v;
     void createdAt;
@@ -443,6 +448,7 @@ propertiesRouter.post("/:id/duplicate", requireAuth, async (req, res, next) => {
       by: req.user?.name || req.user?.email || "desk",
     });
     await invalidatePropertyListCache();
+    queueListingSync(String(created._id));
     res.status(201).json(serializeProperty(created.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);
@@ -466,6 +472,7 @@ propertiesRouter.delete("/:id", requireAuth, async (req, res, next) => {
       by: req.user?.name || req.user?.email || "desk",
     });
     await invalidatePropertyListCache();
+    queueListingSync(String(updated._id));
     res.json(serializeProperty(updated.toObject(), { includeInternal: true }));
   } catch (err) {
     next(err);

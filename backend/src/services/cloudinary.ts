@@ -50,3 +50,19 @@ export function isCloudinaryReady(): boolean {
     env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret,
   );
 }
+
+/** Pull a remote image (Zoho attachment or URL field) into the listings folder. */
+export async function uploadImageFromUrl(url: string, publicId?: string) {
+  ensureConfigured();
+  const result = await cloudinary.uploader.upload(url, {
+    folder: env.cloudinary.folder,
+    ...(publicId ? { public_id: publicId } : {}),
+    overwrite: true,
+    resource_type: "image",
+  });
+  return {
+    publicId: result.public_id as string,
+    width: result.width as number | undefined,
+    height: result.height as number | undefined,
+  };
+}
